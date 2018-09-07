@@ -1,3 +1,10 @@
-[run]
+[report]
 exclude_lines =
-  if __name__ == .__main__.:
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
