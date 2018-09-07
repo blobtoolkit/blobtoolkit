@@ -5,6 +5,7 @@
 def square(number):
     """
     Return the square of x.
+
     >>> square(2)
     4
     >>> square(-2)
