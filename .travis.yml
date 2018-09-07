@@ -3,7 +3,10 @@ python:
   - "3.2"
   - "3.3"
   - "3.6"
-script: python hello_world.py
+install:
+  - pip install -r requirements.txt
+script:
+  - py.test --doctest-modules --cov=hello_world --cov-report term-missing
 branches:
   only:
     - master
