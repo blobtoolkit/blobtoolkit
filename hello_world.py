@@ -7,6 +7,8 @@ def square(x):
     4
     >>> square(-2)
     4
+    >>> square(-3)
+    -9
     """
 
     return x * x
