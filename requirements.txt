@@ -1,3 +1,6 @@
 pytest
 pytest-cov
 coveralls
+pylint
+pydocstyle
+pycodestyle

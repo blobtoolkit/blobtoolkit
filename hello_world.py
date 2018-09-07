@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
+"""Test module to learn how to use continuous integration."""
 
-def square(x):
-    """Return the square of x.
+
+def square(number):
+    """
+    Return the square of x.
 
     >>> square(2)
     4
     >>> square(-2)
     4
     """
+    return number * number
 
-    return x * x
 
 if __name__ == '__main__':
     import doctest
