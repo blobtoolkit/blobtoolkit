@@ -5,10 +5,10 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - "pylint --rcfile=.pylintrc *.py -f parseable -r n && \
-  pycodestyle *.py --max-line-length=120 && \
-  pydocstyle *.py && \
-  py.test --doctest-modules --cov=*.py --cov-report term-missing"
+  - "pylint --rcfile=.pylintrc lib -f parseable -r n && \
+  pycodestyle lib --max-line-length=120 && \
+  pydocstyle lib && \
+  py.test --doctest-modules --cov=lib --cov-report term-missing"
 branches:
   only:
     - master
