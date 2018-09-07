@@ -3,7 +3,6 @@ python:
   - "3.2"
   - "3.3"
   - "3.6"
-  - "3.7"
 script: python hello_world.py
 branches:
   only:
