@@ -9,7 +9,7 @@ def cube(number):
     >>> cube(2)
     8
     >>> cube(-2)
-    8
+    -8
     """
     return number ** 3
 
