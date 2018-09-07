@@ -7,7 +7,7 @@ script:
   - "pylint --rcfile=.pylintrc lib -f parseable -r n && \
   pycodestyle lib --max-line-length=120 && \
   pydocstyle lib && \
-  py.test --doctest-modules --cov=lib --cov-report term-missing"
+  py.test --cov-config .coveragerc --doctest-modules --cov=lib --cov-report term-missing"
 branches:
   only:
     - master
