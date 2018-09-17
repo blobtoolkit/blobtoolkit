@@ -416,7 +416,11 @@ good-names=i,
            k,
            ex,
            Run,
-           _
+           _,
+           fh,
+           x,
+           y,
+           z
 
 # Include a hint for the correct naming format with invalid-name.
 include-naming-hint=no

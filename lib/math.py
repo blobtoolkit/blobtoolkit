@@ -2,7 +2,7 @@
 """Example second module."""
 
 
-def cube(number):
+def cube(x):
     """
     Return the cube of number.
 
@@ -11,7 +11,7 @@ def cube(number):
     >>> cube(-2)
     -8
     """
-    return number ** 3
+    return x ** 3
 
 
 if __name__ == '__main__':

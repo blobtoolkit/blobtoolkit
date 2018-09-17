@@ -2,7 +2,7 @@
 """Test module to learn how to use continuous integration."""
 
 
-def square(number):
+def square(x):
     """
     Return the square of number.
 
@@ -11,7 +11,7 @@ def square(number):
     >>> square(-2)
     4
     """
-    return number * number
+    return x * x
 
 
 if __name__ == '__main__':
