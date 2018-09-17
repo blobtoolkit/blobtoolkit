@@ -3,11 +3,11 @@
 
 
 def read_file(filename):
-    """
-    Reads a file.
+    r"""
+    Read a file.
 
     >>> read_file('test/files/infile')
-    'testfile content\\n'
+    'testfile content\n'
     """
     with open(filename, 'r') as fh:
         return fh.read()
