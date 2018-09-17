@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """functions to read, write and parse files."""
 
+
 def read_file(filename):
     """
     Reads a file.
