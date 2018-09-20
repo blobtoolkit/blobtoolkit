@@ -1,1 +1,1 @@
-"""This package contains some code."""
+"""This is a template package to demonstrate Continuous Integration."""

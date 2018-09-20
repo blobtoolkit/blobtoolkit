@@ -1,6 +1,8 @@
+coveralls
+mock
+pycodestyle
+pydocstyle
 pytest
 pytest-cov
-coveralls
-pylint
-pydocstyle
-pycodestyle
+pytest-mock
+pyyaml

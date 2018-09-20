@@ -4,10 +4,7 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - "pylint --rcfile=.pylintrc lib -f parseable -r n && \
-  pycodestyle lib --max-line-length=120 && \
-  pydocstyle lib && \
-  py.test --cov-config .coveragerc --doctest-modules --cov=lib --cov-report term-missing"
+  - run_test.sh
 branches:
   only:
     - master
