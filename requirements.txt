@@ -2,6 +2,7 @@ coveralls
 mock
 pycodestyle
 pydocstyle
+pylint
 pytest
 pytest-cov
 pytest-mock

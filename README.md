@@ -7,6 +7,7 @@ A template repository to lint and test code using:
 * pylint
 * pycodestyle
 * pydocstyle
+* doctest
 * pytest
 * mock
 
