@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # lint code in lib directory
 pylint --rcfile=.pylintrc lib -f parseable -r n &&
