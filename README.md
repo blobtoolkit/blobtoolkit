@@ -1,5 +1,6 @@
 ## Python3 continuous integration demo
 
+[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Build Status](https://travis-ci.org/rjchallis/test.svg?branch=master)](https://travis-ci.org/rjchallis/test)
 [![Coverage Status](https://coveralls.io/repos/github/rjchallis/test/badge.svg?branch=master)](https://coveralls.io/github/rjchallis/test?branch=master)
 
@@ -25,7 +26,7 @@ git clone https://github.com/rjchallis/test.git
 Install dependencies:
 ```
 cd test
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 Run all tests:
@@ -35,6 +36,9 @@ Run all tests:
 
 
 ### Mirroring this repository
+
+To mirror this repository to use as a template for a new project:
+
 ```
 git clone --bare https://github.com/rjchallis/test.git
 ```

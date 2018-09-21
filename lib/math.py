@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Example second module."""
+"""
+Example module with basic maths functions.
+
+Tests are included in docstrings and run using doctest.
+"""
 
 
 def square(x):

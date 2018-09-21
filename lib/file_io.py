@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""functions to read, write and parse files."""
+"""
+Example module with functions to read, write and parse files.
+
+Simple tests are included in docstrings and run using doctest.
+
+Further tests are implemented in a separate file using pytest
+(tests/unit_tests/test_file_io.py) to avoid adding test-specific code to
+docstrings.
+"""
 
 import gzip
 import json
