@@ -62,6 +62,11 @@ git clone https://github.com/exampleuser/new-repository.git
 cd new-repository
 ```
 
+Set up pre-commit hook to automate test running:
+```
+ln -s ../../pre-commit.sh .git/hooks/pre-commit
+```
+
 ### Setting up continuous integration
 
 * Follow steps 1-3 of the Travis CI ['Getting Started' guide](https://docs.travis-ci.com/user/getting-started/)):
