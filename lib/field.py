@@ -9,11 +9,12 @@ Tests are included in docstrings and run using doctest.
 class Field():
     """Parent class for specific field types."""
 
-    __slots__ = ['field_id', 'values', 'keys']
+    __slots__ = ['field_id', 'values', 'keys', 'type']
 
     def __init__(self, field_id, **kwargs):
         """Init Field class."""
         self.field_id = field_id
+        self.type = 'generic'
         self.values = []
         self.keys = []
         for key, value in kwargs.items():
