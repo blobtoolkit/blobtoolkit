@@ -19,9 +19,17 @@ class Field():
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def get_value_by_index(self, index):
-        """Get a record at an index."""
-        return self.values[index]
+    def get_values_by_indices(self, indices):
+        """Get values for all records at matching indices."""
+        values = []
+        if not isinstance(indices, list):
+            indices = [indices]
+        for index in indices:
+            try:
+                values.append(self.values[index])
+            except TypeError:
+                pass
+        return values
 
     def get_indices_by_value(self, values):
         """Get indices for all records matching a value."""
