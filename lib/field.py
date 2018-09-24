@@ -32,7 +32,7 @@ class Field():
                 pass
         return values
 
-    def get_indices_by_value(self, values):
+    def get_indices_by_values(self, values):
         """Get indices for all records matching a value."""
         if not isinstance(values, set):
             if not isinstance(values, list):

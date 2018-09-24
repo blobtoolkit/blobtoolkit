@@ -32,16 +32,16 @@ def test_get_values_by_index(_my_field):
     assert _my_field.get_values_by_indices(['string']) == []
 
 
-def test_get_indices_by_value(_my_field):
-    assert _my_field.get_indices_by_value(4) == [3, 5]
+def test_get_indices_by_values(_my_field):
+    assert _my_field.get_indices_by_values(4) == [3, 5]
 
 
-def test_get_indices_by_value_with_list(_my_field):
-    assert _my_field.get_indices_by_value([3]) == [2, 6]
+def test_get_indices_by_values_with_list(_my_field):
+    assert _my_field.get_indices_by_values([3]) == [2, 6]
 
 
-def test_get_indices_by_value_with_set(_my_field):
-    assert _my_field.get_indices_by_value(set([2])) == [1, 7]
+def test_get_indices_by_values_with_set(_my_field):
+    assert _my_field.get_indices_by_values(set([2])) == [1, 7]
 
 
 # def test_load_yaml(mocker):
