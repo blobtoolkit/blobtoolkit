@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Example Class module.
+Field Class module.
 
-Tests are included in docstrings and run using doctest.
+Generic, identifier, variable, category, array and object field types.
 """
 
 from functools import reduce
@@ -22,6 +22,12 @@ class Field():
         self.values = []
         self.keys = []
         self._subset = False
+        self.update_data(**kwargs)
+        # for key, value in kwargs.items():
+        #     setattr(self, key, value)
+
+    def update_data(self, **kwargs):
+        """Update values and keys for an existing field."""
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -41,9 +47,10 @@ class Field():
         """Get indices for all records matching a value."""
         if not isinstance(values, set):
             if not isinstance(values, list):
-                values = set([values])
+                values = [values]
             else:
                 values = set(values)
+        print(values)
         indices = [i for i, x in enumerate(self.values) if x in values]
         return indices
 
@@ -76,11 +83,38 @@ class Field():
             self._subset = False
 
 
+class Identifier(Field):
+    """Class for record identifiers."""
+
+    def __init__(self, field_id, **kwargs):
+        """Init Identifier class."""
+        super().__init__(field_id, **kwargs)
+        self.type = 'identifier'
+
+    @staticmethod
+    def check_unique(entries):
+        """Check all entries are unique."""
+        unique = set()
+        for entry in entries:
+            unique.add(entry)
+        return len(unique) == len(entries)
+
+    def validate_list(self, names):
+        """Ensure all list entries are unique and match identifiers."""
+        valid = True
+        if self.check_unique(names):
+            if len(self.get_indices_by_values(names)) != len(names):
+                valid = False
+        else:
+            valid = False
+        return valid
+
+
 class Variable(Field):
     """Class for variable field type."""
 
     def __init__(self, field_id, **kwargs):
-        """Init Field class."""
+        """Init Variable class."""
         super().__init__(field_id, **kwargs)
         self.type = 'variable'
 
@@ -111,7 +145,7 @@ class Variable(Field):
         return total
 
 
-__all__ = ['Field', 'Variable']
+__all__ = ['Field', 'Identifier', 'Variable']
 
 
 if __name__ == '__main__':
