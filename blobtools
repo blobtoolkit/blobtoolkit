@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+"""
+BlobTools Add - a BlobTools prototype.
+
+usage: blobtools [<command>] [<args>...] [-h|--help] [--version]
+
+commands:
+    add             add data to a BlobDir
+    replace         call blobtools add with --replace flag
+    -h, --help      show this
+    -v, --version   show version number
+See 'blobtools <command> --help' for more information on a specific command.
+
+examples:
+    # 1. Add BUSCO scores to BlobDir
+    ./blobtools add --busco busco.full_table.tsv --blobdir BlobDir
+
+"""
+
+import os
+from subprocess import call
+from docopt import docopt
+
+__version__ = "blobtools v2.0.0alpha"
+MAINDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
+LIBDIR = os.path.abspath(os.path.join(MAINDIR, 'lib/'))
+
+if __name__ == '__main__':
+    ARGS = docopt(__doc__,
+                  version=__version__,
+                  options_first=True)
+    ARGV = [ARGS['<command>']] + ARGS['<args>']
+    if ARGS['<command>'] == 'add':
+        exit(call(['python', LIBDIR + '/add.py'] + ARGV))
+    if ARGS['<command>'] == 'replace':
+        exit(call(['python', LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>']))
+    else:
+        exit(call([os.path.join(MAINDIR, './blobtools'), '-h']))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-
+# pylint: disable=wrong-import-position
 import pytest
-from lib import Field, Identifier, Variable
+from lib import Array, Category, Field, Identifier, Variable
 
 FIELD_ID = 'test_field'
 FIELD_DATA = {'keys': ['first', 'second'], 'values': [1, 2, 3, 4, 5, 4, 3, 2]}
@@ -11,6 +11,18 @@ STRING_DATA = {'values': ['A', 'B', 'third']}
 @pytest.fixture(scope='function', name='_my_field')
 def my_field():
     return Field(FIELD_ID, **FIELD_DATA)
+
+
+def test_update_values(_my_field):
+    _my_field.update_values([10, 20, 30, 40, 50, 40, 30, 20])
+    assert _my_field.values[2] == 30
+    _my_field.update_values([110, 120, 130, 140, 150, 140])
+    assert _my_field.values[2] == 30
+
+
+def test_update_keys(_my_field):
+    _my_field.update_keys(['key1', 'key2'])
+    assert _my_field.keys[1] == 'key2'
 
 
 def test_field_init(_my_field):
@@ -37,7 +49,7 @@ def test_get_indices_by_values(_my_field):
     assert _my_field.get_indices_by_values(set([2])) == [1, 7]
 
 
-def test_update_values(_my_field):
+def test_update_data(_my_field):
     _my_field.update_data(**STRING_DATA)
     assert _my_field.values == STRING_DATA['values']
     assert _my_field.get_indices_by_values('B') == [1]
@@ -136,11 +148,88 @@ def test_sum_values(_my_variable, mocker):
 
 
 # TODO: test Category
+CATEGORY_ID = 'test_category'
 CATEGORY_DATA = {'keys': ['first', 'second', 'third', 'fourth', 'fifth'],
                  'values': [1, 3, 0, 0, 4, 1, 2, 2]}
+CATEGORY_VALUES_ONLY = {'values': ['A', 'C', 'B', 'D', 'A', 'D', 'B', 'E']}
 # TODO: convert list to category
 
-# TODO: test Array
-ARRAY_DATA = {'keys': ['first', 'second'], 'values': [[1, 23, 67, 12], [0, 48, 96, 16]]}
+
+@pytest.fixture(scope='function', name='_my_category')
+def my_category():
+    return Category(CATEGORY_ID, **CATEGORY_DATA)
+
+
+def test_category_init(_my_category):
+    assert _my_category.field_id == CATEGORY_ID
+    assert _my_category.values == CATEGORY_DATA['values']
+    assert _my_category.type == 'category'
+
+
+def test_category_init_without_keys():
+    keyless_category = Category(CATEGORY_ID, **CATEGORY_VALUES_ONLY)
+    assert keyless_category.values == [0, 1, 2, 3, 0, 3, 2, 4]
+    assert keyless_category.keys == ['A', 'C', 'B', 'D', 'E']
+
+
+ARRAY_ID = 'test_array'
+ARRAY_DATA = (
+    {
+        'keys': ['first', 'second'],
+        'values': [
+            [1, 23, 67, 12],
+            [0, 48, 96, 16],
+            [1, 45, 72, 18],
+            [0, 41, 88, 12]
+        ]
+    }
+)
+ARRAY_VALUES_ONLY = (
+    {
+        'category_slot': 0,
+        'values': [
+            ['second', 23, 67, 12],
+            ['first', 48, 96, 16],
+            ['second', 45, 72, 18],
+            ['first', 41, 88, 12]
+        ]
+    }
+)
+
+
+@pytest.fixture(scope='function', name='_my_array')
+def my_array():
+    return Array(ARRAY_ID, **ARRAY_DATA)
+
+
+def test_array_init(_my_array):
+    assert _my_array.field_id == ARRAY_ID
+    assert _my_array.values == ARRAY_DATA['values']
+    assert _my_array.type == 'array'
+
+
+def test_array_init_without_keys():
+    keyless_array = Array(ARRAY_ID, **ARRAY_VALUES_ONLY)
+    assert keyless_array.values[3][0] == 1
+    assert keyless_array.keys == ['second', 'first']
+
+
+def test_get_values_by_indices_for_slots(_my_array):
+    values = _my_array.get_values_by_indices_for_slots([2, 3], [1, 2])
+    assert isinstance(values, list)
+    assert len(values) == 2
+    assert isinstance(values[0], list)
+    assert values[0] == [45, 72]
+    values = _my_array.get_values_by_indices_for_slots([0, 1], 3)
+    assert len(values) == 2
+    assert values == [12, 16]
+
+
+def test_update_slots(_my_array):
+    _my_array.update_slots([0, 1, 0, 1])
+    assert _my_array.values[2][0] == 0
+    _my_array.update_slots([2, 4, 6, 7], slot=3)
+    assert _my_array.values[1][3] == 4
+
 
 # TODO: test Object
