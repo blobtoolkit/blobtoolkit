@@ -7,7 +7,7 @@ import file_io
 from field import MultiArray
 
 
-def parse(busco_file, identifiers):
+def parse(busco_file, identifiers, **_kwargs):
     """Parse BUSCO results into a MultiArray."""
     data = file_io.read_file(busco_file)
     lines = data.split('\n')
@@ -34,6 +34,7 @@ def parse(busco_file, identifiers):
                              values=values,
                              meta=meta,
                              headers=('Busco id', 'Status'),
+                             parents=['children'],
                              category_slot=1
                              )
     return busco_field
@@ -45,10 +46,8 @@ def parent():
         'datatype': 'mixed',
         'type': 'array',
         'id': 'busco',
-        'name': 'Busco',
-        'children': []
+        'name': 'Busco'
     }
     return [
-        busco,
-        'children'
+        busco
     ]

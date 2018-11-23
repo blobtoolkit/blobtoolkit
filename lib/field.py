@@ -33,8 +33,6 @@ class Field():
         self.meta = {}
         self._subset = False
         self.update_data(**kwargs)
-        # for key, value in kwargs.items():
-        #     setattr(self, key, value)
 
     def update_data(self, **kwargs):
         """Update values and keys for an existing field."""
@@ -110,16 +108,18 @@ class Field():
             self._subset = False
 
     @staticmethod
-    def _collapse_values(values):
+    def _collapse_values(values, keys=None):
         """
         Replace values with indices in list of keys.
 
         >>> Field._collapse_values(['A', 'A', 'B', 'A'])
         (['A', 'B'], [0, 0, 1, 0])
         """
-        keys = OrderedDict()
+        if keys is None:
+            keys = []
+        counter = len(keys)
+        keys = OrderedDict([(key, index) for index, key in enumerate(keys)])
         indexed_values = []
-        counter = 0
         for value in values:
             if value in keys:
                 index = keys[value]
@@ -220,7 +220,8 @@ class Array(Field):
         if 'category_slot' in kwargs and 'keys' not in kwargs:
             slot = kwargs['category_slot']
             cat_values = [value[slot] for value in kwargs['values']]
-            kwargs['keys'], values = self._collapse_values(cat_values)
+            keys = kwargs.get('fixed_keys', [])
+            kwargs['keys'], values = self._collapse_values(cat_values, keys)
             for index, value in enumerate(kwargs['values']):
                 value[slot] = values[index]
         super().__init__(field_id, **kwargs)
@@ -258,7 +259,8 @@ class MultiArray(Field):
                 if record:
                     for arr in record:
                         cat_values.append(arr[slot])
-            kwargs['keys'], values = self._collapse_values(cat_values)
+            keys = kwargs.get('fixed_keys', [])
+            kwargs['keys'], values = self._collapse_values(cat_values, keys)
             index = 0
             for record in kwargs['values']:
                 if record:
@@ -275,7 +277,8 @@ class Category(Field):
     def __init__(self, field_id, **kwargs):
         """Init Category class."""
         if 'keys' not in kwargs:
-            kwargs['keys'], kwargs['values'] = self._collapse_values(kwargs['values'])
+            keys = kwargs.get('fixed_keys', [])
+            kwargs['keys'], kwargs['values'] = self._collapse_values(kwargs['values'], keys)
         super().__init__(field_id, **kwargs)
         self.type = 'category'
 

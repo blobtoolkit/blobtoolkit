@@ -16,8 +16,8 @@ def test_read_file_that_exists():
 
 
 def test_read_file_that_does_not_exist():
-    assert file_io.read_file('nofile') == ''
-    assert file_io.read_file('nofile.gz') == ''
+    assert file_io.read_file('nofile') is None
+    assert file_io.read_file('nofile.gz') is None
 
 
 def test_load_yaml(mocker):

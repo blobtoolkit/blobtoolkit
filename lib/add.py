@@ -1,20 +1,29 @@
 #!/usr/bin/env python3
 
+# pylint: disable=no-member
+
 """
 Add data to a BlobDir.
 
 Usage:
-    blobtools add [--busco TSV...] [--key path=value...] [--link path=url...]
-                  [--synonyms TSV...] [--replace] DIRECTORY
+    blobtools add [--busco TSV...] [--hits TSV...] [--key path=value...]
+                  [--link path=url...]
+                  [--synonyms TSV...]
+                  [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
+                  [--replace] DIRECTORY
 
 Arguments:
     DIRECTORY             Existing Blob directory.
 
 Options:
     --busco TSV           BUSCO full_table.tsv output file.
+    --hits TSV            Tabular BLAST/Diamond output file.
     --key path=value      Set a metadata key to value.
     --link path=url       Link to an external resource.
     --synonyms TSV        TSV file containing current identifiers and synonyms.
+    --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
+    --taxrule bestsum|bestsumorder
+                          Rule to use when assigning BLAST hits to taxa. [Default: bestsum]
     --replace             Replace existing fields with matching ids.
 
 Examples:
@@ -25,15 +34,19 @@ Examples:
 
 from docopt import docopt
 import file_io
+import hits
 import busco
 import key
 import link
 import synonyms
+from taxdump import Taxdump
 from field import Identifier
 from dataset import Metadata
 
-FIELDS = [{'flag': '--busco', 'module': busco},
+FIELDS = [{'flag': '--hits', 'module': hits},
+          {'flag': '--busco', 'module': busco},
           {'flag': '--synonyms', 'module': synonyms}]
+PARAMS = set(['--taxrule'])
 
 
 def fetch_identifiers(path_to_dataset):
@@ -57,6 +70,20 @@ def fetch_metadata(path_to_dataset):
     return Metadata(dataset_id, **meta)
 
 
+def fetch_taxdump(path_to_taxdump):
+    """Load Taxdump from file."""
+    json_file = "%s/taxdump.json" % path_to_taxdump
+    data = file_io.load_yaml(json_file)
+    if data is None:
+        print('Parsing taxdump')
+        taxdump = Taxdump(path_to_taxdump)
+        file_io.write_file(json_file, taxdump.values_to_dict())
+    else:
+        print('Loading parsed taxdump')
+        taxdump = Taxdump(path_to_taxdump, **data)
+    return taxdump
+
+
 def has_field_warning(meta, field_id):
     """Warn if dataset has existing field with same id."""
     if meta.has_field(field_id):
@@ -71,16 +98,27 @@ def main():
     args = docopt(__doc__)
     meta = fetch_metadata(args['DIRECTORY'])
     identifiers = fetch_identifiers(args['DIRECTORY'])
+    taxdump = None
     for field in FIELDS:
         for file in args[field['flag']]:
-            data = field['module'].parse(file, identifiers)
-            if not args['--replace']:
-                if has_field_warning(meta, data.field_id):
-                    continue
+            if field['flag'] == '--hits':
+                if not taxdump:
+                    taxdump = fetch_taxdump(args['--taxdump'])
             parents = field['module'].parent()
-            meta.add_field(parents, **data.meta)
-            json_file = "%s/%s.json" % ('tests/files/dataset', data.field_id)
-            file_io.write_file(json_file, data.values_to_dict())
+            parsed = field['module'].parse(
+                file,
+                identifiers,
+                **{key: args[key] for key in PARAMS},
+                taxdump=taxdump)
+            if not isinstance(parsed, list):
+                parsed = [parsed]
+            for data in parsed:
+                if not args['--replace']:
+                    if has_field_warning(meta, data.field_id):
+                        continue
+                meta.add_field(parents+data.parents, **data.meta)
+                json_file = "%s/%s.json" % ('tests/files/dataset', data.field_id)
+                file_io.write_file(json_file, data.values_to_dict())
     for string in args['--link']:
         link.add(string, meta, identifiers.values)
     for string in args['--key']:

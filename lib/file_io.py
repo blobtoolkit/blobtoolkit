@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# pylint: disable=c-extension-no-member
+
 """
 Example module with functions to read, write and parse files.
 
@@ -10,31 +13,42 @@ docstrings.
 """
 
 import gzip
-import json
 import pathlib
 import yaml
+import ujson
 
 
 def read_file(filename):
     r"""
-    Read a file, automatically detect gzipped filed based on suffix.
+    Read a whole file into memory.
 
     >>> read_file('tests/files/infile')
     'testfile content\n'
     >>> read_file('nofile')
-    ''
+
+    """
+    try:
+        with stream_file(filename) as fh:
+            return fh.read()
+    except AttributeError:
+        return None
+
+
+def stream_file(filename):
+    """
+    Stream a file, line by lineself.
+
+    Automatically detect gzipped files based on suffix.
     """
     if '.gz' in pathlib.Path(filename).suffixes:
         try:
-            with gzip.open(filename, 'rt') as fh:
-                return fh.read()
+            return gzip.open(filename, 'rt')
         except OSError:
-            return ''
+            return None
     try:
-        with open(filename, 'r') as fh:
-            return fh.read()
+        return open(filename, 'r')
     except IOError:
-        return ''
+        return None
 
 
 def load_yaml(filename):
@@ -44,8 +58,15 @@ def load_yaml(filename):
     load_yaml('identifiers.yaml')
     """
     data = read_file(filename)
-    identifiers = yaml.load(data)
-    return identifiers
+    if data is None:
+        return data
+    if '.json' in filename:
+        content = ujson.loads(data)
+    elif '.yaml' in filename:
+        content = yaml.load(data)
+    else:
+        content = data
+    return content
 
 
 def write_file(filename, data):
@@ -58,7 +79,7 @@ def write_file(filename, data):
     write_file('variable.json.gz')
     """
     if '.json' in filename:
-        content = json.dumps(data, indent=1)
+        content = ujson.dumps(data, indent=1)
     elif '.yaml' in filename:
         content = yaml.dump(data, indent=1)
     else:

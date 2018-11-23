@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Dataset Class module."""
 
+# pylint: disable=no-member
+
 
 class Metadata():
     """Class for field and dataset metadata."""
@@ -62,9 +64,15 @@ class Metadata():
                     parent = parent[required['id']]
                 elif required['id'] in self._field_list:
                     parent = self._field_list[required['id']]
-                else:
-                    parent.append(required)
-                    parent = required
+                elif isinstance(parent, list):
+                    try:
+                        index = next(i for i, field in enumerate(parent)
+                                     if field['id'] == required['id'])
+                        print(index)
+                        parent = parent[index]
+                    except StopIteration:
+                        parent.append(required)
+                        parent = required
             else:
                 if required not in parent:
                     parent.update({required: []})
