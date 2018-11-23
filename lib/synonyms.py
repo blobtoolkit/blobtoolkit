@@ -6,7 +6,7 @@ import file_io
 from field import Array
 
 
-def parse(synonym_file, identifiers, **_kwargs):
+def parse_synonyms(synonym_file, identifiers, **_kwargs):
     """Parse synonyms into Array."""
     meta = {}
     file_stem = Path(synonym_file).stem
@@ -26,6 +26,14 @@ def parse(synonym_file, identifiers, **_kwargs):
     values = [by_id[id] if id in by_id else [] for id in identifiers.values]
     synonyms_field = Array(meta['field_id'], meta=meta, values=values, parents=['children'])
     return synonyms_field
+
+
+def parse(files, identifiers, **_kwargs):
+    """Parse all synonym files."""
+    parsed = []
+    for file in files:
+        parsed.append(parse_synonyms(file, identifiers, **_kwargs))
+    return parsed
 
 
 def parent():

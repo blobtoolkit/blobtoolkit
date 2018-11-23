@@ -68,7 +68,6 @@ class Metadata():
                     try:
                         index = next(i for i, field in enumerate(parent)
                                      if field['id'] == required['id'])
-                        print(index)
                         parent = parent[index]
                     except StopIteration:
                         parent.append(required)

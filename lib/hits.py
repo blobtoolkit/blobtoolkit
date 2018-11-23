@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# pylint: disable=too-many-locals,too-many-branches
+
 """Parse BLAST results into MultiArray Field."""
 
 from collections import defaultdict
@@ -6,9 +9,10 @@ import file_io
 from field import Category, MultiArray, Variable
 
 
-def parse_blast(blast_file):
+def parse_blast(blast_file, results=None):
     """Parse file into dict of lists."""
-    results = defaultdict(list)
+    if results is None:
+        results = defaultdict(list)
     for line in file_io.stream_file(blast_file):
         row = line.rstrip().split('\t')
         seq_id, *offset = row[0].split('_-_')
@@ -22,20 +26,16 @@ def parse_blast(blast_file):
     return results
 
 
-def apply_taxrule(blast, taxdump, taxrule, identifiers):
+def apply_taxrule(blast, taxdump, taxrule, identifiers, results=None):
     """Apply taxrule to parsed BLAST results."""
-    # results = [
-    #     {'field_id': "%s_%s" % (taxrule, rank), 'values': defaultdict(str), 'data': {
-    #         'cindex': defaultdict(int), 'score': defaultdict(int), 'positions': defaultdict(list)
-    #     }}
-    #     for rank in taxdump.list_ranks()
-    # ]
-    results = [
-        {'field_id': "%s_%s" % (taxrule, rank), 'values': [], 'data': {
-            'cindex': [], 'score': [], 'positions': []
-        }}
-        for rank in taxdump.list_ranks()
-    ]
+    if results is None:
+        blank = [None] * len(identifiers.values)
+        results = [
+            {'field_id': "%s_%s" % (taxrule, rank), 'values': blank[:], 'data': {
+                'cindex': blank[:], 'score': blank[:], 'positions': blank[:]
+            }}
+            for rank in taxdump.list_ranks()
+        ]
     values = [{
         'category': defaultdict(str),
         'cindex': defaultdict(int),
@@ -72,26 +72,25 @@ def apply_taxrule(blast, taxdump, taxrule, identifiers):
     for index, rank in enumerate(taxdump.list_ranks()):
         if not identifiers.validate_list(list(values[index]['category'].keys())):
             raise UserWarning('Contig names in the hits file do not match dataset identifiers.')
-        results[index]['values'] = [
-            values[index]['category'][id] if id in values[index]['category'] else 'no-hit'
-            for id in identifiers.values]
-        results[index]['data']['score'] = [
-            values[index]['score'][id] if id in values[index]['score'] else 0
-            for id in identifiers.values]
-        results[index]['data']['cindex'] = [
-            values[index]['cindex'][id] if id in values[index]['cindex'] else 0
-            for id in identifiers.values]
-        results[index]['data']['positions'] = [
-            values[index]['positions'][id] if id in values[index]['positions'] else []
-            for id in identifiers.values]
+        for i, seq_id in enumerate(identifiers.values):
+            if results[index]['data']['score'][i] in (0, None):
+                if seq_id in values[index]['category']:
+                    results[index]['values'][i] = values[index]['category'][seq_id]
+                    results[index]['data']['score'][i] = values[index]['score'][seq_id]
+                    results[index]['data']['cindex'][i] = values[index]['cindex'][seq_id]
+                    results[index]['data']['positions'][i] = values[index]['positions'][seq_id]
+                else:
+                    results[index]['values'][i] = 'no-hit'
+                    results[index]['data']['score'][i] = 0
+                    results[index]['data']['cindex'][i] = 0
+                    results[index]['data']['positions'][i] = []
     return results
 
 
-def parse(blast_file, identifiers, **kwargs):
-    """Parse BLAST results into Fields."""
-    blast = parse_blast(blast_file)
-    results = apply_taxrule(blast, kwargs['taxdump'], kwargs['--taxrule'], identifiers)
-    fields = []
+def create_fields(results, fields=None):
+    """Store BLAST results as Fields."""
+    if fields is None:
+        fields = []
     for result in results:
         parents = ['children']
         main = Category(result['field_id'],
@@ -115,6 +114,28 @@ def parse(blast_file, identifiers, **kwargs):
                                  parents=parents,
                                  category_slot=0,
                                  headers=['name', 'start', 'end', 'score']))
+    return fields
+
+
+def parse(files, identifiers, **kwargs):
+    """Parse BLAST results into Fields."""
+    blast = None
+    fields = []
+    if kwargs['--taxrule'] == 'bestsum':
+        for file in files:
+            blast = parse_blast(file, blast)
+        results = apply_taxrule(blast, kwargs['taxdump'], kwargs['--taxrule'], identifiers)
+        fields = create_fields(results)
+    elif kwargs['--taxrule'] == 'bestsumorder':
+        results = None
+        for file in files:
+            blast = parse_blast(file)
+            results = apply_taxrule(blast,
+                                    kwargs['taxdump'],
+                                    kwargs['--taxrule'],
+                                    identifiers,
+                                    results)
+        fields = create_fields(results)
     return fields
 
 

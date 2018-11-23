@@ -7,7 +7,7 @@ import file_io
 from field import MultiArray
 
 
-def parse(busco_file, identifiers, **_kwargs):
+def parse_busco(busco_file, identifiers, **_kwargs):
     """Parse BUSCO results into a MultiArray."""
     data = file_io.read_file(busco_file)
     lines = data.split('\n')
@@ -38,6 +38,14 @@ def parse(busco_file, identifiers, **_kwargs):
                              category_slot=1
                              )
     return busco_field
+
+
+def parse(files, identifiers, **_kwargs):
+    """Parse all BUSCO files."""
+    parsed = []
+    for file in files:
+        parsed.append(parse_busco(file, identifiers, **_kwargs))
+    return parsed
 
 
 def parent():

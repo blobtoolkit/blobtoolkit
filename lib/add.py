@@ -100,13 +100,13 @@ def main():
     identifiers = fetch_identifiers(args['DIRECTORY'])
     taxdump = None
     for field in FIELDS:
-        for file in args[field['flag']]:
+        if args[field['flag']]:
             if field['flag'] == '--hits':
                 if not taxdump:
                     taxdump = fetch_taxdump(args['--taxdump'])
             parents = field['module'].parent()
             parsed = field['module'].parse(
-                file,
+                args[field['flag']],
                 identifiers,
                 **{key: args[key] for key in PARAMS},
                 taxdump=taxdump)
