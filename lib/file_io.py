@@ -14,6 +14,8 @@ docstrings.
 
 import gzip
 import pathlib
+from itertools import groupby
+from subprocess import Popen, PIPE
 import yaml
 import ujson
 
@@ -36,7 +38,7 @@ def read_file(filename):
 
 def stream_file(filename):
     """
-    Stream a file, line by lineself.
+    Stream a file, line by line.
 
     Automatically detect gzipped files based on suffix.
     """
@@ -49,6 +51,24 @@ def stream_file(filename):
         return open(filename, 'r')
     except IOError:
         return None
+
+
+def stream_fasta(filename):
+    """
+    Stream a fasta file, sequence by sequence.
+
+    Automatically detect gzipped files based on suffix.
+    """
+    if '.gz' in pathlib.Path(filename).suffixes:
+        cmd = ['pigz', '-dc', filename]
+    else:
+        cmd = ['cat', filename]
+    with Popen(cmd, stdout=PIPE, encoding='utf-8', bufsize=4096) as proc:
+        faiter = (x[1] for x in groupby(proc.stdout, lambda line: line[0] == '>'))
+        for header in faiter:
+            seq_id = header.__next__().split()[0].replace('>', '')
+            seq_str = ''.join(map(lambda s: s.strip(), faiter.__next__()))
+            yield seq_id, seq_str
 
 
 def load_yaml(filename):

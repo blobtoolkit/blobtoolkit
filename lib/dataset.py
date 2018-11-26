@@ -53,8 +53,10 @@ class Metadata():
 
     def add_parents(self, parents):
         """Add field metadata."""
-        parent = self._field_list
         fields = self.fields
+        if not parents:
+            return fields
+        parent = self._field_list
         for required in parents:
             if isinstance(required, dict):
                 if isinstance(parent, dict):

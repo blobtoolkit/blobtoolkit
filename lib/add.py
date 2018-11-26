@@ -6,24 +6,27 @@
 Add data to a BlobDir.
 
 Usage:
-    blobtools add [--busco TSV...] [--hits TSV...] [--key path=value...]
-                  [--link path=url...]
+    blobtools add [--busco TSV...] [--hits TSV...]  [--fasta FASTA]
+                  [--key path=value...] [--link path=url...] [--meta YAML]
                   [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
-                  [--replace] DIRECTORY
+                  [--create] [--replace] DIRECTORY
 
 Arguments:
     DIRECTORY             Existing Blob directory.
 
 Options:
     --busco TSV           BUSCO full_table.tsv output file.
+    --fasta FASTA         FASTA sequence file.
     --hits TSV            Tabular BLAST/Diamond output file.
     --key path=value      Set a metadata key to value.
     --link path=url       Link to an external resource.
+    --meta YAML           Dataset metadata.
     --synonyms TSV        TSV file containing current identifiers and synonyms.
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
     --taxrule bestsum|bestsumorder
                           Rule to use when assigning BLAST hits to taxa. [Default: bestsum]
+    --create              Create a new BlobDir.
     --replace             Replace existing fields with matching ids.
 
 Examples:
@@ -32,10 +35,13 @@ Examples:
 
 """
 
+import os
+import glob
 from docopt import docopt
 import file_io
-import hits
 import busco
+import fasta
+import hits
 import key
 import link
 import synonyms
@@ -43,8 +49,9 @@ from taxdump import Taxdump
 from field import Identifier
 from dataset import Metadata
 
-FIELDS = [{'flag': '--hits', 'module': hits},
+FIELDS = [{'flag': '--fasta', 'module': fasta},
           {'flag': '--busco', 'module': busco},
+          {'flag': '--hits', 'module': hits},
           {'flag': '--synonyms', 'module': synonyms}]
 PARAMS = set(['--taxrule'])
 
@@ -59,14 +66,21 @@ def fetch_identifiers(path_to_dataset):
     return Identifier('identifiers', **data)
 
 
-def fetch_metadata(path_to_dataset):
+def fetch_metadata(path_to_dataset, **kwargs):
     """
     Load Metadata from file.
 
     fetch_metadata('tests/files/dataset')
     """
-    meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
     dataset_id = path_to_dataset.split('/').pop()
+    if '--meta' in kwargs:
+        meta = file_io.load_yaml(kwargs['--meta'])
+        if kwargs['--replace']:
+            files = glob.glob("%s/*" % kwargs['DIRECTORY'])
+            for file in files:
+                os.remove(file)
+    else:
+        meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
     return Metadata(dataset_id, **meta)
 
 
@@ -93,14 +107,37 @@ def has_field_warning(meta, field_id):
     return 0
 
 
+# def create_or_replace_dataset(directory, exists, create, replace):
+#     """Warn about dataset existence."""
+#     if exists:
+#         if replace:
+#             print("INFO: Replacing existing dataset \'%s\'." % directory)
+#             return 'replace'
+#         if create:
+#             print("WARN: Dataset \'%s\' is already present, not overwriting." % directory)
+#             print("WARN: Use '--replace' flag to overwrite existing dataset.")
+#             exit()
+#     if create:
+#         print("INFO: Creating dataset \'%s\'." % directory)
+#         return 'create'
+#     print("WARN: Dataset \'%s\' does not exist." % directory)
+#     print("WARN: Use '--create' flag to create a new dataset.")
+#     exit()
+
+
 def main():
     """Entrypoint for blobtools add."""
     args = docopt(__doc__)
-    meta = fetch_metadata(args['DIRECTORY'])
-    identifiers = fetch_identifiers(args['DIRECTORY'])
+    meta = fetch_metadata(args['DIRECTORY'], **args)
+    identifiers = False
     taxdump = None
     for field in FIELDS:
         if args[field['flag']]:
+            if not identifiers:
+                try:
+                    identifiers = fetch_identifiers(args['DIRECTORY'])
+                except TypeError:
+                    identifiers = False
             if field['flag'] == '--hits':
                 if not taxdump:
                     taxdump = fetch_taxdump(args['--taxdump'])
@@ -117,7 +154,7 @@ def main():
                     if has_field_warning(meta, data.field_id):
                         continue
                 meta.add_field(parents+data.parents, **data.meta)
-                json_file = "%s/%s.json" % ('tests/files/dataset', data.field_id)
+                json_file = "%s/%s.json" % (args['DIRECTORY'], data.field_id)
                 file_io.write_file(json_file, data.values_to_dict())
     for string in args['--link']:
         link.add(string, meta, identifiers.values)
