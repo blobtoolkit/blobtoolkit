@@ -23,7 +23,7 @@ def base_composition(seq_str):
     return gc_portion, n_count
 
 
-def parse(file, identifiers, **_kwargs):
+def parse(file, **kwargs):
     """Parse all synonym files."""
     parsed = []
     _lengths = OrderedDict()
@@ -35,6 +35,7 @@ def parse(file, identifiers, **_kwargs):
     for seq_id, seq_str in file_io.stream_fasta(file):
         _lengths[seq_id] = len(seq_str)
         _gc_portions[seq_id], _n_counts[seq_id] = base_composition(seq_str)
+    identifiers = kwargs['dependencies']['identifiers']
     if not identifiers:
         identifiers = Identifier('identifiers',
                                  meta={'field_id': 'identifiers'},

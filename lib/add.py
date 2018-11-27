@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-# pylint: disable=no-member
+# pylint: disable=no-member, too-many-branches
 
 """
 Add data to a BlobDir.
 
 Usage:
-    blobtools add [--busco TSV...] [--hits TSV...]  [--fasta FASTA]
+    blobtools add [--busco TSV...] [--cov BAM...]  [--hits TSV...]  [--fasta FASTA]
                   [--key path=value...] [--link path=url...] [--skip-link-test]
                   [--meta YAML] [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
@@ -17,6 +17,7 @@ Arguments:
 
 Options:
     --busco TSV           BUSCO full_table.tsv output file.
+    --cov BAM             BAM read alignment file.
     --fasta FASTA         FASTA sequence file.
     --hits TSV            Tabular BLAST/Diamond output file.
     --key path=value      Set a metadata key to value.
@@ -41,34 +42,39 @@ import glob
 from docopt import docopt
 import file_io
 import busco
+import cov
 import fasta
 import hits
 import key
 import link
 import synonyms
 from taxdump import Taxdump
-from field import Identifier
+from field import Identifier, Variable
 from dataset import Metadata
 
-FIELDS = [{'flag': '--fasta', 'module': fasta},
-          {'flag': '--busco', 'module': busco},
-          {'flag': '--hits', 'module': hits},
-          {'flag': '--synonyms', 'module': synonyms}]
+FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
+          {'flag': '--busco', 'module': busco, 'depends': ['identifiers']},
+          {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
+          {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
+          {'flag': '--synonyms', 'module': synonyms, 'depends': ['identifiers']}]
 PARAMS = set(['--taxrule'])
 
 
-def fetch_identifiers(path_to_dataset):
+def fetch_dependency(path_to_dataset, field_id):
     """
-    Load Identifiers from file.
+    Load fields from file.
 
-    fetch_identifiers('tests/files/dataset')
+    fetch_dependency('tests/files/dataset', 'identifiers')
     """
     try:
-        data = file_io.load_yaml("%s/identifiers.json" % path_to_dataset)
-        identifiers = Identifier('identifiers', **data)
+        data = file_io.load_yaml("%s/%s.json" % (path_to_dataset, field_id))
+        if field_id == 'identifiers':
+            dependency = Identifier(field_id, **data)
+        else:
+            dependency = Variable(field_id, **data)
     except TypeError:
-        identifiers = False
-    return identifiers
+        dependency = False
+    return dependency
 
 
 def fetch_metadata(path_to_dataset, **kwargs):
@@ -78,12 +84,16 @@ def fetch_metadata(path_to_dataset, **kwargs):
     fetch_metadata('tests/files/dataset')
     """
     dataset_id = path_to_dataset.split('/').pop()
+    if not os.path.exists(path_to_dataset):
+        os.makedirs(path_to_dataset)
     if kwargs['--meta']:
         meta = file_io.load_yaml(kwargs['--meta'])
         if kwargs['--replace']:
             files = glob.glob("%s/*" % kwargs['DIRECTORY'])
             for file in files:
                 os.remove(file)
+        if 'id' not in meta:
+            meta['id'] = dataset_id
     else:
         meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
     return Metadata(dataset_id, **meta)
@@ -134,34 +144,39 @@ def main():
     """Entrypoint for blobtools add."""
     args = docopt(__doc__)
     meta = fetch_metadata(args['DIRECTORY'], **args)
-    identifiers = False
     taxdump = None
+    dependencies = {}
     for field in FIELDS:
         if args[field['flag']]:
-            if not identifiers:
-                identifiers = fetch_identifiers(args['DIRECTORY'])
+            print(field['flag'])
+            for dep in field['depends']:
+                print(dep)
+                if dep not in dependencies or not dependencies[dep]:
+                    dependencies[dep] = fetch_dependency(args['DIRECTORY'], dep)
+                    print(dependencies[dep])
             if field['flag'] == '--hits':
                 if not taxdump:
                     taxdump = fetch_taxdump(args['--taxdump'])
             parents = field['module'].parent()
             parsed = field['module'].parse(
                 args[field['flag']],
-                identifiers,
                 **{key: args[key] for key in PARAMS},
-                taxdump=taxdump)
+                taxdump=taxdump,
+                dependencies=dependencies)
             if not isinstance(parsed, list):
                 parsed = [parsed]
             for data in parsed:
+                print(data.field_id)
                 if not args['--replace']:
                     if has_field_warning(meta, data.field_id):
                         continue
                 meta.add_field(parents+data.parents, **data.meta)
                 json_file = "%s/%s.json" % (args['DIRECTORY'], data.field_id)
                 file_io.write_file(json_file, data.values_to_dict())
-    if not identifiers:
-        identifiers = fetch_identifiers(args['DIRECTORY'])
+    if 'identifiers' not in dependencies:
+        dependencies['identifiers'] = fetch_dependency(args['DIRECTORY'], 'identifiers')
     for string in args['--link']:
-        link.add(string, meta, identifiers.values, args['--skip-link-test'])
+        link.add(string, meta, dependencies['identifiers'].values, args['--skip-link-test'])
     for string in args['--key']:
         key.add(string, meta)
     file_io.write_file("%s/meta.json" % args['DIRECTORY'], meta.to_dict())

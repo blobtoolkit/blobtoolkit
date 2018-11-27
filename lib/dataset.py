@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Dataset Class module."""
 
-# pylint: disable=no-member
+# pylint: disable=no-member, too-many-nested-blocks, too-many-branches
 
 
 class Metadata():
@@ -63,8 +63,15 @@ class Metadata():
                     if required['id'] not in parent:
                         parent.update({required['id']: required})
                         fields.append(required)
+                    else:
+                        for key in required.keys():
+                            if key not in ['children', 'data']:
+                                parent[required['id']][key] = required[key]
                     parent = parent[required['id']]
                 elif required['id'] in self._field_list:
+                    for key in required.keys():
+                        if key not in ['children', 'data']:
+                            self._field_list[required['id']][key] = required[key]
                     parent = self._field_list[required['id']]
                 elif isinstance(parent, list):
                     try:
@@ -101,7 +108,10 @@ class Metadata():
         for key in self.__slots__:
             if not key.startswith('_'):
                 if hasattr(self, key):
-                    data[key] = getattr(self, key)
+                    if key == 'dataset_id':
+                        data['id'] = getattr(self, key)
+                    else:
+                        data[key] = getattr(self, key)
         return data
 
     @staticmethod

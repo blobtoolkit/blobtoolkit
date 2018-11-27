@@ -142,10 +142,11 @@ def create_fields(results, fields=None):
     return fields
 
 
-def parse(files, identifiers, **kwargs):
+def parse(files, **kwargs):
     """Parse BLAST results into Fields."""
     blast = None
     fields = []
+    identifiers = kwargs['dependencies']['identifiers']
     if kwargs['--taxrule'] == 'bestsum':
         for file in files:
             blast = parse_blast(file, blast)
