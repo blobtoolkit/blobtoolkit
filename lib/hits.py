@@ -92,25 +92,50 @@ def create_fields(results, fields=None):
     if fields is None:
         fields = []
     for result in results:
-        parents = ['children']
         main = Category(result['field_id'],
                         values=result['values'],
-                        meta={'field_id': result['field_id']},
-                        parents=parents)
+                        meta={
+                            'field_id': result['field_id'],
+                            'name': result['field_id']
+                        },
+                        parents=['children'])
         fields.append(main)
-        parents += [{'id': result['field_id']}, 'data']
-        for subfield in ['score', 'cindex']:
-            field_id = "%s_%s" % (result['field_id'], subfield)
-            fields.append(Variable(field_id,
-                                   values=result['data'][subfield],
-                                   meta={'field_id': field_id},
-                                   parents=parents))
+        parents = ['children', {'id': result['field_id']}, 'data']
+        field_id = "%s_%s" % (result['field_id'], 'cindex')
+        fields.append(Variable(field_id,
+                               values=result['data']['cindex'],
+                               meta={
+                                   'scale': 'scaleLinear',
+                                   'field_id': field_id,
+                                   'name': field_id,
+                                   'datatype': 'integer',
+                                   'range': [min(result['data']['cindex']),
+                                             max(result['data']['cindex'])]
+                                   },
+                               parents=parents))
+        field_id = "%s_%s" % (result['field_id'], 'score')
+        fields.append(Variable(field_id,
+                               values=result['data']['score'],
+                               meta={
+                                   'scale': 'scaleLog',
+                                   'field_id': field_id,
+                                   'name': field_id,
+                                   'datatype': 'integer',
+                                   'range': [min(result['data']['score']),
+                                             max(result['data']['score'])]
+                                   },
+                               parents=parents))
         subfield = 'positions'
         field_id = "%s_%s" % (result['field_id'], subfield)
         fields.append(MultiArray(field_id,
                                  values=result['data'][subfield],
                                  fixed_keys=main.keys,
-                                 meta={'field_id': field_id},
+                                 meta={
+                                     'field_id': field_id,
+                                     'name': field_id,
+                                     'type': 'multiarray',
+                                     'datatype': 'mixed'
+                                     },
                                  parents=parents,
                                  category_slot=0,
                                  headers=['name', 'start', 'end', 'score']))
@@ -142,11 +167,10 @@ def parse(files, identifiers, **kwargs):
 def parent():
     """Set standard metadata for BLAST."""
     blast = {
-        'datatype': 'mixed',
-        'type': 'array',
-        'id': 'blast',
-        'name': 'blast',
-        'children': []
+        'datatype': 'string',
+        'type': 'category',
+        'id': 'taxonomy',
+        'name': 'Taxonomy'
     }
     return [
         blast

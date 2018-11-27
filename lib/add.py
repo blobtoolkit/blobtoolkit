@@ -73,7 +73,7 @@ def fetch_metadata(path_to_dataset, **kwargs):
     fetch_metadata('tests/files/dataset')
     """
     dataset_id = path_to_dataset.split('/').pop()
-    if '--meta' in kwargs:
+    if kwargs['--meta']:
         meta = file_io.load_yaml(kwargs['--meta'])
         if kwargs['--replace']:
             files = glob.glob("%s/*" % kwargs['DIRECTORY'])

@@ -267,6 +267,8 @@ class MultiArray(Field):
                     for arr in record:
                         arr[slot] = values[index]
                         index += 1
+            kwargs['meta'].update({'category_slot': kwargs['category_slot']})
+            kwargs['meta'].update({'headers': kwargs['headers']})
         super().__init__(field_id, **kwargs)
         self.type = 'array'
 
