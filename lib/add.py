@@ -7,8 +7,8 @@ Add data to a BlobDir.
 
 Usage:
     blobtools add [--busco TSV...] [--hits TSV...]  [--fasta FASTA]
-                  [--key path=value...] [--link path=url...] [--meta YAML]
-                  [--synonyms TSV...]
+                  [--key path=value...] [--link path=url...] [--skip-link-test]
+                  [--meta YAML] [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
                   [--create] [--replace] DIRECTORY
 
@@ -20,7 +20,8 @@ Options:
     --fasta FASTA         FASTA sequence file.
     --hits TSV            Tabular BLAST/Diamond output file.
     --key path=value      Set a metadata key to value.
-    --link path=url       Link to an external resource.
+    --link path=URL       Link to an external resource.
+    --skip-link-test      Skip test to see if link URL can be resolved.
     --meta YAML           Dataset metadata.
     --synonyms TSV        TSV file containing current identifiers and synonyms.
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
@@ -62,8 +63,12 @@ def fetch_identifiers(path_to_dataset):
 
     fetch_identifiers('tests/files/dataset')
     """
-    data = file_io.load_yaml("%s/identifiers.json" % path_to_dataset)
-    return Identifier('identifiers', **data)
+    try:
+        data = file_io.load_yaml("%s/identifiers.json" % path_to_dataset)
+        identifiers = Identifier('identifiers', **data)
+    except TypeError:
+        identifiers = False
+    return identifiers
 
 
 def fetch_metadata(path_to_dataset, **kwargs):
@@ -134,10 +139,7 @@ def main():
     for field in FIELDS:
         if args[field['flag']]:
             if not identifiers:
-                try:
-                    identifiers = fetch_identifiers(args['DIRECTORY'])
-                except TypeError:
-                    identifiers = False
+                identifiers = fetch_identifiers(args['DIRECTORY'])
             if field['flag'] == '--hits':
                 if not taxdump:
                     taxdump = fetch_taxdump(args['--taxdump'])
@@ -156,11 +158,13 @@ def main():
                 meta.add_field(parents+data.parents, **data.meta)
                 json_file = "%s/%s.json" % (args['DIRECTORY'], data.field_id)
                 file_io.write_file(json_file, data.values_to_dict())
+    if not identifiers:
+        identifiers = fetch_identifiers(args['DIRECTORY'])
     for string in args['--link']:
-        link.add(string, meta, identifiers.values)
+        link.add(string, meta, identifiers.values, args['--skip-link-test'])
     for string in args['--key']:
         key.add(string, meta)
-    file_io.write_file("%s/meta.update.json" % args['DIRECTORY'], meta.to_dict())
+    file_io.write_file("%s/meta.json" % args['DIRECTORY'], meta.to_dict())
 
 
 if __name__ == '__main__':

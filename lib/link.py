@@ -31,7 +31,7 @@ def _test_link(url):
         return True
 
 
-def add(string, meta, identifiers):
+def add(string, meta, identifiers, skip_test):
     """Add a link to meta."""
     path, url = string.split('=')
     keys = path.split('.')
@@ -42,7 +42,11 @@ def add(string, meta, identifiers):
             values = values[key]
         else:
             values = getattr(values, key)
-    if _test_link(_expand_link(url, values, identifiers)):
+    if skip_test:
+        valid = True
+    else:
+        valid = _test_link(_expand_link(url, values, identifiers))
+    if valid:
         for key in keys[:-1]:
             if key not in links:
                 links[key] = {}
