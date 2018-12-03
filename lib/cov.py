@@ -29,6 +29,7 @@ def parse_bam(bam_file, **kwargs):
     samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
     _covs = defaultdict(int)
     _read_covs = {}
+    print("Loading mapping data from %s" % bam_file)
     for seq_id in tqdm(identifiers.values):
         reads = set()
         for pileupcolumn in samfile.pileup(seq_id):
@@ -71,7 +72,7 @@ def parse_bam(bam_file, **kwargs):
                                   meta={'field_id': field_id},
                                   parents=['children',
                                            {'id': 'read_coverage',
-                                            'type': 'integer',
+                                            'datatype': 'integer',
                                             'clamp': 1,
                                             'range': fields['read_cov_range']},
                                            'children']
@@ -122,8 +123,8 @@ def parse(files, **kwargs):
 def parent():
     """Set standard metadata for Coverage."""
     coverage = {
-        'datatype': 'variable',
-        'type': 'float',
+        'datatype': 'float',
+        'type': 'variable',
         'scale': 'scaleLog',
         'id': 'coverage',
         'name': 'coverage'

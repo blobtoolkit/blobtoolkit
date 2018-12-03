@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# pylint: disable=no-member, too-many-branches
+# pylint: disable=no-member, too-many-branches, too-many-locals
 
 """
 Filter a BlobDir.
@@ -69,11 +69,11 @@ def parse_params(args, meta):
             continue
         if meta.has_field(field_id):
             field_meta = meta.field_meta(field_id)
-            if field_meta.get('range'):
-                field_type = 'variable'
-            else:
-                field_type = 'category'
-            if param in valid[field_type]:
+            # if field_meta.get('range'):
+            #     field_type = 'variable'
+            # else:
+            #     field_type = 'category'
+            if param in valid[field_meta['type']]:
                 params[field_id].update({param: value})
             else:
                 print("WARN: '%s' is not a valid parameter for field '%s'" % (param, field_id))
@@ -82,10 +82,10 @@ def parse_params(args, meta):
     return dict(params)
 
 
-def filter_by_params(directory, indices, params, invert_all):
+def filter_by_params(meta, directory, indices, params, invert_all):
     """Filter included set using params."""
     for field_id, filters in params.items():
-        field = fetch_field(directory, field_id)
+        field = fetch_field(directory, field_id, meta)
         invert = invert_all
         if filters.get('Inv'):
             invert = not invert
@@ -124,19 +124,25 @@ def filter_by_json(identifiers, indices, json_file, invert):
     return indices
 
 
-def create_filtered_dataset(full_meta, indir, outdir, indices):
+def create_filtered_dataset(dataset_meta, indir, outdir, indices):
     """Write filtered records to new dataset."""
-    # meta = fetch_metadata(outdir, meta={'origin': full_meta.dataset_id})
-    for field_id in full_meta.list_fields():
-        field_meta = full_meta.field_meta(field_id)
+    meta = dataset_meta.to_dict()
+    meta.update({'fields': [],
+                 'origin': dataset_meta.dataset_id,
+                 'records': len(indices)})
+    meta = fetch_metadata(outdir, meta=meta)
+    # meta = fetch_metadata(outdir, **args)
+    for field_id in dataset_meta.list_fields():
+        field_meta = dataset_meta.field_meta(field_id)
         if not field_meta.get('children') or field_meta.get('data'):
             keys = None
             slot = None
             headers = None
-            full_field = fetch_field(indir, field_id)
+            full_field = fetch_field(indir, field_id, dataset_meta)
             if isinstance(full_field, (Variable, Identifier)):
                 values = [full_field.values[i] for i in indices]
-                field_meta.update({'range': [min(values), max(values)]})
+                if isinstance(full_field, Variable):
+                    field_meta.update({'range': [min(values), max(values)]})
             elif isinstance(full_field, Category):
                 full_values = full_field.expand_values()
                 values = [full_values[i] for i in indices]
@@ -149,7 +155,7 @@ def create_filtered_dataset(full_meta, indir, outdir, indices):
                 except AttributeError:
                     pass
                 if field_meta.get('parent'):
-                    parent_field = fetch_field(outdir, field_meta['parent'])
+                    parent_field = fetch_field(outdir, field_meta['parent'], dataset_meta)
                     if parent_field:
                         keys = parent_field.keys
             field = type(full_field)(field_id,
@@ -158,8 +164,11 @@ def create_filtered_dataset(full_meta, indir, outdir, indices):
                                      fixed_keys=keys,
                                      category_slot=slot,
                                      headers=headers)
+            parents = dataset_meta.field_parent_list(field_id)
+            meta.add_field(parents, **field_meta, field_id=field_id)
             json_file = "%s/%s.json" % (outdir, field.field_id)
             file_io.write_file(json_file, field.values_to_dict())
+    file_io.write_file("%s/meta.json" % outdir, meta.to_dict())
 
 
 def main():
@@ -167,11 +176,11 @@ def main():
     args = docopt(__doc__)
     meta = fetch_metadata(args['DIRECTORY'], **args)
     params = parse_params(args, meta)
-    identifiers = fetch_field(args['DIRECTORY'], 'identifiers')
+    identifiers = fetch_field(args['DIRECTORY'], 'identifiers', meta)
     indices = [index for index, value in enumerate(identifiers.values)]
     invert = args['--invert']
     if params:
-        indices = filter_by_params(args['DIRECTORY'], indices, params, invert)
+        indices = filter_by_params(meta, args['DIRECTORY'], indices, params, invert)
     if args['--json']:
         indices = filter_by_json(identifiers.values, indices, args['--json'], invert)
     if args['--output']:

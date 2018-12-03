@@ -94,7 +94,7 @@ def main():
         if args[field['flag']]:
             for dep in field['depends']:
                 if dep not in dependencies or not dependencies[dep]:
-                    dependencies[dep] = fetch_field(args['DIRECTORY'], dep)
+                    dependencies[dep] = fetch_field(args['DIRECTORY'], dep, meta)
             if field['flag'] == '--hits':
                 if not taxdump:
                     taxdump = fetch_taxdump(args['--taxdump'])
@@ -107,7 +107,6 @@ def main():
             if not isinstance(parsed, list):
                 parsed = [parsed]
             for data in parsed:
-                print(data.field_id)
                 if not args['--replace']:
                     if has_field_warning(meta, data.field_id):
                         continue
@@ -116,13 +115,13 @@ def main():
                     meta.records = len(data.values)
                 json_file = "%s/%s.json" % (args['DIRECTORY'], data.field_id)
                 file_io.write_file(json_file, data.values_to_dict())
+                dependencies[data.field_id] = data
     if 'identifiers' not in dependencies:
-        dependencies['identifiers'] = fetch_field(args['DIRECTORY'], 'identifiers')
+        dependencies['identifiers'] = fetch_field(args['DIRECTORY'], 'identifiers', meta)
     for string in args['--link']:
         link.add(string, meta, dependencies['identifiers'].values, args['--skip-link-test'])
     for string in args['--key']:
         key.add(string, meta)
-    print("%s/meta.json" % args['DIRECTORY'])
     file_io.write_file("%s/meta.json" % args['DIRECTORY'], meta.to_dict())
 
 

@@ -63,6 +63,23 @@ class Metadata():
             meta = self.add_parent_meta(meta, meta['parent'])
         return meta
 
+    def field_parent_list(self, field_id):
+        """Return list of parent fields for a field."""
+        parents = []
+        meta = self.field_meta(field_id)
+        if meta.get('parent'):
+            parent_meta = self.field_meta(meta['parent'])
+            parents.append({'id': meta['parent']})
+            for key, value in parent_meta.items():
+                if key not in ('field_id', 'children', 'data'):
+                    parents[-1].update({key: value})
+            if 'children' in parent_meta:
+                parents.append('children')
+            elif 'data' in parent_meta:
+                parents.append('data')
+            parents = self.field_parent_list(meta['parent']) + parents
+        return parents
+
     def add_parents(self, parents):
         """Add field metadata."""
         fields = self.fields

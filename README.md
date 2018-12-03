@@ -22,6 +22,26 @@ Install dependencies:
 ```
 cd test
 pip install -r requirements.txt
+conda install pigz seqtk
+```
+
+
+### Examples
+
+```
+./blobtools create --meta meta.yaml --fasta assembly.fasta --key record_type=scaffold path/to/dataset
+```
+
+```
+./blobtools add --cov mapping_file.bam --taxdump path/to/extracted/ncbi/new_taxdump --hits blast.out path/to/dataset
+```
+
+```
+./blobtools filter --param gc--Max=0.26 --output path/to/filtered_dataset path/to/dataset
+```
+
+```
+./blobtools add --key plot.x=gc --key plot.y=mapping_file_cov --key plot.z=length --key plot.cat=bestsum_phylum path/to/filtered_dataset
 ```
 
 ### Contributing

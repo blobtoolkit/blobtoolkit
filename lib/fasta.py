@@ -77,7 +77,6 @@ def parse(file, **kwargs):
                                'scale': 'scaleLog',
                                'field_id': 'length',
                                'name': 'Length',
-                               'clamp': 100,
                                'datatype': 'integer',
                                'range': [min(lengths), max(lengths)]
                            },

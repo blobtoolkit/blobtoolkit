@@ -18,15 +18,18 @@ TYPES = {
 }
 
 
-def fetch_field(path_to_dataset, field_id):
+def fetch_field(path_to_dataset, field_id, meta=None):
     """
     Load fields from file.
 
-    fetch_field('tests/files/dataset', 'identifiers')
+    fetch_field('tests/files/dataset', 'identifiers', meta)
     """
+    field_meta = meta.field_meta(field_id)
     try:
         data = file_io.load_yaml("%s/%s.json" % (path_to_dataset, field_id))
-        field = TYPES[data['type']](field_id, **data)
+        if data is not None:
+            data.update({'meta': field_meta})
+        field = TYPES[field_meta['type']](field_id, **data)
     except TypeError:
         field = False
     except KeyError:

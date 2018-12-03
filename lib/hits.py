@@ -110,7 +110,9 @@ def create_fields(results, fields=None):
                                    'name': field_id,
                                    'datatype': 'integer',
                                    'range': [min(result['data']['cindex']),
-                                             max(result['data']['cindex'])]
+                                             max(result['data']['cindex'])],
+                                   'preload': False,
+                                   'active': False
                                    },
                                parents=parents))
         field_id = "%s_%s" % (result['field_id'], 'score')
@@ -123,7 +125,9 @@ def create_fields(results, fields=None):
                                    'clamp': 1,
                                    'datatype': 'integer',
                                    'range': [min(result['data']['score']),
-                                             max(result['data']['score'])]
+                                             max(result['data']['score'])],
+                                   'preload': False,
+                                   'active': False
                                    },
                                parents=parents))
         subfield = 'positions'
@@ -135,7 +139,9 @@ def create_fields(results, fields=None):
                                      'field_id': field_id,
                                      'name': field_id,
                                      'type': 'multiarray',
-                                     'datatype': 'mixed'
+                                     'datatype': 'mixed',
+                                     'preload': False,
+                                     'active': False
                                      },
                                  parents=parents,
                                  category_slot=0,
