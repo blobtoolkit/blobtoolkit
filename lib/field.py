@@ -27,7 +27,7 @@ class Field():
     def __init__(self, field_id, **kwargs):
         """Init Field class."""
         self.field_id = field_id
-        self.type = 'generic'
+        self.type = 'field'
         self.values = []
         self.keys = []
         self.meta = {}
@@ -83,7 +83,7 @@ class Field():
     def values_to_dict(self):
         """Create a dict of values (with keys if applicable)."""
         data = {'values': self.values}
-        for key in ('keys', 'headers', 'category_slot'):
+        for key in ('keys', 'headers', 'category_slot', 'type'):
             if key in self.__slots__:
                 if hasattr(self, key):
                     data[key] = getattr(self, key)
@@ -217,7 +217,8 @@ class Array(Field):
     def __init__(self, field_id, **kwargs):
         """Init Array class."""
         self.category_slot = None
-        if 'category_slot' in kwargs and 'keys' not in kwargs:
+        exists = 'category_slot' in kwargs and kwargs['category_slot'] is not None
+        if exists and not kwargs.get('keys'):
             slot = kwargs['category_slot']
             cat_values = [value[slot] for value in kwargs['values']]
             keys = kwargs.get('fixed_keys', [])
@@ -245,6 +246,20 @@ class Array(Field):
             for index, value in enumerate(values):
                 self.values[index][slot] = value
 
+    def expand_values(self):
+        """Return list of full values."""
+        slot = self.category_slot
+        keys = self.keys
+        values = []
+        if slot is not None:
+            for record in self.values:
+                record_values = [i for i in record]
+                record_values[slot] = keys[record_values[slot]]
+                values.append(record_values)
+        else:
+            values = self.values
+        return values
+
 
 class MultiArray(Field):
     """Class for MultiArray field type."""
@@ -252,7 +267,9 @@ class MultiArray(Field):
     def __init__(self, field_id, **kwargs):
         """Init MultiArray class."""
         self.category_slot = None
-        if 'category_slot' in kwargs and 'keys' not in kwargs:
+        if 'category_slot' in kwargs:
+            self.category_slot = kwargs['category_slot']
+        if self.category_slot is not None and not kwargs.get('keys'):
             slot = kwargs['category_slot']
             cat_values = []
             for record in kwargs['values']:
@@ -270,7 +287,24 @@ class MultiArray(Field):
             kwargs['meta'].update({'category_slot': kwargs['category_slot']})
             kwargs['meta'].update({'headers': kwargs['headers']})
         super().__init__(field_id, **kwargs)
-        self.type = 'array'
+        self.type = 'multiarray'
+
+    def expand_values(self):
+        """Return list of full values."""
+        slot = self.category_slot
+        keys = self.keys
+        values = []
+        if slot is not None:
+            for record in self.values:
+                record_values = []
+                for arr in record:
+                    arr_values = [i for i in arr]
+                    arr_values[slot] = keys[arr_values[slot]]
+                    record_values.append(arr_values)
+                values.append(record_values)
+        else:
+            values = self.values
+        return values
 
 
 class Category(Field):
@@ -278,7 +312,7 @@ class Category(Field):
 
     def __init__(self, field_id, **kwargs):
         """Init Category class."""
-        if 'keys' not in kwargs:
+        if 'keys' not in kwargs or kwargs['keys'] is None:
             keys = kwargs.get('fixed_keys', [])
             kwargs['keys'], kwargs['values'] = self._collapse_values(kwargs['values'], keys)
         super().__init__(field_id, **kwargs)

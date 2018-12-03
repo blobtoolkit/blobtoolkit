@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Parse FASTA sequence into Fields."""
 
+import pathlib
 from collections import Counter, OrderedDict
+from tqdm import tqdm
 import file_io
 from field import Identifier, Variable
+from run_external import seqtk_subseq
 
 
 def base_composition(seq_str):
@@ -23,6 +26,14 @@ def base_composition(seq_str):
     return gc_portion, n_count
 
 
+def apply_filter(ids, fasta_file, **kwargs):
+    """Filter FASTA format assembly."""
+    suffix = kwargs['--suffix']
+    path = pathlib.Path(fasta_file)
+    outfile = path.parent / (path.stem + '.' + suffix + path.suffix)
+    seqtk_subseq(fasta_file, '\n'.join(ids), outfile)
+
+
 def parse(file, **kwargs):
     """Parse all synonym files."""
     parsed = []
@@ -32,7 +43,10 @@ def parse(file, **kwargs):
     lengths = []
     gc_portions = []
     n_counts = []
-    for seq_id, seq_str in file_io.stream_fasta(file):
+    print("Loading sequences from %s" % file)
+    pbar = tqdm(file_io.stream_fasta(file))
+    for seq_id, seq_str in pbar:
+        pbar.set_description(" - processing %s" % seq_id)
         _lengths[seq_id] = len(seq_str)
         _gc_portions[seq_id], _n_counts[seq_id] = base_composition(seq_str)
     identifiers = kwargs['dependencies']['identifiers']
@@ -46,14 +60,6 @@ def parse(file, **kwargs):
         lengths.append(_lengths[seq_id] if seq_id in _lengths else 0)
         gc_portions.append(_gc_portions[seq_id] if seq_id in _gc_portions else 0)
         n_counts.append(_n_counts[seq_id] if seq_id in _n_counts else 0)
-    # else:
-    #     lengths = list(_lengths.values())
-    #     gc_portions = list(_gc_portions.values())
-    #     n_counts = list(_n_counts.values())
-    #     parsed.append(Identifier('identifiers',
-    #                              meta={'field_id': 'identifiers'},
-    #                              values=list(_lengths.keys()),
-    #                              parents=[]))
     parsed.append(Variable('gc',
                            meta={
                                'preload': True,
@@ -71,6 +77,7 @@ def parse(file, **kwargs):
                                'scale': 'scaleLog',
                                'field_id': 'length',
                                'name': 'Length',
+                               'clamp': 100,
                                'datatype': 'integer',
                                'range': [min(lengths), max(lengths)]
                            },

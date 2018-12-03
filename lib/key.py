@@ -6,6 +6,9 @@ def add(string, meta):
     """Add a key value to meta."""
     path, value = string.split('=')
     keys = path.split('.')
+    if len(keys) == 1:
+        setattr(meta, keys[0], value)
+        return True
     if hasattr(meta, keys[0]):
         current = getattr(meta, keys[0])
     else:
@@ -16,3 +19,4 @@ def add(string, meta):
             current[key] = {}
         current = current[key]
     current.update({keys[-1]: value})
+    return True

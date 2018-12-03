@@ -29,7 +29,7 @@ def test_field_init(_my_field):
     assert _my_field.field_id == FIELD_ID
     assert _my_field.values == FIELD_DATA['values']
     assert _my_field.keys == FIELD_DATA['keys']
-    assert _my_field.type == 'generic'
+    assert _my_field.type == 'field'
 
 
 def test_get_values_by_index(_my_field):

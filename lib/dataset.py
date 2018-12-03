@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Dataset Class module."""
 
-# pylint: disable=no-member, too-many-nested-blocks, too-many-branches
+# pylint: disable=no-member, too-many-nested-blocks, too-many-branches, too-many-instance-attributes
 
 
 class Metadata():
@@ -14,6 +14,8 @@ class Metadata():
                  'fields',
                  'links',
                  'name',
+                 'origin',
+                 'parents',
                  'plot',
                  'reads',
                  'record_type',
@@ -28,9 +30,10 @@ class Metadata():
         """Init Dataset class."""
         self.dataset_id = dataset_id
         self.fields = []
-        self.name = ''
+        self.name = dataset_id
         self.links = {}
         self.record_type = 'record'
+        self.records = 0
         self.update_data(**kwargs)
         self._field_list = self.list_fields()
         self._field_ids = list(self._field_list.keys())
@@ -50,6 +53,15 @@ class Metadata():
     def has_field(self, field_id):
         """Return true if a field_id is present."""
         return field_id in self._field_ids
+
+    def field_meta(self, field_id):
+        """Return full metadata for a field."""
+        if not self.has_field(field_id):
+            return False
+        meta = {key: value for key, value in self._field_list[field_id].items()}
+        if meta.get('parent'):
+            meta = self.add_parent_meta(meta, meta['parent'])
+        return meta
 
     def add_parents(self, parents):
         """Add field metadata."""
@@ -101,6 +113,8 @@ class Metadata():
             if key == 'field_id':
                 key = 'id'
             meta[key] = value
+        # if parents:
+        #     meta['parents'] = parents
 
     def to_dict(self):
         """Create a dict of metadata."""
@@ -115,16 +129,29 @@ class Metadata():
         return data
 
     @staticmethod
-    def _list_fields(parent, fields=None):
+    def _list_fields(parent, fields=None, parent_id=None):
+        """Create a dict of fields."""
         if fields is None:
             fields = {}
         for field in parent:
+            if parent_id:
+                field.update({'parent': parent_id})
             fields.update({field['id']: field})
             if 'children' in field:
-                Metadata._list_fields(field['children'], fields)
+                Metadata._list_fields(field['children'], fields, field['id'])
             if 'data' in field:
-                Metadata._list_fields(field['data'], fields)
+                Metadata._list_fields(field['data'], fields, field['id'])
         return fields
+
+    def add_parent_meta(self, meta, parent_id):
+        """Add parent metadata to field metadata."""
+        parent_meta = self.field_meta(parent_id)
+        for key, value in parent_meta.items():
+            if key not in list(meta.keys()) + ['children', 'data']:
+                meta.update({key: value})
+        if parent_meta.get('parent'):
+            meta = self.add_parent_meta(meta, parent_meta['parent'])
+        return meta
 
 
 if __name__ == '__main__':

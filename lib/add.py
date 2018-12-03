@@ -17,7 +17,7 @@ Arguments:
 
 Options:
     --busco TSV           BUSCO full_table.tsv output file.
-    --cov BAM             BAM read alignment file.
+    --cov BAM             BAM/SAM/CRAM read alignment file.
     --fasta FASTA         FASTA sequence file.
     --hits TSV            Tabular BLAST/Diamond output file.
     --key path=value      Set a metadata key to value.
@@ -37,8 +37,6 @@ Examples:
 
 """
 
-import os
-import glob
 from docopt import docopt
 import file_io
 import busco
@@ -48,9 +46,8 @@ import hits
 import key
 import link
 import synonyms
-from taxdump import Taxdump
-from field import Identifier, Variable
-from dataset import Metadata
+from field import Identifier
+from fetch import fetch_field, fetch_metadata, fetch_taxdump
 
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--busco', 'module': busco, 'depends': ['identifiers']},
@@ -58,59 +55,6 @@ FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
           {'flag': '--synonyms', 'module': synonyms, 'depends': ['identifiers']}]
 PARAMS = set(['--taxrule'])
-
-
-def fetch_dependency(path_to_dataset, field_id):
-    """
-    Load fields from file.
-
-    fetch_dependency('tests/files/dataset', 'identifiers')
-    """
-    try:
-        data = file_io.load_yaml("%s/%s.json" % (path_to_dataset, field_id))
-        if field_id == 'identifiers':
-            dependency = Identifier(field_id, **data)
-        else:
-            dependency = Variable(field_id, **data)
-    except TypeError:
-        dependency = False
-    return dependency
-
-
-def fetch_metadata(path_to_dataset, **kwargs):
-    """
-    Load Metadata from file.
-
-    fetch_metadata('tests/files/dataset')
-    """
-    dataset_id = path_to_dataset.split('/').pop()
-    if not os.path.exists(path_to_dataset):
-        os.makedirs(path_to_dataset)
-    if kwargs['--meta']:
-        meta = file_io.load_yaml(kwargs['--meta'])
-        if kwargs['--replace']:
-            files = glob.glob("%s/*" % kwargs['DIRECTORY'])
-            for file in files:
-                os.remove(file)
-        if 'id' not in meta:
-            meta['id'] = dataset_id
-    else:
-        meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
-    return Metadata(dataset_id, **meta)
-
-
-def fetch_taxdump(path_to_taxdump):
-    """Load Taxdump from file."""
-    json_file = "%s/taxdump.json" % path_to_taxdump
-    data = file_io.load_yaml(json_file)
-    if data is None:
-        print('Parsing taxdump')
-        taxdump = Taxdump(path_to_taxdump)
-        file_io.write_file(json_file, taxdump.values_to_dict())
-    else:
-        print('Loading parsed taxdump')
-        taxdump = Taxdump(path_to_taxdump, **data)
-    return taxdump
 
 
 def has_field_warning(meta, field_id):
@@ -148,12 +92,9 @@ def main():
     dependencies = {}
     for field in FIELDS:
         if args[field['flag']]:
-            print(field['flag'])
             for dep in field['depends']:
-                print(dep)
                 if dep not in dependencies or not dependencies[dep]:
-                    dependencies[dep] = fetch_dependency(args['DIRECTORY'], dep)
-                    print(dependencies[dep])
+                    dependencies[dep] = fetch_field(args['DIRECTORY'], dep)
             if field['flag'] == '--hits':
                 if not taxdump:
                     taxdump = fetch_taxdump(args['--taxdump'])
@@ -171,14 +112,17 @@ def main():
                     if has_field_warning(meta, data.field_id):
                         continue
                 meta.add_field(parents+data.parents, **data.meta)
+                if isinstance(data, Identifier):
+                    meta.records = len(data.values)
                 json_file = "%s/%s.json" % (args['DIRECTORY'], data.field_id)
                 file_io.write_file(json_file, data.values_to_dict())
     if 'identifiers' not in dependencies:
-        dependencies['identifiers'] = fetch_dependency(args['DIRECTORY'], 'identifiers')
+        dependencies['identifiers'] = fetch_field(args['DIRECTORY'], 'identifiers')
     for string in args['--link']:
         link.add(string, meta, dependencies['identifiers'].values, args['--skip-link-test'])
     for string in args['--key']:
         key.add(string, meta)
+    print("%s/meta.json" % args['DIRECTORY'])
     file_io.write_file("%s/meta.json" % args['DIRECTORY'], meta.to_dict())
 
 

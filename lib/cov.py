@@ -6,11 +6,12 @@
 
 import os
 import math
-import time
 from collections import defaultdict
 from pathlib import Path
 import pysam
+from tqdm import tqdm
 from field import Variable
+from run_external import seqtk_subseq
 
 
 def parse_bam(bam_file, **kwargs):
@@ -19,20 +20,16 @@ def parse_bam(bam_file, **kwargs):
     lengths = kwargs['dependencies']['length'].values
     ncounts = kwargs['dependencies']['ncount'].values
     base_name = Path(bam_file).stem.split('.')[-1]
+    filetype_letter = Path(bam_file).suffix[1]
     index_file = Path("%s.bai" % bam_file)
     if not index_file.is_file():
         pysam.index(bam_file)
     else:
         index_file = False
-    samfile = pysam.AlignmentFile(bam_file, "rb")
-    # for read in samfile.fetch(identifiers.values[0], 100, 120):
-    #     print(read)
-    # samfile.close()
+    samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
     _covs = defaultdict(int)
     _read_covs = {}
-    ctr = 0
-    start = time.time()
-    for seq_id in identifiers.values:
+    for seq_id in tqdm(identifiers.values):
         reads = set()
         for pileupcolumn in samfile.pileup(seq_id):
             _covs[seq_id] += pileupcolumn.n
@@ -40,10 +37,6 @@ def parse_bam(bam_file, **kwargs):
                 if not pileupread.is_del and not pileupread.is_refskip:
                     reads.add(pileupread.alignment.query_name)
         _read_covs[seq_id] = len(reads)
-        ctr += 1
-        if ctr == 200:
-            break
-    print("%.1fs elapsed parsing %d contigs" % (time.time() - start, ctr))
     samfile.close()
     # stats = pysam.flagstat(bam_file)
     # print(stats)
@@ -66,6 +59,7 @@ def parse_bam(bam_file, **kwargs):
                              meta={'field_id': field_id},
                              parents=['children',
                                       {'id': 'base_coverage',
+                                       'clamp': 0.1,
                                        'range': fields['cov_range']},
                                       'children']
                              )
@@ -78,10 +72,37 @@ def parse_bam(bam_file, **kwargs):
                                   parents=['children',
                                            {'id': 'read_coverage',
                                             'type': 'integer',
+                                            'clamp': 1,
                                             'range': fields['read_cov_range']},
                                            'children']
                                   )
     return fields
+
+
+def apply_filter(ids, fastq_files, **kwargs):
+    """Filter FASTQ file based on read alignment file."""
+    suffix = kwargs['--suffix']
+    bam_file = kwargs['--cov']
+    read_ids = set()
+    filetype_letter = Path(bam_file).suffix[1]
+    index_file = Path("%s.bai" % bam_file)
+    if not index_file.is_file():
+        pysam.index(bam_file)
+    else:
+        index_file = False
+    samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
+    for seq_id in tqdm(ids):
+        for read in samfile.fetch(seq_id):
+            read_ids.add(read.query_name)
+            break
+    samfile.close()
+    if index_file:
+        os.remove(index_file)
+    # read_ids = '\n'.join(list(read_ids))
+    for fastq_file in fastq_files:
+        path = Path(fastq_file)
+        outfile = path.parent / (path.stem + '.' + suffix + path.suffix)
+        seqtk_subseq(fastq_file, '\n'.join(list(read_ids)), outfile)
 
 
 def parse(files, **kwargs):

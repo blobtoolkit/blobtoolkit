@@ -1,6 +1,0 @@
-.pytest_cache
-.coverage
-lib/__pycache__
-__pycache__
-.DS_Store
-*tsv.gz

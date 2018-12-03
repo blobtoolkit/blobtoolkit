@@ -120,6 +120,7 @@ def create_fields(results, fields=None):
                                    'scale': 'scaleLog',
                                    'field_id': field_id,
                                    'name': field_id,
+                                   'clamp': 1,
                                    'datatype': 'integer',
                                    'range': [min(result['data']['score']),
                                              max(result['data']['score'])]

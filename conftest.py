@@ -1,7 +1,10 @@
+"""Configuration parameters for pytest."""
+# pylint: disable=unused-import
 import sys
-from pytest_mock import mocker
 from os.path import dirname as d
 from os.path import abspath, join
-root_dir = d(d(abspath(__file__)))
-sys.path.insert(0, root_dir)
+from pytest_mock import mocker
+ROOT_DIR = d(d(abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
 sys.path.insert(0, abspath(join(d(__file__), 'lib')))
+print(sys.path)

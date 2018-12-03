@@ -8,6 +8,7 @@ usage: blobtools [<command>] [<args>...] [-h|--help] [--version]
 commands:
     add             add data to a BlobDir
     create          create a new BlobDir
+    filter          filter a BlobDir
     replace         call blobtools add with --replace flag
     -h, --help      show this
     -v, --version   show version number
@@ -34,9 +35,11 @@ if __name__ == '__main__':
     ARGV = [ARGS['<command>']] + ARGS['<args>']
     if ARGS['<command>'] == 'add':
         exit(call(['python', LIBDIR + '/add.py'] + ARGV))
-    if ARGS['<command>'] == 'create':
+    elif ARGS['<command>'] == 'create':
         exit(call(['python', LIBDIR + '/add.py'] + ['add', '--create'] + ARGS['<args>']))
-    if ARGS['<command>'] == 'replace':
+    elif ARGS['<command>'] == 'filter':
+        exit(call(['python', LIBDIR + '/filter.py'] + ARGV))
+    elif ARGS['<command>'] == 'replace':
         exit(call(['python', LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>']))
     else:
         exit(call([os.path.join(MAINDIR, './blobtools'), '-h']))
