@@ -47,8 +47,8 @@ def parse_bam(bam_file, **kwargs):
     print("Loading mapping data from %s" % bam_file)
     with Pool(int(kwargs['--threads'])) as pool:
         results = list(tqdm(pool.imap(_get_coverage,
-                                      map(lambda x: (bam_file, f_char, x), ids[:10])),
-                            total=len(ids[:10])))
+                                      map(lambda x: (bam_file, f_char, x), ids)),
+                            total=len(ids)))
     _covs = {}
     _read_covs = {}
     for result in results:
