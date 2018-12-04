@@ -99,7 +99,7 @@ def write_file(filename, data):
     write_file('variable.json.gz')
     """
     if '.json' in filename:
-        content = ujson.dumps(data, indent=1)
+        content = ujson.dumps(data, indent=1, escape_forward_slashes=False)
     elif '.yaml' in filename:
         content = yaml.dump(data, indent=1)
     else:
