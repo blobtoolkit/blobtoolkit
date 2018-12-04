@@ -9,3 +9,4 @@ pytest-mock>=1.10
 pyyaml>=3.12
 ujson>=1.35
 pysam>=0.15.1
+tqdm>=4.23.4
