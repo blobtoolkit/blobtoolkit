@@ -130,6 +130,7 @@ def create_filtered_dataset(dataset_meta, indir, outdir, indices):
     meta.update({'fields': [],
                  'origin': dataset_meta.dataset_id,
                  'records': len(indices)})
+    meta.pop('id')
     meta = fetch_metadata(outdir, meta=meta)
     # meta = fetch_metadata(outdir, **args)
     for field_id in dataset_meta.list_fields():

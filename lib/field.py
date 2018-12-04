@@ -34,13 +34,15 @@ class Field():
         self._subset = False
         if 'meta' not in kwargs:
             kwargs['meta'] = {}
-        kwargs['meta'].update({'type': self.type})
+        if 'type' not in kwargs['meta']:
+            kwargs['meta'].update({'type': self.type})
         self.update_data(**kwargs)
 
     def update_data(self, **kwargs):
         """Update values and keys for an existing field."""
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            if key != 'sparent':
+                setattr(self, key, value)
 
     def update_values(self, values):
         """Update values and keys for an existing field."""

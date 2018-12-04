@@ -44,6 +44,7 @@ def fetch_metadata(path_to_dataset, **kwargs):
     fetch_metadata('tests/files/dataset')
     """
     dataset_id = path_to_dataset.split('/').pop()
+    meta = {}
     if not os.path.exists(path_to_dataset):
         os.makedirs(path_to_dataset)
     if kwargs.get('--meta'):
@@ -54,10 +55,11 @@ def fetch_metadata(path_to_dataset, **kwargs):
                 os.remove(file)
     elif not kwargs.get('meta'):
         meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
-    else:
+    if not meta:
         meta = kwargs['meta']
     if 'id' not in meta:
         meta['id'] = dataset_id
+        meta['name'] = dataset_id
     return Metadata(dataset_id, **meta)
 
 
