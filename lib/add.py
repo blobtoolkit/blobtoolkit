@@ -10,7 +10,7 @@ Usage:
                   [--key path=value...] [--link path=url...] [--skip-link-test]
                   [--meta YAML] [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
-                  [--create] [--replace] DIRECTORY
+                  [--threads INT] [--create] [--replace] DIRECTORY
 
 Arguments:
     DIRECTORY             Existing Blob directory.
@@ -28,6 +28,7 @@ Options:
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
     --taxrule bestsum|bestsumorder
                           Rule to use when assigning BLAST hits to taxa. [Default: bestsum]
+    --threads INT         Number of threads to use for multithreaded tasks. [Default: 1]
     --create              Create a new BlobDir.
     --replace             Replace existing fields with matching ids.
 
@@ -54,7 +55,7 @@ FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
           {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
           {'flag': '--synonyms', 'module': synonyms, 'depends': ['identifiers']}]
-PARAMS = set(['--taxrule'])
+PARAMS = set(['--taxrule', '--threads'])
 
 
 def has_field_warning(meta, field_id):

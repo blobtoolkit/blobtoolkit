@@ -6,7 +6,7 @@
 
 import os
 import math
-from collections import defaultdict
+from multiprocessing import Pool
 from pathlib import Path
 import pysam
 from tqdm import tqdm
@@ -14,31 +14,55 @@ from field import Variable
 from run_external import seqtk_subseq
 
 
+def _get_coverage(args):
+    bam_file = args[0]
+    f_char = args[1]
+    seq_id = args[2]
+    samfile = pysam.AlignmentFile(bam_file, "r%s" % f_char)
+    cov = 0
+    reads = set()
+    for pileupcolumn in samfile.pileup(seq_id):
+        cov += pileupcolumn.n
+        for pileupread in pileupcolumn.pileups:
+            if not pileupread.is_del and not pileupread.is_refskip:
+                reads.add(pileupread.alignment.query_name)
+    samfile.close()
+    return [seq_id, cov, len(reads)]
+
+
 def parse_bam(bam_file, **kwargs):
     """Parse coverage into a Variables."""
     identifiers = kwargs['dependencies']['identifiers']
+    ids = identifiers.values
     lengths = kwargs['dependencies']['length'].values
     ncounts = kwargs['dependencies']['ncount'].values
     base_name = Path(bam_file).stem.split('.')[-1]
-    filetype_letter = Path(bam_file).suffix[1]
+    f_char = Path(bam_file).suffix[1]
     index_file = Path("%s.bai" % bam_file)
     if not index_file.is_file():
         pysam.index(bam_file)
     else:
         index_file = False
-    samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
-    _covs = defaultdict(int)
-    _read_covs = {}
+    # samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
     print("Loading mapping data from %s" % bam_file)
-    for seq_id in tqdm(identifiers.values):
-        reads = set()
-        for pileupcolumn in samfile.pileup(seq_id):
-            _covs[seq_id] += pileupcolumn.n
-            for pileupread in pileupcolumn.pileups:
-                if not pileupread.is_del and not pileupread.is_refskip:
-                    reads.add(pileupread.alignment.query_name)
-        _read_covs[seq_id] = len(reads)
-    samfile.close()
+    with Pool(int(kwargs['--threads'])) as pool:
+        results = list(tqdm(pool.imap(_get_coverage,
+                                      map(lambda x: (bam_file, f_char, x), ids[:10])),
+                            total=len(ids[:10])))
+    _covs = {}
+    _read_covs = {}
+    for result in results:
+        _covs.update({result[0]: result[1]})
+        _read_covs.update({result[0]: result[2]})
+    # for seq_id in tqdm(ids):
+    #     reads = set()
+    #     for pileupcolumn in samfile.pileup(seq_id):
+    #         _covs[seq_id] += pileupcolumn.n
+    #         for pileupread in pileupcolumn.pileups:
+    #             if not pileupread.is_del and not pileupread.is_refskip:
+    #                 reads.add(pileupread.alignment.query_name)
+    #     _read_covs[seq_id] = len(reads)
+    # samfile.close()
     # stats = pysam.flagstat(bam_file)
     # print(stats)
     if index_file:
@@ -47,7 +71,7 @@ def parse_bam(bam_file, **kwargs):
         raise UserWarning('Contig names in the coverage file did not match dataset identifiers.')
     covs = []
     read_covs = []
-    for index, seq_id in enumerate(identifiers.values):
+    for index, seq_id in enumerate(ids):
         acgt_count = lengths[index] - ncounts[index]
         covs.append(float("%.4f" % (_covs[seq_id]/acgt_count)) if seq_id in _covs else 0)
         read_covs.append(_read_covs[seq_id] if seq_id in _read_covs else 0)

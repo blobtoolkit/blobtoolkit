@@ -134,7 +134,8 @@ def create_filtered_dataset(dataset_meta, indir, outdir, indices):
     # meta = fetch_metadata(outdir, **args)
     for field_id in dataset_meta.list_fields():
         field_meta = dataset_meta.field_meta(field_id)
-        if not field_meta.get('children') or field_meta.get('data'):
+        if not field_meta.get('children'):
+            field_meta.pop('data', False)
             keys = None
             slot = None
             headers = None
