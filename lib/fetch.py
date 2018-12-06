@@ -56,7 +56,10 @@ def fetch_metadata(path_to_dataset, **kwargs):
     elif not kwargs.get('meta'):
         meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
     if not meta:
-        meta = kwargs['meta']
+        if kwargs.get('meta'):
+            meta = kwargs['meta']
+        else:
+            meta = {}
     if 'id' not in meta:
         meta['id'] = dataset_id
         meta['name'] = dataset_id

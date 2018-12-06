@@ -8,7 +8,7 @@ Add data to a BlobDir.
 Usage:
     blobtools add [--busco TSV...] [--cov BAM...]  [--hits TSV...]  [--fasta FASTA]
                   [--key path=value...] [--link path=url...] [--skip-link-test]
-                  [--meta YAML] [--synonyms TSV...]
+                  [--blobDB JSON] [--meta YAML] [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
                   [--threads INT] [--create] [--replace] DIRECTORY
 
@@ -24,6 +24,7 @@ Options:
     --link path=URL       Link to an external resource.
     --skip-link-test      Skip test to see if link URL can be resolved.
     --meta YAML           Dataset metadata.
+    --blobDB JSON         Blobtools v1 blobDB.
     --synonyms TSV        TSV file containing current identifiers and synonyms.
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
     --taxrule bestsum|bestsumorder
@@ -40,6 +41,7 @@ Examples:
 
 from docopt import docopt
 import file_io
+import blob_db
 import busco
 import cov
 import fasta
@@ -51,6 +53,7 @@ from field import Identifier
 from fetch import fetch_field, fetch_metadata, fetch_taxdump
 
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
+          {'flag': '--blobDB', 'module': blob_db, 'depends': ['identifiers']},
           {'flag': '--busco', 'module': busco, 'depends': ['identifiers']},
           {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
           {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},

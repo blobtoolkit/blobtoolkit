@@ -116,15 +116,16 @@ def create_fields(results, fields=None):
                                    },
                                parents=parents))
         field_id = "%s_%s" % (result['field_id'], 'score')
+        _min = min(result['data']['score'])
         fields.append(Variable(field_id,
                                values=result['data']['score'],
                                meta={
                                    'scale': 'scaleLog',
                                    'field_id': field_id,
                                    'name': field_id,
-                                   'clamp': 1,
+                                   'clamp': 1 if _min == 0 else False,
                                    'datatype': 'integer',
-                                   'range': [min(result['data']['score']),
+                                   'range': [_min,
                                              max(result['data']['score'])],
                                    'preload': False,
                                    'active': False

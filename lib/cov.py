@@ -54,17 +54,6 @@ def parse_bam(bam_file, **kwargs):
     for result in results:
         _covs.update({result[0]: result[1]})
         _read_covs.update({result[0]: result[2]})
-    # for seq_id in tqdm(ids):
-    #     reads = set()
-    #     for pileupcolumn in samfile.pileup(seq_id):
-    #         _covs[seq_id] += pileupcolumn.n
-    #         for pileupread in pileupcolumn.pileups:
-    #             if not pileupread.is_del and not pileupread.is_refskip:
-    #                 reads.add(pileupread.alignment.query_name)
-    #     _read_covs[seq_id] = len(reads)
-    # samfile.close()
-    # stats = pysam.flagstat(bam_file)
-    # print(stats)
     if index_file:
         os.remove(index_file)
     if not identifiers.validate_list(list(_covs.keys())):
@@ -84,7 +73,7 @@ def parse_bam(bam_file, **kwargs):
                              meta={'field_id': field_id},
                              parents=['children',
                                       {'id': 'base_coverage',
-                                       'clamp': 0.1,
+                                       'clamp': 1 if fields['cov_range'][0] == 0 else False,
                                        'range': fields['cov_range']},
                                       'children']
                              )
@@ -97,7 +86,7 @@ def parse_bam(bam_file, **kwargs):
                                   parents=['children',
                                            {'id': 'read_coverage',
                                             'datatype': 'integer',
-                                            'clamp': 1,
+                                            'clamp': 1 if fields['read_cov_range'][0] == 0 else False,
                                             'range': fields['read_cov_range']},
                                            'children']
                                   )

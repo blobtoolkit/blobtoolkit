@@ -153,6 +153,9 @@ class Identifier(Field):
     def __init__(self, field_id, **kwargs):
         """Init Identifier class."""
         kwargs['type'] = 'identifier'
+        if 'meta' not in kwargs:
+            kwargs['meta'] = {}
+        kwargs['meta']['type'] = kwargs['type']
         super().__init__(field_id, **kwargs)
 
     def to_set(self):
@@ -187,6 +190,9 @@ class Variable(Field):
     def __init__(self, field_id, **kwargs):
         """Init Variable class."""
         kwargs['type'] = 'variable'
+        if 'meta' not in kwargs:
+            kwargs['meta'] = {}
+        kwargs['meta']['type'] = kwargs['type']
         super().__init__(field_id, **kwargs)
 
     def get_indices_in_range(self, min_max, invert=False):
@@ -231,6 +237,9 @@ class Array(Field):
             for index, value in enumerate(kwargs['values']):
                 value[slot] = values[index]
         kwargs['type'] = 'array'
+        if 'meta' not in kwargs:
+            kwargs['meta'] = {}
+        kwargs['meta']['type'] = kwargs['type']
         super().__init__(field_id, **kwargs)
 
     def get_values_by_indices_for_slots(self, indices, slots):
@@ -273,6 +282,9 @@ class MultiArray(Field):
         """Init MultiArray class."""
         self.category_slot = None
         kwargs['type'] = 'multiarray'
+        if 'meta' not in kwargs:
+            kwargs['meta'] = {}
+        kwargs['meta']['type'] = kwargs['type']
         if 'category_slot' in kwargs:
             self.category_slot = kwargs['category_slot']
         if self.category_slot is not None and not kwargs.get('keys'):
@@ -318,6 +330,9 @@ class Category(Field):
     def __init__(self, field_id, **kwargs):
         """Init Category class."""
         kwargs['type'] = 'category'
+        if 'meta' not in kwargs:
+            kwargs['meta'] = {}
+        kwargs['meta']['type'] = kwargs['type']
         if 'keys' not in kwargs or kwargs['keys'] is None:
             keys = kwargs.get('fixed_keys', [])
             kwargs['keys'], kwargs['values'] = self._collapse_values(kwargs['values'], keys)
