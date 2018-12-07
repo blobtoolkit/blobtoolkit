@@ -89,7 +89,6 @@ def parse_bam(bam_file, **kwargs):
                                   values=read_covs,
                                   meta={'field_id': field_id,
                                         'file': bam_file,
-                                        'reads_total': stats['mapped'] + stats['unmapped'],
                                         'reads_mapped': stats['mapped'],
                                         'reads_unmapped': stats['unmapped']
                                         },

@@ -117,16 +117,15 @@ def create_fields(results, taxrule, files, fields=None):
                              category_slot=None,
                              headers=['taxid', 'start', 'end', 'score', 'subject']))
     for result in results:
-        parents = ['children', {'id': taxrule}, 'children']
         main = Category(result['field_id'],
                         values=result['values'],
                         meta={
                             'field_id': result['field_id'],
                             'name': result['field_id']
                         },
-                        parents=parents)
+                        parents=['children', {'id': taxrule}, 'children'])
         fields.append(main)
-        parents += [{'id': result['field_id']}, 'data']
+        parents = ['children', {'id': taxrule}, 'children', {'id': result['field_id']}, 'data']
         field_id = "%s_%s" % (result['field_id'], 'cindex')
         fields.append(Variable(field_id,
                                values=result['data']['cindex'],
