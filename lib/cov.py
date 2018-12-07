@@ -43,6 +43,11 @@ def parse_bam(bam_file, **kwargs):
         pysam.index(bam_file)
     else:
         index_file = False
+    samfile = pysam.AlignmentFile(bam_file, "r%s" % f_char)
+    stats = {'mapped': samfile.mapped,
+             'unmapped': samfile.unmapped}
+    samfile.close()
+    print(stats)
     # samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
     print("Loading mapping data from %s" % bam_file)
     with Pool(int(kwargs['--threads'])) as pool:
@@ -70,7 +75,7 @@ def parse_bam(bam_file, **kwargs):
                            max(covs+[kwargs['cov_range'][1]])]
     fields['cov'] = Variable(field_id,
                              values=covs,
-                             meta={'field_id': field_id},
+                             meta={'field_id': field_id, 'file': bam_file},
                              parents=['children',
                                       {'id': 'base_coverage',
                                        'clamp': 1 if fields['cov_range'][0] == 0 else False,
@@ -82,7 +87,12 @@ def parse_bam(bam_file, **kwargs):
                                 max(read_covs+[kwargs['read_cov_range'][1]])]
     fields['read_cov'] = Variable(field_id,
                                   values=read_covs,
-                                  meta={'field_id': field_id},
+                                  meta={'field_id': field_id,
+                                        'file': bam_file,
+                                        'reads_total': stats['mapped'] + stats['unmapped'],
+                                        'reads_mapped': stats['mapped'],
+                                        'reads_unmapped': stats['unmapped']
+                                        },
                                   parents=['children',
                                            {'id': 'read_coverage',
                                             'datatype': 'integer',

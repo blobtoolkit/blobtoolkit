@@ -303,7 +303,7 @@ class MultiArray(Field):
                         arr[slot] = values[index]
                         index += 1
             kwargs['meta'].update({'category_slot': kwargs['category_slot']})
-            kwargs['meta'].update({'headers': kwargs['headers']})
+        kwargs['meta'].update({'headers': kwargs['headers']})
         super().__init__(field_id, **kwargs)
 
     def expand_values(self):

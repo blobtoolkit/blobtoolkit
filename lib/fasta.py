@@ -60,7 +60,17 @@ def parse(file, **kwargs):
         lengths.append(_lengths[seq_id] if seq_id in _lengths else 0)
         gc_portions.append(_gc_portions[seq_id] if seq_id in _gc_portions else 0)
         n_counts.append(_n_counts[seq_id] if seq_id in _n_counts else 0)
-    parsed.append()
+    parsed.append(Variable('gc',
+                           meta={
+                               'field_id': 'gc',
+                               'preload': True,
+                               'scale': 'scaleLinear',
+                               'name': 'GC',
+                               'datatype': 'float',
+                               'range': [min(gc_portions), max(gc_portions)]
+                           },
+                           values=gc_portions,
+                           parents=[]))
     _min = min(lengths)
     parsed.append(Variable('length',
                            meta={

@@ -16,7 +16,8 @@ def parse_busco(busco_file, identifiers):
         'version': lines[0].split(':')[1].strip(),
         'set': re.split(r':|\(|\)', lines[1])[1].strip(),
         'count': int(re.split(r':|\(|\)', lines[1])[5].strip()),
-        'command': lines[2].split(':')[1].strip()
+        'command': lines[2].split(':')[1].strip(),
+        'file': busco_file
     }
     meta['field_id'] = "%s_busco" % meta['set']
     columns = re.split(r'# |\t', lines[4])[1:]

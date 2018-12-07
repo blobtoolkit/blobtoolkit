@@ -92,6 +92,8 @@ def main():
     """Entrypoint for blobtools add."""
     args = docopt(__doc__)
     meta = fetch_metadata(args['DIRECTORY'], **args)
+    if args['--fasta']:
+        meta.assembly.update({'file': args['--fasta']})
     taxdump = None
     dependencies = {}
     for field in FIELDS:

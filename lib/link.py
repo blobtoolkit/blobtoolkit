@@ -33,7 +33,7 @@ def _test_link(url):
 
 def add(string, meta, identifiers, skip_test):
     """Add a link to meta."""
-    path, url = string.split('=')
+    path, url = string.split('=', 1)
     keys = path.split('.')
     links = meta.links
     values = meta
