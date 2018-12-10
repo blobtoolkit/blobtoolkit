@@ -8,7 +8,7 @@ Add data to a BlobDir.
 Usage:
     blobtools add [--busco TSV...] [--cov BAM...]  [--hits TSV...]  [--fasta FASTA]
                   [--key path=value...] [--link path=url...] [--skip-link-test]
-                  [--blobDB JSON] [--meta YAML] [--synonyms TSV...]
+                  [--blobdb JSON] [--meta YAML] [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
                   [--threads INT] [--create] [--replace] DIRECTORY
 
@@ -24,7 +24,7 @@ Options:
     --link path=URL       Link to an external resource.
     --skip-link-test      Skip test to see if link URL can be resolved.
     --meta YAML           Dataset metadata.
-    --blobDB JSON         Blobtools v1 blobDB.
+    --blobdb JSON         Blobtools v1 blobDB.
     --synonyms TSV        TSV file containing current identifiers and synonyms.
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
     --taxrule bestsum|bestsumorder
@@ -53,7 +53,7 @@ from field import Identifier
 from fetch import fetch_field, fetch_metadata, fetch_taxdump
 
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
-          {'flag': '--blobDB', 'module': blob_db, 'depends': ['identifiers']},
+          {'flag': '--blobdb', 'module': blob_db, 'depends': ['identifiers']},
           {'flag': '--busco', 'module': busco, 'depends': ['identifiers']},
           {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
           {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
@@ -109,7 +109,8 @@ def main():
                 args[field['flag']],
                 **{key: args[key] for key in PARAMS},
                 taxdump=taxdump,
-                dependencies=dependencies)
+                dependencies=dependencies,
+                meta=meta)
             if not isinstance(parsed, list):
                 parsed = [parsed]
             for data in parsed:

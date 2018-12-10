@@ -56,7 +56,6 @@ def parse_params(args, meta):
         strings += urllib.parse.unquote(qstr).split('&')
     params = defaultdict(dict)
     for string in strings:
-        print(string)
         try:
             key, value = string.split('=')
         except ValueError:
@@ -145,6 +144,9 @@ def create_filtered_dataset(dataset_meta, indir, outdir, indices):
                 values = [full_field.values[i] for i in indices]
                 if isinstance(full_field, Variable):
                     field_meta.update({'range': [min(values), max(values)]})
+                    if field_id == 'length':
+                        meta.assembly.update({'span': sum(values)})
+                        meta.assembly.update({'scaffold-count': len(values)})
             elif isinstance(full_field, Category):
                 full_values = full_field.expand_values()
                 values = [full_values[i] for i in indices]
@@ -203,11 +205,6 @@ def main():
             if not requirements:
                 continue
             field['module'].apply_filter(ids, args[field['flag']], **args)
-    # else:
-    #     ids = [identifiers.values[i] for i in indices]
-    #     print('\n'.join(ids))
-# file_io.write_file(json_file, data.values_to_dict())
-# file_io.write_file("%s/meta.json" % args['DIRECTORY'], meta.to_dict())
 
 
 if __name__ == '__main__':

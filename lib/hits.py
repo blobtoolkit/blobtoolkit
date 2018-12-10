@@ -18,7 +18,7 @@ def parse_blast(blast_file, results=None):
         seq_id, *offset = row[0].split('_-_')
         offset = int(offset[0]) if offset else 0
         hit = {'subject': row[4],
-               'score': int(row[2]),
+               'score': float(row[2]),
                'start': int(row[9])+offset,
                'end': int(row[10])+offset}
         try:
@@ -43,14 +43,14 @@ def apply_taxrule(blast, taxdump, taxrule, identifiers, results=None):
     values = [{
         'category': defaultdict(str),
         'cindex': defaultdict(int),
-        'score': defaultdict(int),
+        'score': defaultdict(float),
         'positions': defaultdict(list),
         'hits': defaultdict(list)
         } for rank in taxdump.list_ranks()]
     for seq_id, hits in blast.items():
         sorted_hits = sorted(hits, key=lambda k: k['score'], reverse=True)
         for index, rank in enumerate(taxdump.list_ranks()):
-            cat_scores = defaultdict(int)
+            cat_scores = defaultdict(float)
             for hit in sorted_hits:
                 try:
                     category = taxdump.ancestors[hit['taxid']][rank]
@@ -149,7 +149,7 @@ def create_fields(results, taxrule, files, fields=None):
                                    'field_id': field_id,
                                    'name': field_id,
                                    'clamp': 1 if _min == 0 else False,
-                                   'datatype': 'integer',
+                                   'datatype': 'float',
                                    'range': [_min,
                                              max(result['data']['score'])],
                                    'preload': False,

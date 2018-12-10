@@ -125,8 +125,12 @@ class Metadata():
         if self.has_field(kwargs['field_id']):
             meta = self._field_list[kwargs['field_id']]
         else:
-            meta = {}
-            parent.append(meta)
+            index = next((i for (i, d) in enumerate(parent) if d['id'] == kwargs['field_id']), None)
+            if index is not None:
+                meta = parent[index]
+            else:
+                meta = {}
+                parent.append(meta)
         for key, value in kwargs.items():
             if key == 'field_id':
                 key = 'id'

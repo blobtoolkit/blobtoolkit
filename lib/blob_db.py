@@ -9,7 +9,7 @@ from collections import defaultdict
 import file_io
 import cov
 import hits
-from field import Identifier, Variable, Category
+from field import Identifier, Variable, Category, MultiArray
 
 
 def field_name_from_path(path):
@@ -23,7 +23,7 @@ def field_name_from_path(path):
 
 
 def values_from_blob_db(blob_db):
-    """Read values from a blobDB ints a dict of lists of values."""
+    """Read values from a blobDB into a dict of lists of values."""
     values = defaultdict(list)
     for identifier in blob_db['order_of_blobs']:
         blob = blob_db['dict_of_blobs'][identifier]
@@ -36,14 +36,31 @@ def values_from_blob_db(blob_db):
         for tax_rule in blob_db['taxrules']:
             for rank, results in blob['taxonomy'][tax_rule].items():
                 values["%s_%s" % (tax_rule, rank)].append(results.get('tax', 'no-hit'))
-                values["%s_%s_score" % (tax_rule, rank)].append(int(results.get('score', 0)))
+                values["%s_%s_score" % (tax_rule, rank)].append(float(results.get('score', 0)))
                 values["%s_%s_cindex" % (tax_rule, rank)].append(int(results.get('c_index', 0)))
+    return values
+
+
+def hits_from_blob_db(blob_db, tax_rule):
+    """Read values from a blobDB into a dict of lists of values."""
+    values = defaultdict(list)
+    for identifier in blob_db['order_of_blobs']:
+        if identifier in values and tax_rule == 'bestsumorder':
+            continue
+        hit_list = blob_db['dict_of_blobs'][identifier]['hits']
+        for tax_lib in blob_db['hitLibs'].keys():
+            if tax_lib in hit_list:
+                for detail in hit_list[tax_lib]:
+                    values[identifier].append({'taxid': int(detail['taxId']),
+                                               'score': int(detail['score'])})
+    values = [values.get(identifier, []) for identifier in blob_db['order_of_blobs']]
     return values
 
 
 def parse(file, **kwargs):
     """Parse all synonym files."""
     blob_db = file_io.load_yaml(file)
+    kwargs['meta'].assembly.update({'file': blob_db['assembly_f']})
     parsed = []
     identifiers = kwargs['dependencies']['identifiers']
     if not identifiers:
@@ -89,7 +106,7 @@ def parse(file, **kwargs):
                            parents=[]))
     cov_range = [math.inf, -math.inf]
     read_cov_range = [math.inf, -math.inf]
-    for cov_lib in blob_db['covLibs']:
+    for cov_lib, cov_meta in blob_db['covLibs'].items():
         cov_file_name = field_name_from_path(blob_db['covLibs'][cov_lib]['f'])
         covs = values["%s_cov" % cov_lib]
         read_covs = values["%s_read_cov" % cov_lib]
@@ -99,7 +116,8 @@ def parse(file, **kwargs):
                           max(read_covs+[read_cov_range[1]])]
         parsed.append(Variable("%s_cov" % cov_file_name,
                                values=covs,
-                               meta={'field_id': "%s_cov" % cov_file_name},
+                               meta={'field_id': "%s_cov" % cov_file_name,
+                                     'file': cov_meta['f']},
                                parents=cov.parent() + ['children',
                                                        {'id': 'base_coverage',
                                                         'clamp': 1 if cov_range[0] == 0 else False,
@@ -108,7 +126,10 @@ def parse(file, **kwargs):
                                ))
         parsed.append(Variable("%s_read_cov" % cov_file_name,
                                values=read_covs,
-                               meta={'field_id': "%s_read_cov" % cov_file_name},
+                               meta={'field_id': "%s_read_cov" % cov_file_name,
+                                     'file': cov_meta['f'],
+                                     'reads_mapped': cov_meta['reads_mapped'],
+                                     'reads_unmapped': cov_meta['reads_unmapped']},
                                parents=cov.parent() + ['children',
                                                        {'id': 'read_coverage',
                                                         'datatype': 'integer',
@@ -116,16 +137,27 @@ def parse(file, **kwargs):
                                                         'range': read_cov_range},
                                                        'children']
                                ))
-    ranks = blob_db['dict_of_blobs'][
-        identifiers.values[0]]['taxonomy'][blob_db['taxrules'][0]].keys()
+    ranks = blob_db['dict_of_blobs'][identifiers.values[0]]['taxonomy'][blob_db['taxrules'][0]].keys()
     for tax_rule in blob_db['taxrules']:
+        hit_list = hits_from_blob_db(blob_db, tax_rule)
+        parsed.append(MultiArray("%s_hits" % tax_rule,
+                                 values=hit_list,
+                                 meta={'field_id': "%s_hits" % tax_rule,
+                                       'type': 'multiarray',
+                                       'datatype': 'mixed',
+                                       'preload': False,
+                                       'active': False,
+                                       'files': [m['f'] for x, m in blob_db['hitLibs'].items()]},
+                                 parents=hits.parent() + ['children', {'id': tax_rule}, 'children'],
+                                 category_slot=None,
+                                 headers=['taxid', 'score']))
         for rank in ranks:
             field_id = "%s_%s" % (tax_rule, rank)
             parsed.append(Category(field_id,
                                    values=values[field_id],
                                    meta={'field_id': field_id},
-                                   parents=hits.parent() + ['children']))
-            parents = hits.parent() + ['children', {'id': field_id}, 'data']
+                                   parents=hits.parent() + ['children', {'id': tax_rule}, 'children']))
+            parents = hits.parent() + ['children', {'id': tax_rule}, 'children', {'id': field_id}, 'data']
             field_id = "%s_%s_cindex" % (tax_rule, rank)
             parsed.append(Variable(field_id,
                                    values=values[field_id],
@@ -147,7 +179,7 @@ def parse(file, **kwargs):
                                        'scale': 'scaleLog',
                                        'field_id': field_id,
                                        'clamp': 1 if _min == 0 else False,
-                                       'datatype': 'integer',
+                                       'datatype': 'float',
                                        'range': [_min,
                                                  max(values[field_id])],
                                        'preload': False,
