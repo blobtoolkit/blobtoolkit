@@ -9,6 +9,7 @@ commands:
     add             add data to a BlobDir
     create          create a new BlobDir
     filter          filter a BlobDir
+    host            host interactive view of all BlobDirs in a directory
     replace         call blobtools add with --replace flag
     -h, --help      show this
     -v, --version   show version number
@@ -39,6 +40,8 @@ if __name__ == '__main__':
         exit(call(['python', LIBDIR + '/add.py'] + ['add', '--create'] + ARGS['<args>']))
     elif ARGS['<command>'] == 'filter':
         exit(call(['python', LIBDIR + '/filter.py'] + ARGV))
+    elif ARGS['<command>'] == 'host':
+        exit(call(['python', LIBDIR + '/host.py'] + ARGV))
     elif ARGS['<command>'] == 'replace':
         exit(call(['python', LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>']))
     else:

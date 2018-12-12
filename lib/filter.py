@@ -192,9 +192,6 @@ def main():
     ids = [identifiers.values[i] for i in indices]
     for field in FIELDS:
         if args[field['flag']]:
-            # for dep in field['depends']:
-            #     if dep not in dependencies or not dependencies[dep]:
-            #         dependencies[dep] = fetch_field(args['DIRECTORY'], dep)
             requirements = True
             if field.get('requires'):
                 for flag in field['requires']:

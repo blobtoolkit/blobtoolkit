@@ -19,5 +19,5 @@ pycodestyle tests/unit_tests/* --max-line-length=120 &&
 # requiring docstrings for tests would be excessive so don't run pydocstyle
 
 # run tests and generate coverage report
-echo "py.test --cov-config .coveragerc --doctest-modules --cov=lib --cov-report term-missing" &&
-py.test --cov-config .coveragerc --doctest-modules --cov=lib --cov-report term-missing
+echo "py.test --ignore viewer --cov-config .coveragerc --doctest-modules --cov=lib --cov-report term-missing" &&
+py.test --ignore viewer --cov-config .coveragerc --doctest-modules --cov=lib --cov-report term-missing
