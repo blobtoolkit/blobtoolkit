@@ -51,8 +51,8 @@ def parse_bam(bam_file, **kwargs):
     # samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
     print("Loading mapping data from %s" % bam_file)
     try:
-        flags = {key: value for key, value in kwargs['--pileup-args']}
-    except KeyError:
+        flags = dict(flag.split('=') for flag in kwargs['--pileup-args'])
+    except ValueError:
         flags = {}
     with Pool(int(kwargs['--threads'])) as pool:
         results = list(tqdm(pool.imap(_get_coverage,

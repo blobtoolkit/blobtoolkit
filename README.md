@@ -54,6 +54,7 @@ cd -
 ```
 
 ```
+./blobtools add --cov examples/assembly.reads.bam --pileup-args stepper=nofilter --threads 4 tmp/example
 ./blobtools add --cov examples/assembly.reads.bam tmp/example
 ```
 
@@ -65,22 +66,53 @@ cd -
 ./blobtools add --busco examples/busco.tsv tmp/example
 ```
 
-
 ```
-./blobtools create --meta meta.yaml --fasta assembly.fasta --key record_type=scaffold path/to/dataset
-```
-
-```
-./blobtools add --cov mapping_file.bam --taxdump path/to/new_taxdump --hits blast.out --threads 8 path/to/dataset
+./blobtools add --key taxon.taxid=42157 --key taxon.name="Onchocerca ochengi" --key ./assembly.accession=draft tmp/example
 ```
 
 ```
-./blobtools filter --param gc--Max=0.26 --output path/to/filtered_dataset path/to/dataset
+./blobtools add --link taxon.taxid.ENA="https://www.ebi.ac.uk/ena/data/view/Taxon:{taxid}" --link taxon.name.Wikipedia="https://en.wikipedia.org/wiki/{name}" --link record.ENA="https://www.ebi.ac.uk/ena/data/view/{id}" tmp/example/
 ```
 
 ```
-./blobtools add --key plot.x=gc --key plot.y=mapping_file_cov --key plot.z=length --key plot.cat=bestsum_phylum path/to/filtered_dataset
+./blobtools add --link position.NCBI="https://www.ncbi.nlm.nih.gov/nuccore/{subject}" tmp/example
 ```
+
+### File-based metadata
+`examples/meta.yaml`:
+```
+record_type: scaffold
+assembly:
+  accession: GCA_000950515.2
+  alias: O_ochengi_Ngaoundere
+  bioproject: PRJEB1204
+  biosample: SAMEA1034766
+  prefix: FJNM01
+taxon:
+  name: Onchocerca ochengi
+  taxid: 42157
+  phylum: Nematoda
+```
+
+```
+./blobtools create --fasta examples/assembly.fasta tmp/example
+./blobtools add --meta examples/meta.yaml tmp/example
+```
+
+
+
+```
+./blobtools filter --param length--Min=5000 --output tmp/example_len_gt_5000 tmp/example
+```
+
+```
+./blobtools filter --query-string "http://localhost:8080/all/dataset/example/blob?length--Min=5000#Filters" --output tmp/example_len_gt_5000 tmp/example
+```
+
+```
+./blobtools filter --json examples/list.json --output tmp/example_len_gt_5000 tmp/example
+```
+
 
 
 ## Contributing

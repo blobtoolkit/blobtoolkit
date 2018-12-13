@@ -37,6 +37,8 @@ def add(string, meta, identifiers, skip_test):
     keys = path.split('.')
     links = meta.links
     values = meta
+    if keys[0] == 'position':
+        skip_test = True
     for key in keys[:-2]:
         if isinstance(values, dict):
             values = values[key]

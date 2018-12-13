@@ -10,7 +10,7 @@ Usage:
                   [--key path=value...] [--link path=url...] [--skip-link-test]
                   [--blobdb JSON] [--meta YAML] [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
-                  [--threads INT] [--pileup-args key=value] [--create] [--replace] DIRECTORY
+                  [--threads INT] [--pileup-args key=value...] [--create] [--replace] DIRECTORY
 
 Arguments:
     DIRECTORY             Existing Blob directory.

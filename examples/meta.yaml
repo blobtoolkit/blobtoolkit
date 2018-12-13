@@ -1,0 +1,11 @@
+record_type: scaffold
+assembly:
+  accession: GCA_000950515.2
+  alias: O_ochengi_Ngaoundere
+  bioproject: PRJEB1204
+  biosample: SAMEA1034766
+  prefix: FJNM01
+taxon:
+  name: Onchocerca ochengi
+  taxid: 42157
+  phylum: Nematoda

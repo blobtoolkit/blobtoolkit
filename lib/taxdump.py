@@ -36,10 +36,14 @@ class Taxdump():
     def load_ranks(self):
         """Load ranks from file."""
         filename = os.path.abspath(os.path.join(self.directory, 'nodes.dmp'))
-        for line in file_io.stream_file(filename):
-            row = self.parse_taxdump_row(line)
-            if len(row) > 1:
-                self.ranks[int(row[0])] = row[2]
+        try:
+            for line in file_io.stream_file(filename):
+                row = self.parse_taxdump_row(line)
+                if len(row) > 1:
+                    self.ranks[int(row[0])] = row[2]
+        except TypeError:
+            print("ERROR: Unable to parse %s." % filename)
+            exit(1)
 
     def load_names(self):
         """Load names from file."""

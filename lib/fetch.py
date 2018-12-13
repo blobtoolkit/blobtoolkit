@@ -45,25 +45,34 @@ def fetch_metadata(path_to_dataset, **kwargs):
     fetch_metadata('tests/files/dataset')
     """
     dataset_id = path_to_dataset.split('/').pop()
-    meta = {}
+    new_meta = {}
     if not os.path.exists(path_to_dataset):
         os.makedirs(path_to_dataset)
     if kwargs.get('--meta'):
-        meta = file_io.load_yaml(kwargs['--meta'])
+        new_meta = file_io.load_yaml(kwargs['--meta'])
         if kwargs['--replace']:
             files = glob.glob("%s/*" % kwargs['DIRECTORY'])
             for file in files:
                 os.remove(file)
-    elif not kwargs.get('meta'):
+    try:
+        meta = kwargs['meta']
+    except KeyError:
         meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
     if not meta:
-        if kwargs.get('meta'):
-            meta = kwargs['meta']
-        else:
-            meta = {}
+        meta = {}
     if 'id' not in meta:
         meta['id'] = dataset_id
         meta['name'] = dataset_id
+    for key, value in new_meta.items():
+        if isinstance(value, dict):
+            try:
+                meta[key].update({k: v for k, v in value.items()})
+            except KeyError:
+                meta[key] = value
+        elif isinstance(value, list):
+            meta[key] += value
+        else:
+            meta[key] = value
     return Metadata(dataset_id, **meta)
 
 
