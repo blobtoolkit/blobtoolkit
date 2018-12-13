@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# pylint: disable=no-member, too-many-branches, too-many-locals
+# pylint: disable=no-member, too-many-branches, too-many-locals, W0603
 
 """
 Host a collection of BlobDirs.
@@ -26,6 +26,9 @@ import time
 from pathlib import Path
 from subprocess import PIPE, Popen
 from docopt import docopt
+
+
+PIDS = []
 
 
 def test_port(port, service):
@@ -83,6 +86,7 @@ def start_viewer(port, api_port, hostname):
 
 def main():
     """Entrypoint for blobtools host."""
+    global PIDS
     args = docopt(__doc__)
     path = Path(args['DIRECTORY'])
     if not path.exists():
@@ -94,11 +98,13 @@ def main():
                     args['--api-port'],
                     args['--hostname'],
                     path.absolute())
+    PIDS.append(api.pid)
     print("Starting BlobToolKit API on port %d (pid: %d)" % (int(args['--api-port']), api.pid))
     time.sleep(2)
     viewer = start_viewer(args['--port'],
                           args['--api-port'],
                           args['--hostname'])
+    PIDS.append(viewer.pid)
     print("Starting BlobToolKit viewer on port %d (pid: %d)" % (int(args['--port']), viewer.pid))
     time.sleep(2)
     ready = False
@@ -124,4 +130,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as err:
+        for pid in PIDS:
+            os.kill(pid, signal.SIGTERM)
+        raise err
