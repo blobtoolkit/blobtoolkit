@@ -18,10 +18,11 @@ def _get_coverage(args):
     bam_file = args[0]
     f_char = args[1]
     seq_id = args[2]
+    flags = args[3]
     samfile = pysam.AlignmentFile(bam_file, "r%s" % f_char)
     cov = 0
     reads = set()
-    for pileupcolumn in samfile.pileup(seq_id):
+    for pileupcolumn in samfile.pileup(seq_id, **flags):
         cov += pileupcolumn.n
         for pileupread in pileupcolumn.pileups:
             if not pileupread.is_del and not pileupread.is_refskip:
@@ -47,12 +48,15 @@ def parse_bam(bam_file, **kwargs):
     stats = {'mapped': samfile.mapped,
              'unmapped': samfile.unmapped}
     samfile.close()
-    print(stats)
     # samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
     print("Loading mapping data from %s" % bam_file)
+    try:
+        flags = {key: value for key, value in kwargs['--pileup-args']}
+    except KeyError:
+        flags = {}
     with Pool(int(kwargs['--threads'])) as pool:
         results = list(tqdm(pool.imap(_get_coverage,
-                                      map(lambda x: (bam_file, f_char, x), ids)),
+                                      map(lambda x: (bam_file, f_char, x, flags), ids)),
                             total=len(ids)))
     _covs = {}
     _read_covs = {}
@@ -70,7 +74,7 @@ def parse_bam(bam_file, **kwargs):
         covs.append(float("%.4f" % (_covs[seq_id]/acgt_count)) if seq_id in _covs else 0)
         read_covs.append(_read_covs[seq_id] if seq_id in _read_covs else 0)
     field_id = "%s_cov" % base_name
-    fields = {}
+    fields = {'cov_id': field_id}
     fields['cov_range'] = [min(covs+[kwargs['cov_range'][0]]),
                            max(covs+[kwargs['cov_range'][1]])]
     fields['cov'] = Variable(field_id,
@@ -138,6 +142,8 @@ def parse(files, **kwargs):
         parsed.append(fields['cov'])
         parsed.append(fields['read_cov'])
         cov_range = fields['cov_range']
+        if 'y' not in kwargs['meta'].plot:
+            kwargs['meta'].plot.update({'y': fields['cov_id']})
         read_cov_range = fields['read_cov_range']
     return parsed
 

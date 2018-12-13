@@ -55,11 +55,13 @@ def parse(file, **kwargs):
                                  meta={'field_id': 'identifiers'},
                                  values=list(_lengths.keys()),
                                  parents=[])
+        kwargs['meta'].assembly.update({'scaffold-count': len(identifiers.values)})
         parsed.append(identifiers)
     for seq_id in identifiers.values:
         lengths.append(_lengths[seq_id] if seq_id in _lengths else 0)
         gc_portions.append(_gc_portions[seq_id] if seq_id in _gc_portions else 0)
         n_counts.append(_n_counts[seq_id] if seq_id in _n_counts else 0)
+    kwargs['meta'].assembly.update({'span': sum(lengths)})
     parsed.append(Variable('gc',
                            meta={
                                'field_id': 'gc',
@@ -94,7 +96,10 @@ def parse(file, **kwargs):
                            },
                            values=n_counts,
                            parents=[]))
-
+    if 'x' not in kwargs['meta'].plot:
+        kwargs['meta'].plot.update({'x': 'gc'})
+    if 'z' not in kwargs['meta'].plot:
+        kwargs['meta'].plot.update({'z': 'length'})
     return parsed
 
 

@@ -40,7 +40,6 @@ class Taxdump():
             row = self.parse_taxdump_row(line)
             if len(row) > 1:
                 self.ranks[int(row[0])] = row[2]
-        print(self.ranks[3888])
 
     def load_names(self):
         """Load names from file."""
@@ -49,7 +48,6 @@ class Taxdump():
             row = self.parse_taxdump_row(line)
             if row and row[3] == 'scientific name':
                 self.names[int(row[0])] = row[1]
-        print(self.names[3888])
 
     def load_ancestors(self):
         """Load ancestors from file."""
@@ -71,7 +69,6 @@ class Taxdump():
                         last = -self.ancestors[taxid][rank]
                     else:
                         self.ancestors[taxid].update({rank: last})
-        print(self.ancestors[3888])
 
     def values_to_dict(self):
         """Create a dict of values."""

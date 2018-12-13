@@ -33,6 +33,7 @@ class Metadata():
         self.name = dataset_id
         self.links = {}
         self.assembly = {}
+        self.plot = {}
         self.record_type = 'record'
         self.records = 0
         self.update_data(**kwargs)

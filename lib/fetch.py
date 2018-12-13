@@ -3,6 +3,7 @@
 
 import os
 import glob
+from pathlib import Path
 import file_io
 from taxdump import Taxdump
 from field import Field, Identifier, Category, Variable, Array, MultiArray
@@ -69,13 +70,15 @@ def fetch_metadata(path_to_dataset, **kwargs):
 def fetch_taxdump(path_to_taxdump):
     """Load Taxdump from file."""
     json_file = "%s/taxdump.json" % path_to_taxdump
+    if not Path(json_file).exists():
+        print('Parsing taxdump')
+    else:
+        print('Loading parsed taxdump')
     data = file_io.load_yaml(json_file)
     if data is None:
-        print('Parsing taxdump')
         taxdump = Taxdump(path_to_taxdump)
         file_io.write_file(json_file, taxdump.values_to_dict())
     else:
-        print('Loading parsed taxdump')
         taxdump = Taxdump(path_to_taxdump, **data)
     return taxdump
 

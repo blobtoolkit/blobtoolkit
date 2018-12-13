@@ -50,6 +50,23 @@ cd -
 ## Examples
 
 ```
+./blobtools create --fasta examples/assembly.fasta tmp/example
+```
+
+```
+./blobtools add --cov examples/assembly.reads.bam tmp/example
+```
+
+```
+./blobtools add --hits examples/blast.out --hits examples/diamond.out --taxdump /path/to/new_taxdump/ --taxrule bestsumorder tmp/example
+```
+
+```
+./blobtools add --busco examples/busco.tsv tmp/example
+```
+
+
+```
 ./blobtools create --meta meta.yaml --fasta assembly.fasta --key record_type=scaffold path/to/dataset
 ```
 

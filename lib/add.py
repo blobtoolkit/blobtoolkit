@@ -10,7 +10,7 @@ Usage:
                   [--key path=value...] [--link path=url...] [--skip-link-test]
                   [--blobdb JSON] [--meta YAML] [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
-                  [--threads INT] [--create] [--replace] DIRECTORY
+                  [--threads INT] [--pileup-args key=value] [--create] [--replace] DIRECTORY
 
 Arguments:
     DIRECTORY             Existing Blob directory.
@@ -30,6 +30,7 @@ Options:
     --taxrule bestsum|bestsumorder
                           Rule to use when assigning BLAST hits to taxa. [Default: bestsum]
     --threads INT         Number of threads to use for multithreaded tasks. [Default: 1]
+    --pileup-args key=val Key/value pairs to pass to samtools pileup.
     --create              Create a new BlobDir.
     --replace             Replace existing fields with matching ids.
 
@@ -58,7 +59,7 @@ FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
           {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
           {'flag': '--synonyms', 'module': synonyms, 'depends': ['identifiers']}]
-PARAMS = set(['--taxrule', '--threads'])
+PARAMS = set(['--taxrule', '--threads', '--pileup-args'])
 
 
 def has_field_warning(meta, field_id):
@@ -68,24 +69,6 @@ def has_field_warning(meta, field_id):
         print("WARN: Use '--replace' flag to overwrite existing field.")
         return 1
     return 0
-
-
-# def create_or_replace_dataset(directory, exists, create, replace):
-#     """Warn about dataset existence."""
-#     if exists:
-#         if replace:
-#             print("INFO: Replacing existing dataset \'%s\'." % directory)
-#             return 'replace'
-#         if create:
-#             print("WARN: Dataset \'%s\' is already present, not overwriting." % directory)
-#             print("WARN: Use '--replace' flag to overwrite existing dataset.")
-#             exit()
-#     if create:
-#         print("INFO: Creating dataset \'%s\'." % directory)
-#         return 'create'
-#     print("WARN: Dataset \'%s\' does not exist." % directory)
-#     print("WARN: Use '--create' flag to create a new dataset.")
-#     exit()
 
 
 def main():

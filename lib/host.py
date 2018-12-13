@@ -25,7 +25,6 @@ import signal
 import time
 from pathlib import Path
 from subprocess import PIPE, Popen
-import urllib3
 from docopt import docopt
 
 
@@ -104,7 +103,6 @@ def main():
     time.sleep(2)
     ready = False
     url = "http://%s:%d" % (args['--hostname'], int(args['--port']))
-    http = urllib3.PoolManager()
     while True:
         if api.poll() is not None:
             for line in api.stderr.readlines():
@@ -120,18 +118,8 @@ def main():
             os.kill(api.pid, signal.SIGTERM)
             break
         elif not ready:
-            print("Waiting for BlobToolKit viewer at %s..." % url)
-            req = http.request('GET', url)
-            if req.status == 200:
-                print("    ...ready.")
-                print("Visit %s to use the interactive BlobToolKit Viewer." % url)
-                ready = True
-            else:
-                print("unable to connect.")
-                print("Error: Got response code %d." % req.status)
-                os.kill(api.pid, signal.SIGTERM)
-                os.kill(viewer.pid, signal.SIGTERM)
-                exit(1)
+            print("Visit %s to use the interactive BlobToolKit Viewer." % url)
+            ready = True
         time.sleep(2)
 
 

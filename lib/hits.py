@@ -17,10 +17,16 @@ def parse_blast(blast_file, results=None):
         row = line.rstrip().split('\t')
         seq_id, *offset = row[0].split('_-_')
         offset = int(offset[0]) if offset else 0
-        hit = {'subject': row[4],
-               'score': float(row[2]),
-               'start': int(row[9])+offset,
-               'end': int(row[10])+offset}
+        try:
+            hit = {'subject': row[4],
+                   'score': float(row[2]),
+                   'start': int(row[9])+offset,
+                   'end': int(row[10])+offset}
+        except IndexError:
+            hit = {'subject': row[3],
+                   'score': float(row[2]),
+                   'start': None,
+                   'end': None}
         try:
             hit.update({'taxid': int(row[1])})
         except ValueError:
@@ -196,6 +202,8 @@ def parse(files, **kwargs):
                                     identifiers,
                                     results)
         fields = create_fields(results, kwargs['--taxrule'], files)
+    if 'cat' not in kwargs['meta'].plot:
+        kwargs['meta'].plot.update({'cat': "%s_phylum" % kwargs['--taxrule']})
     return fields
 
 
