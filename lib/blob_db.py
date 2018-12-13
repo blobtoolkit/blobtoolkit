@@ -68,8 +68,10 @@ def parse(file, **kwargs):
                                  meta={'field_id': 'identifiers'},
                                  values=blob_db['order_of_blobs'],
                                  parents=[])
+        kwargs['meta'].assembly.update({'scaffold-count': len(identifiers.values)})
         parsed.append(identifiers)
     values = values_from_blob_db(blob_db)
+    kwargs['meta'].assembly.update({'span': sum(values['lengths'])})
     parsed.append(Variable('gc',
                            meta={
                                'preload': True,
@@ -104,6 +106,10 @@ def parse(file, **kwargs):
                            },
                            values=values['n_counts'],
                            parents=[]))
+    if 'z' not in kwargs['meta'].plot:
+        kwargs['meta'].plot.update({'z': 'length'})
+    if 'x' not in kwargs['meta'].plot:
+        kwargs['meta'].plot.update({'x': 'gc'})
     cov_range = [math.inf, -math.inf]
     read_cov_range = [math.inf, -math.inf]
     for cov_lib, cov_meta in blob_db['covLibs'].items():
@@ -114,6 +120,8 @@ def parse(file, **kwargs):
                      max(covs+[cov_range[1]])]
         read_cov_range = [min(read_covs+[read_cov_range[0]]),
                           max(read_covs+[read_cov_range[1]])]
+        if 'y' not in kwargs['meta'].plot:
+            kwargs['meta'].plot.update({'y': "%s_cov" % cov_file_name})
         parsed.append(Variable("%s_cov" % cov_file_name,
                                values=covs,
                                meta={'field_id': "%s_cov" % cov_file_name,
@@ -139,6 +147,8 @@ def parse(file, **kwargs):
                                ))
     ranks = blob_db['dict_of_blobs'][identifiers.values[0]]['taxonomy'][blob_db['taxrules'][0]].keys()
     for tax_rule in blob_db['taxrules']:
+        if 'cat' not in kwargs['meta'].plot:
+            kwargs['meta'].plot.update({'cat': "%s_phylum" % tax_rule})
         hit_list = hits_from_blob_db(blob_db, tax_rule)
         parsed.append(MultiArray("%s_hits" % tax_rule,
                                  values=hit_list,

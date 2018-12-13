@@ -116,12 +116,18 @@ def main():
             if viewer.poll() is not None:
                 for line in viewer.stderr.readlines():
                     print(line.strip())
-                os.kill(viewer.pid, signal.SIGTERM)
+                try:
+                    os.kill(viewer.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
             break
         elif viewer.poll() is not None:
             for line in viewer.stderr.readlines():
                 print(line.strip())
-            os.kill(api.pid, signal.SIGTERM)
+            try:
+                os.kill(api.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
             break
         elif not ready:
             print("Visit %s to use the interactive BlobToolKit Viewer." % url)
@@ -134,5 +140,8 @@ if __name__ == '__main__':
         main()
     except Exception as err:
         for pid in PIDS:
-            os.kill(pid, signal.SIGTERM)
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
         raise err

@@ -114,6 +114,9 @@ taxon:
 ```
 
 
+```
+./blobtools create --blobdb examples/blobDB.json tmp/from_blobdb
+```
 
 ## Contributing
 
