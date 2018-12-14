@@ -7,7 +7,7 @@ Add data to a BlobDir.
 
 Usage:
     blobtools add [--busco TSV...] [--cov BAM...]  [--hits TSV...]  [--fasta FASTA]
-                  [--key path=value...] [--link path=url...] [--skip-link-test]
+                  [--key path=value...] [--link path=url...] [--taxid INT] [--skip-link-test]
                   [--blobdb JSON] [--meta YAML] [--synonyms TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
                   [--threads INT] [--pileup-args key=value...] [--create] [--replace] DIRECTORY
@@ -20,6 +20,7 @@ Options:
     --cov BAM             BAM/SAM/CRAM read alignment file.
     --fasta FASTA         FASTA sequence file.
     --hits TSV            Tabular BLAST/Diamond output file.
+    --taxid INT           Add ranks to metadata for a taxid.
     --key path=value      Set a metadata key to value.
     --link path=URL       Link to an external resource.
     --skip-link-test      Skip test to see if link URL can be resolved.
@@ -49,6 +50,7 @@ import fasta
 import hits
 import key
 import link
+import taxid
 import synonyms
 from field import Identifier
 from fetch import fetch_field, fetch_metadata, fetch_taxdump
@@ -112,6 +114,10 @@ def main():
         link.add(string, meta, dependencies['identifiers'].values, args['--skip-link-test'])
     for string in args['--key']:
         key.add(string, meta)
+    if args['--taxid']:
+        if not taxdump:
+            taxdump = fetch_taxdump(args['--taxdump'])
+        taxid.add(args['--taxid'], taxdump, meta)
     file_io.write_file("%s/meta.json" % args['DIRECTORY'], meta.to_dict())
 
 

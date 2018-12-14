@@ -1,24 +1,28 @@
-# BlobTools 2.0
+# BlobTools2
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Build Status](https://travis-ci.org/blobtoolkit/blobtools2.svg?branch=master)](https://travis-ci.org/blobtoolkit/blobtools-add)
 [![Coverage Status](https://coveralls.io/repos/github/blobtoolkit/blobtools-add/badge.svg?branch=master)](https://coveralls.io/github/blobtoolkit/blobtools2?branch=master)
 
-A new implementation of [BlobTools](https://github.com/DRL/blobtools) with support for interactive data exploration via the [BlobToolKit Viewer](https://github.com/blobtoolkit/viewer).
+
+A new implementation of [BlobTools](https://github.com/DRL/blobtools) with support for interactive data exploration via the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer).
+
+[!TOC]
+
 
 ## About
 
 Similar to [BlobTools v1](https://github.com/DRL/blobtools), **BlobTools2** is a command line tool designed to aid genome assembly QC and contaminant/cobiont detection and filtering. In addition to supporting interactive visualisation, a motivation for this reimplementation was to provide greater flexibility to include new types of information, such as [BUSCO](https://busco.ezlab.org) results and [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) hit distributions.
 
-**BlobTools2** supports command-line filtering of datasets, assembly files and read files based on values or categories assigned to assembly contigs/scaffolds through the `blobtools filter` command. Interactive filters and selections made using the [BlobToolKit Viewer](https://github.com/blobtoolkit/viewer) can be reproduced on the command line and used to generate new, filtered datasets which retain all fields from the original dataset.
+**BlobTools2** supports command-line filtering of datasets, assembly files and read files based on values or categories assigned to assembly contigs/scaffolds through the `blobtools filter` command. Interactive filters and selections made using the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer) can be reproduced on the command line and used to generate new, filtered datasets which retain all fields from the original dataset.
 
 **BlobTools2** is built around a file-based data structure, with data for each field contained in a separate `JSON` file within a directory (`BlobDir`) containing a single `meta.json` file with metadata for each field and the dataset as a whole. Additional fields can be added to an existing `BlobDir` using the `blobtools add` command, which parses an input to generate one or more additional `JSON` files and updates the dataset metadata. Fields are treated as generic datatypes, `Variable` (e.g. gc content, length and coverage), `Category` (e.g. taxonomic assignment based on BLAST hits) alongside `Array` and `MultiArray` datatypes to store information such as start, end, [NCBI](https://www.ncbi.nlm.nih.gov) taxid and bitscore for a set of blast hits to a single sequence. Support for new analyses can added to **BlobTools2** by creating a new python module with an appropriate `parse` function
 
 
 ## Installing
 
-These install instructions assume a Unix/Linux system with standard development tools and [Conda](https://conda.io/docs/user-guide/install/index.html) installed. The [BlobToolKit Viewer](https://github.com/blobtoolkit/viewer) (which is included as a submodule) also requires `libpng-dev`.
+These install instructions assume a Unix/Linux system with standard development tools and [Conda](https://conda.io/docs/user-guide/install/index.html) installed. Installing the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer) as described below also requires `libpng-dev`.
 
 1. Create and activate a Conda environment
 ```
@@ -28,58 +32,87 @@ conda activate blobtools2
 
 2. Download and extract the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) taxdump:
 ```
-mkdir -p /path/to/new_taxdump
-cd /path/to/new_taxdump
+mkdir -p taxdump
+cd taxdump
 curl -L ftp://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz | tar xzf -
-cd -
+cd ..
 ```
 
 3. Clone this repository:
 ```
-git clone --recursive https://github.com/blobtoolkit/blobtools2
+git clone https://github.com/blobtoolkit/blobtools2
 ```
 
-4. Install node modules for [BlobToolKit Viewer](https://github.com/blobtoolkit/viewer):
+4. Clone and install the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer):
 ```
-cd blobtools2/viewer
+git clone https://github.com/blobtoolkit/blobtools2
+cd viewer
 npm install
-cd -
+cd ..
 ```
 
 
 ## Examples
 
+### Create a new dataset
+
+Either add all data in a single command to generate a full dataset ready to explore in the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer):
 ```
-./blobtools create --fasta examples/assembly.fasta tmp/example
+./blobtools create --fasta examples/assembly.fasta --cov examples/assembly.reads.bam --hits examples/blast.out --taxdump ../taxdump tmp/dataset_1
 ```
 
+Or create a new dataset based on an assembly and add further fields later:
 ```
-./blobtools add --cov examples/assembly.reads.bam --pileup-args stepper=nofilter --threads 4 tmp/example
-./blobtools add --cov examples/assembly.reads.bam tmp/example
-```
-
-```
-./blobtools add --hits examples/blast.out --hits examples/diamond.out --taxdump /path/to/new_taxdump/ --taxrule bestsumorder tmp/example
+./blobtools create --fasta examples/assembly.fasta tmp/dataset_2
 ```
 
+### Import an existing dataset from a BlobDB file
+
+If you already have a `blobDB.json` file from [BlobTools v1](https://github.com/DRL/blobtools), this can be converted to the BlobTools2 `BlobDir` format:
 ```
-./blobtools add --busco examples/busco.tsv tmp/example
+./blobtools create --blobdb examples/blobDB.json tmp/dataset_3
 ```
 
+### Adding more data
+
+All `blobtools add` flags can also be used with `blobtools create` to generate a more complete dataset in a single command.
+
+#### Coverage
+
+Add coverage information from BAM or CRAM files:
 ```
-./blobtools add --key taxon.taxid=42157 --key taxon.name="Onchocerca ochengi" --key ./assembly.accession=draft tmp/example
+./blobtools add --cov examples/assembly.reads.bam tmp/dataset_2
 ```
 
+Specify `--pileup-args` to customise coverage calculations (e.g. as the example dataset is so small setting `stepper=nofilter` ensures all aligned positions are counted):
 ```
-./blobtools add --link taxon.taxid.ENA="https://www.ebi.ac.uk/ena/data/view/Taxon:{taxid}" --link taxon.name.Wikipedia="https://en.wikipedia.org/wiki/{name}" --link record.ENA="https://www.ebi.ac.uk/ena/data/view/{id}" tmp/example/
-```
-
-```
-./blobtools add --link position.NCBI="https://www.ncbi.nlm.nih.gov/nuccore/{subject}" tmp/example
+./blobtools add --cov examples/assembly.reads.bam --pileup-args stepper=nofilter tmp/dataset_2
 ```
 
-### File-based metadata
-`examples/meta.yaml`:
+To speed up coverage file processing, run commands using multiple threads:
+```
+./blobtools add --cov examples/assembly.reads.bam  --threads 16 tmp/dataset_2
+```
+
+#### BLAST/Diamond hits
+
+Sequence similarity search results are used to assign taxonomy based on [BlobTools v1](https://github.com/DRL/blobtools) taxrules. In order to process taxonomic information, a local copy of the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) taxdump must be available:
+
+```
+./blobtools add --hits examples/blast.out --hits examples/diamond.out --taxdump ../taxdump --taxrule bestsumorder tmp/dataset_2
+```
+
+#### BUSCO results
+
+Results from comparison against one or more [BUSCO](https://busco.ezlab.org) sets can be imported:
+```
+./blobtools add --busco examples/busco.tsv tmp/dataset_2
+```
+
+### Setting dataset metadata
+
+#### File-based metadata
+Metadata can be loaded from a `YAML` or `JSON` format file. Any fields in an `assembly` or `taxon` section will be indexed by the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer) API and will be searchable in the viewer:
 ```
 record_type: scaffold
 assembly:
@@ -95,28 +128,72 @@ taxon:
 ```
 
 ```
-./blobtools create --fasta examples/assembly.fasta tmp/example
-./blobtools add --meta examples/meta.yaml tmp/example
+./blobtools add --meta examples/meta.yaml tmp/dataset_2
 ```
 
-
-
+#### Taxonomic ranks
+Full taxonomic lineage can be loaded for a given taxid based on information in the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) taxdump:
 ```
-./blobtools filter --param length--Min=5000 --output tmp/example_len_gt_5000 tmp/example
-```
-
-```
-./blobtools filter --query-string "http://localhost:8080/all/dataset/example/blob?length--Min=5000#Filters" --output tmp/example_len_gt_5000 tmp/example
+./blobtools add --taxid 42157 --taxdump ../blobtools-add/taxdump tmp/dataset_2
 ```
 
+#### Individual keys
+Specific keys in the metadata can be edited directly using the `--key` flag:
 ```
-./blobtools filter --json examples/list.json --output tmp/example_len_gt_5000 tmp/example
+./blobtools add --key taxon.taxid=42157 --key taxon.name="Onchocerca ochengi" --key ./assembly.accession=draft tmp/dataset_2
 ```
 
+#### External links
+Links to external resources can be added using the `--link` flag, these will be shown alongside the appropriate data in the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer). The location within the metadata is specified by a `.` delimited string with the last part being a title for the link. The url is parsed to replace `{key}` with the corresponding value from the same metadata subsection:
+```
+./blobtools add --link taxon.taxid.ENA="https://www.ebi.ac.uk/ena/data/view/Taxon:{taxid}" --link taxon.name.Wikipedia="https://en.wikipedia.org/wiki/{name}" tmp/dataset_2
+```
+By default **BlobTools2** will test that the link target exists before adding the link to the metadata. to disable this behaviour, use the `--skip-link-test` flag:
+```
+./blobtools add --link taxon.name.Wikipedia="https://en.wikipedia.org/wiki/{name}" --skip-link-test tmp/dataset_2
+```
 
+Links can also be added to individual records:
 ```
-./blobtools create --blobdb examples/blobDB.json tmp/from_blobdb
+--link record.ENA="https://www.ebi.ac.uk/ena/data/view/{id}" tmp/dataset_2
 ```
+
+And to BLAST hits:
+```
+./blobtools add --link position.NCBI="https://www.ncbi.nlm.nih.gov/nuccore/{subject}" tmp/dataset_2
+```
+
+### Filtering datasets
+
+Datasets can be filtered interactively using the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer) or directly on the command line. Most options in the viewer are captured in the URL so interactive filtering can be reproduced on the command line from the values in the URL query string.
+
+#### Specifying filter parameters
+Variable based filters can be specified individually:
+```
+./blobtools filter --param length--Min=5000 --output tmp/example_len_gt_5000 tmp/dataset_2
+```
+
+Or by pasting a query string or complete URL:
+```
+./blobtools filter --query-string "http://localhost:8080/all/dataset/example/blob?length--Min=5000#Filters" --output tmp/example_len_gt_5000 tmp/dataset_2
+```
+
+Selection-based filters are not captured in the query string so to reproduce an interactive selection on the command line, it is necessary to export the current selection from the viewer as a list, which can be loaded using the `--json` flag:
+```
+./blobtools filter --json examples/list.json --output tmp/example_len_gt_5000 tmp/dataset_2
+```
+
+### Visualising datasets
+
+#### Interactive visualisation
+Datasets can be visualised interactively by running the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer). the `host` command provides a convenient way to run a local instance of the viewer:
+```
+./blobtools host tmp
+```
+
+#### Command line visualisation
+Direct generation of images from the command line is not currently avaiable but will be added soon.
+
 
 ## Contributing
 

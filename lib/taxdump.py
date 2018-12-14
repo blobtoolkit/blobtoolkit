@@ -82,6 +82,18 @@ class Taxdump():
                 data[key] = getattr(self, key)
         return data
 
+    def lineage(self, taxid):
+        """Create a dict of rank-name pairs for a taxid."""
+        lineages = {}
+        try:
+            ancestors = self.ancestors[taxid]
+        except ValueError:
+            return {}
+        for rank in self.list_ranks():
+            if rank in ancestors and ancestors[rank] > 0:
+                lineages.update({rank: self.names[ancestors[rank]]})
+        return lineages
+
     @staticmethod
     def parse_taxdump_row(line):
         """Parse an ncbi taxdump file."""

@@ -7,7 +7,7 @@ Host a collection of BlobDirs.
 
 Usage:
     blobtools host [--port INT]  [--api-port INT]
-                   [--hostname STRING] DIRECTORY
+                   [--hostname STRING] [--viewer DIRECTORY] DIRECTORY
 
 Arguments:
     DIRECTORY             Directory containing one or more BlobDirs.
@@ -16,6 +16,7 @@ Options:
     --port INT            HTTP port number. [Default: 8080]
     --api-port INT        API port number. [Default: 8000]
     --hostname STRING     Hostname used to connect to API. [Default: localhost]
+    --viewer DIRECTORY    Path to BlobToolKit viewer. [Default: ../viewer]
 """
 
 import socket
@@ -45,10 +46,9 @@ def test_port(port, service):
     return True
 
 
-def start_api(port, api_port, hostname, directory):
+def start_api(cwd, port, api_port, hostname, directory):
     """Start BlobToolKit API."""
     cmd = 'npm run api'
-    cwd = Path(__file__).resolve().parent.parent / 'viewer'
     origins = "http://localhost:%d http://localhost null" % int(port)
     if hostname != 'localhost':
         origins += " http://%s:%d http://%s" % (hostname, int(port), hostname)
@@ -65,10 +65,9 @@ def start_api(port, api_port, hostname, directory):
     return process
 
 
-def start_viewer(port, api_port, hostname):
+def start_viewer(cwd, port, api_port, hostname):
     """Start BlobToolKit viewer."""
     cmd = 'npm run client'
-    cwd = Path(__file__).resolve().parent.parent / 'viewer'
     api_url = "http://%s:%d/api/v1" % (hostname, int(api_port))
     process = Popen(shlex.split(cmd),
                     stdout=PIPE,
@@ -88,20 +87,30 @@ def main():
     """Entrypoint for blobtools host."""
     global PIDS
     args = docopt(__doc__)
+    viewer_dir = Path(__file__).resolve().parent.parent / args['--viewer']
+    viewer_dir.resolve().absolute()
+    if not viewer_dir.exists():
+        print("ERROR: Viewer could not be found at '%s'" % args['--viewer'])
+        exit(1)
+    elif not (viewer_dir / 'package.json').exists():
+        print("ERROR: Directory '%s' does not appear to contain the viewer code" % args['--viewer'])
+        exit(1)
     path = Path(args['DIRECTORY'])
     if not path.exists():
-        print("ERROR: directory '%s' does not exist" % args['DIRECTORY'])
+        print("ERROR: Directory '%s' does not exist" % args['DIRECTORY'])
         exit(1)
     test_port(args['--api-port'], 'BlobtoolKit API')
     test_port(args['--port'], 'BlobtoolKit viewer')
-    api = start_api(args['--port'],
+    api = start_api(viewer_dir,
+                    args['--port'],
                     args['--api-port'],
                     args['--hostname'],
                     path.absolute())
     PIDS.append(api.pid)
     print("Starting BlobToolKit API on port %d (pid: %d)" % (int(args['--api-port']), api.pid))
     time.sleep(2)
-    viewer = start_viewer(args['--port'],
+    viewer = start_viewer(viewer_dir,
+                          args['--port'],
                           args['--api-port'],
                           args['--hostname'])
     PIDS.append(viewer.pid)
