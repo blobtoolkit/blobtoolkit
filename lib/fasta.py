@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# pylint: skip-file
+
 """Parse FASTA sequence into Fields."""
 
 import pathlib

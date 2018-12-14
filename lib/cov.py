@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # pylint: disable=no-member, too-many-locals
+# pylint: skip-file
 
 """Parse base and read coverage into Variable Field."""
 
