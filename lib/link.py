@@ -39,14 +39,14 @@ def add(string, meta, identifiers, skip_test):
     values = meta
     if keys[0] == 'position':
         skip_test = True
-    for key in keys[:-2]:
-        if isinstance(values, dict):
-            values = values[key]
-        else:
-            values = getattr(values, key)
     if skip_test:
         valid = True
     else:
+        for key in keys[:-2]:
+            if isinstance(values, dict):
+                values = values[key]
+            else:
+                values = getattr(values, key)
         valid = _test_link(_expand_link(url, values, identifiers))
     if valid:
         for key in keys[:-1]:

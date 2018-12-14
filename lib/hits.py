@@ -9,7 +9,7 @@ import file_io
 from field import Category, MultiArray, Variable
 
 
-def parse_blast(blast_file, results=None):
+def parse_blast(blast_file, results=None, index=0):
     """Parse file into dict of lists."""
     if results is None:
         results = defaultdict(list)
@@ -21,12 +21,14 @@ def parse_blast(blast_file, results=None):
             hit = {'subject': row[4],
                    'score': float(row[2]),
                    'start': int(row[9])+offset,
-                   'end': int(row[10])+offset}
+                   'end': int(row[10])+offset,
+                   'file': index}
         except IndexError:
             hit = {'subject': row[3],
                    'score': float(row[2]),
                    'start': None,
-                   'end': None}
+                   'end': None,
+                   'file': index}
         try:
             hit.update({'taxid': int(row[1])})
         except ValueError:
@@ -73,7 +75,7 @@ def apply_taxrule(blast, taxdump, taxrule, identifiers, results=None):
                 )
                 if index == 0:
                     values[index]['hits'][seq_id].append(
-                        [hit['taxid'], hit['start'], hit['end'], hit['score'], hit['subject']]
+                        [hit['taxid'], hit['start'], hit['end'], hit['score'], hit['subject'], hit['file']]
                         )
                 if len(values[index]['positions'][seq_id]) < 10:
                     cat_scores[category] += hit['score']
@@ -121,7 +123,7 @@ def create_fields(results, taxrule, files, fields=None):
                                  },
                              parents=['children', {'id': taxrule}, 'children'],
                              category_slot=None,
-                             headers=['taxid', 'start', 'end', 'score', 'subject']))
+                             headers=['taxid', 'start', 'end', 'score', 'subject', 'index']))
     for result in results:
         main = Category(result['field_id'],
                         values=result['values'],
@@ -188,14 +190,14 @@ def parse(files, **kwargs):
     fields = []
     identifiers = kwargs['dependencies']['identifiers']
     if kwargs['--taxrule'] == 'bestsum':
-        for file in files:
-            blast = parse_blast(file, blast)
+        for index, file in enumerate(files):
+            blast = parse_blast(file, blast, index)
         results = apply_taxrule(blast, kwargs['taxdump'], kwargs['--taxrule'], identifiers)
         fields = create_fields(results, kwargs['--taxrule'], files)
     elif kwargs['--taxrule'] == 'bestsumorder':
         results = None
-        for file in files:
-            blast = parse_blast(file)
+        for index, file in enumerate(files):
+            blast = parse_blast(file, None, index)
             results = apply_taxrule(blast,
                                     kwargs['taxdump'],
                                     kwargs['--taxrule'],
