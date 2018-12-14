@@ -18,7 +18,7 @@ Similar to [BlobTools v1](https://github.com/DRL/blobtools), **BlobTools2** is a
 
 **BlobTools2** is built around a file-based data structure, with data for each field contained in a separate `JSON` file within a directory (`BlobDir`) containing a single `meta.json` file with metadata for each field and the dataset as a whole. Additional fields can be added to an existing `BlobDir` using the `blobtools add` command, which parses an input to generate one or more additional `JSON` files and updates the dataset metadata. Fields are treated as generic datatypes, `Variable` (e.g. gc content, length and coverage), `Category` (e.g. taxonomic assignment based on BLAST hits) alongside `Array` and `MultiArray` datatypes to store information such as start, end, [NCBI](https://www.ncbi.nlm.nih.gov) taxid and bitscore for a set of blast hits to a single sequence. Support for new analyses can added to **BlobTools2** by creating a new python module with an appropriate `parse` function
 
-To learn more about the BlobTools approach, take a look at the papers by [Laetsch DR and Blaxter ML, 2017](https://f1000research.com/articles/6-1287/v1) and [Kumar et al., 2013](https://dx.doi.org/10.3389%2Ffgene.2013.00237). **BlobTools2** is intended to to become a more flexible replacement for [BlobTools v1](https://github.com/DRL/blobtools) but not all of the functionality has been added yet. If you need functions that are not yet ready in **BlobTools2**, please continue to use (and cite!) Dom Laetsch's [previous version](https://github.com/DRL/blobtools) and submit a feature request on the [issue tracker](https://github.com/blobtoolkit/blobtools2/issues) if you'd like to see it added. 
+To learn more about the BlobTools approach, take a look at the papers by [Laetsch DR and Blaxter ML, 2017](https://f1000research.com/articles/6-1287/v1) and [Kumar et al., 2013](https://dx.doi.org/10.3389%2Ffgene.2013.00237). **BlobTools2** is intended to to become a more flexible replacement for [BlobTools v1](https://github.com/DRL/blobtools) but not all of the functionality has been added yet. If you need functions that are not yet ready in **BlobTools2**, please continue to use (and cite!) Dom Laetsch's [previous version](https://github.com/DRL/blobtools) and submit a feature request on the [issue tracker](https://github.com/blobtoolkit/blobtools2/issues) if you'd like to see it added.
 
 
 ## Installing
@@ -46,7 +46,7 @@ git clone https://github.com/blobtoolkit/blobtools2
 
 4. Clone and install the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer):
 ```
-git clone https://github.com/blobtoolkit/blobtools2
+git clone https://github.com/blobtoolkit/viewer
 cd viewer
 npm install
 cd ..
