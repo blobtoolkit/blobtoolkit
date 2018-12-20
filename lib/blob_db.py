@@ -51,8 +51,11 @@ def hits_from_blob_db(blob_db, tax_rule):
         for tax_lib in blob_db['hitLibs'].keys():
             if tax_lib in hit_list:
                 for detail in hit_list[tax_lib]:
-                    values[identifier].append({'taxid': int(detail['taxId']),
-                                               'score': int(detail['score'])})
+                    try:
+                        values[identifier].append({'taxid': int(detail['taxId']),
+                                                   'score': int(detail['score'])})
+                    except ValueError:
+                        pass
     values = [values.get(identifier, []) for identifier in blob_db['order_of_blobs']]
     return values
 
