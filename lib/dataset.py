@@ -22,7 +22,7 @@ class Metadata():
                  'records',
                  'settings',
                  'similarity',
-                 'static_fields',
+                 'static_plots',
                  'taxon'
                  ]
 
