@@ -70,9 +70,14 @@ def apply_taxrule(blast, taxdump, taxrule, identifiers, results=None):
                     category = "%s-undef" % taxdump.names[-category]
                 else:
                     category = 'no-hit'
-                values[index]['positions'][seq_id].append(
-                    [category]
-                )
+                try:
+                    values[index]['positions'][seq_id].append(
+                        [category, hit['subject'], hit['start'], hit['end'], hit['score'], hit['file']]
+                    )
+                except KeyError:
+                    values[index]['positions'][seq_id].append(
+                        [category, hit['file']]
+                    )
                 if index == 0:
                     values[index]['hits'][seq_id].append(
                         [hit['taxid'], hit['start'], hit['end'], hit['score'], hit['subject'], hit['file']]
@@ -166,6 +171,10 @@ def create_fields(results, taxrule, files, fields=None):
                                parents=parents))
         subfield = 'positions'
         field_id = "%s_%s" % (result['field_id'], subfield)
+        if len(result['data'][subfield]) > 1:
+            headers = ['name', 'subject', 'start', 'end', 'score', 'file']
+        else:
+            headers = ['name']
         fields.append(MultiArray(field_id,
                                  values=result['data'][subfield],
                                  fixed_keys=main.keys,
@@ -180,7 +189,7 @@ def create_fields(results, taxrule, files, fields=None):
                                      },
                                  parents=parents,
                                  category_slot=0,
-                                 headers=['name']))
+                                 headers=headers))
     return fields
 
 
