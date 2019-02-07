@@ -83,7 +83,7 @@ def parse_bam(bam_file, **kwargs):
                              meta={'field_id': field_id, 'file': bam_file},
                              parents=['children',
                                       {'id': 'base_coverage',
-                                       'clamp': 1 if fields['cov_range'][0] == 0 else False,
+                                       'clamp': 0.01 if fields['cov_range'][0] == 0 else False,
                                        'range': fields['cov_range']},
                                       'children']
                              )
