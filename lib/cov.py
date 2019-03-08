@@ -15,7 +15,7 @@ from field import Variable
 from run_external import seqtk_subseq
 
 
-def _get_coverage(args):
+def _get_coverage_slow(args):
     bam_file = args[0]
     f_char = args[1]
     seq_id = args[2]
@@ -28,6 +28,22 @@ def _get_coverage(args):
         for pileupread in pileupcolumn.pileups:
             if not pileupread.is_del and not pileupread.is_refskip:
                 reads.add(pileupread.alignment.query_name)
+    samfile.close()
+    return [seq_id, cov, len(reads)]
+
+
+def _get_coverage(args):
+    bam_file = args[0]
+    f_char = args[1]
+    seq_id = args[2]
+    flags = args[3]
+    samfile = pysam.AlignmentFile(bam_file, "r%s" % f_char)
+    cov = 0
+    reads = set()
+    iter = samfile.fetch(seq_id)
+    for segment in iter:
+        cov += segment.infer_query_length()
+        reads.add(segment.query_name)
     samfile.close()
     return [seq_id, cov, len(reads)]
 
