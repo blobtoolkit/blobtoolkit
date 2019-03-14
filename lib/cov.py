@@ -40,10 +40,16 @@ def _get_coverage(args):
     samfile = pysam.AlignmentFile(bam_file, "r%s" % f_char)
     cov = 0
     reads = set()
-    iter = samfile.fetch(seq_id)
+    try:
+        iter = samfile.fetch(seq_id)
+    except ValueError:
+        return [seq_id, 0, 0]
     for segment in iter:
-        cov += segment.infer_query_length()
-        reads.add(segment.query_name)
+        try:
+            cov += segment.infer_query_length()
+            reads.add(segment.query_name)
+        except TypeError:
+            pass
     samfile.close()
     return [seq_id, cov, len(reads)]
 
