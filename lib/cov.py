@@ -9,49 +9,36 @@ import os
 import math
 from multiprocessing import Pool
 from pathlib import Path
+from collections import defaultdict
 import pysam
 from tqdm import tqdm
 from field import Variable
 from run_external import seqtk_subseq
 
 
-def _get_coverage_slow(args):
-    bam_file = args[0]
-    f_char = args[1]
-    seq_id = args[2]
-    flags = args[3]
-    samfile = pysam.AlignmentFile(bam_file, "r%s" % f_char)
-    cov = 0
-    reads = set()
-    for pileupcolumn in samfile.pileup(seq_id, **flags):
-        cov += pileupcolumn.n
-        for pileupread in pileupcolumn.pileups:
-            if not pileupread.is_del and not pileupread.is_refskip:
-                reads.add(pileupread.alignment.query_name)
-    samfile.close()
-    return [seq_id, cov, len(reads)]
+def check_mapped_read(read):
+    """Check read mapping flags."""
+    if read.is_unmapped or read.is_secondary or read.is_supplementary:
+        return False
+    return True
 
 
-def _get_coverage(args):
-    bam_file = args[0]
-    f_char = args[1]
-    seq_id = args[2]
-    flags = args[3]
-    samfile = pysam.AlignmentFile(bam_file, "r%s" % f_char)
-    cov = 0
-    reads = set()
-    try:
-        iter = samfile.fetch(seq_id)
-    except ValueError:
-        return [seq_id, 0, 0]
-    for segment in iter:
-        try:
-            cov += segment.infer_query_length()
-            reads.add(segment.query_name)
-        except TypeError:
-            pass
-    samfile.close()
-    return [seq_id, cov, len(reads)]
+def calculate_coverage(aln, reads_mapped):
+    """Calculate base and read coverage."""
+    _base_cov_dict = defaultdict(list)
+    read_cov_dict = defaultdict(lambda: 0)
+    allowed_operations = set([0, 7, 8])
+    with tqdm(total=reads_mapped, unit_scale=True) as pbar:
+        for read in aln.fetch(until_eof=True):
+            if not check_mapped_read(read):
+                continue
+            for operation, length in read.cigartuples:
+                if operation in allowed_operations:
+                    _base_cov_dict[read.reference_name].append(length)
+            read_cov_dict[read.reference_name] += 1
+            pbar.update()
+    base_cov_dict = {ref_name: sum(_base_cov) for ref_name, _base_cov in _base_cov_dict.items()}
+    return base_cov_dict, read_cov_dict
 
 
 def parse_bam(bam_file, **kwargs):
@@ -67,25 +54,12 @@ def parse_bam(bam_file, **kwargs):
         pysam.index(bam_file)
     else:
         index_file = False
-    samfile = pysam.AlignmentFile(bam_file, "r%s" % f_char)
-    stats = {'mapped': samfile.mapped,
-             'unmapped': samfile.unmapped}
-    samfile.close()
-    # samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
+    stats = {}
     print("Loading mapping data from %s" % bam_file)
-    try:
-        flags = dict(flag.split('=') for flag in kwargs['--pileup-args'])
-    except ValueError:
-        flags = {}
-    with Pool(int(kwargs['--threads'])) as pool:
-        results = list(tqdm(pool.imap(_get_coverage,
-                                      map(lambda x: (bam_file, f_char, x, flags), ids)),
-                            total=len(ids)))
-    _covs = {}
-    _read_covs = {}
-    for result in results:
-        _covs.update({result[0]: result[1]})
-        _read_covs.update({result[0]: result[2]})
+    with pysam.AlignmentFile(bam_file, "r%s" % f_char) as aln:
+        stats = {'mapped': aln.mapped,
+                 'unmapped': aln.unmapped}
+        _covs, _read_covs = calculate_coverage(aln, aln.mapped)
     if index_file:
         os.remove(index_file)
     if not identifiers.validate_list(list(_covs.keys())):
