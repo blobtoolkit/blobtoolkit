@@ -41,6 +41,7 @@ Examples:
 
 """
 
+import math
 from docopt import docopt
 import file_io
 import blob_db
@@ -102,6 +103,12 @@ def main():
                 if not args['--replace']:
                     if has_field_warning(meta, data.field_id):
                         continue
+                for parent in data.parents:
+                    if 'range' in parent:
+                        parent_meta = meta.field_meta(parent['id'])
+                        if parent_meta and 'range' in parent_meta:
+                            parent['range'][0] = min(parent['range'][0], parent_meta['range'][0])
+                            parent['range'][1] = max(parent['range'][1], parent_meta['range'][1])
                 meta.add_field(parents+data.parents, **data.meta)
                 if isinstance(data, Identifier):
                     meta.records = len(data.values)
