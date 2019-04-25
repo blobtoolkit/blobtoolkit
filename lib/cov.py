@@ -13,6 +13,7 @@ from collections import defaultdict
 import pysam
 from tqdm import tqdm
 from field import Variable
+from file_io import load_yaml
 from run_external import seqtk_subseq
 
 
@@ -129,19 +130,72 @@ def apply_filter(ids, fastq_files, **kwargs):
         seqtk_subseq(fastq_file, '\n'.join(list(read_ids)), outfile)
 
 
+def parse_json_cov(json_file, **kwargs):
+    """Parse coverage from JSON cov file."""
+    data = load_yaml(json_file)
+    base_name = Path(json_file).stem.split('.')[0]
+    covs = []
+    if 'values' in data:
+        for value in data['values']:
+            covs.append(float("%.4f" % value))
+    if base_name.endswith('_read_cov'):
+        type = 'read_cov'
+        parent = 'read_coverage'
+        datatype = 'float'
+        clamp = 1
+    elif base_name.endswith('_cov'):
+        type = 'cov'
+        parent = 'base_coverage'
+        datatype = 'integer'
+        clamp = 0.01
+    else:
+        return None
+    field_id = base_name
+    fields = {}
+    fields["%s_id" % type] = field_id
+    fields["%s_range" % type] = [min(covs+[kwargs["%s_range" % type][0]]),
+                                 max(covs+[kwargs["%s_range" % type][1]])]
+    if kwargs['meta'].has_field(field_id):
+        file_name = kwargs['meta'].field_meta(field_id)['file']
+    else:
+        file_name = json_file
+    fields[type] = Variable(field_id,
+                            values=covs,
+                            meta={'field_id': field_id, 'file': file_name},
+                            parents=['children',
+                                     {'id': parent,
+                                      'datatype': 'integer',
+                                      'clamp': clamp if fields["%s_range" % type][0] == 0 else False,
+                                      'range': fields["%s_range" % type]},
+                                     'children']
+                            )
+    return fields
+
+
 def parse(files, **kwargs):
     """Parse all BAM files."""
     parsed = []
-    cov_range = [math.inf, -math.inf]
-    read_cov_range = [math.inf, -math.inf]
+    if kwargs['meta'].has_field('base_coverage'):
+        cov_range = kwargs['meta'].field_meta('base_coverage')['range']
+    else:
+        cov_range = [math.inf, -math.inf]
+    if kwargs['meta'].has_field('read_coverage'):
+        read_cov_range = kwargs['meta'].field_meta('read_coverage')['range']
+    else:
+        read_cov_range = [math.inf, -math.inf]
     for file in files:
-        fields = parse_bam(file, **kwargs, cov_range=cov_range, read_cov_range=read_cov_range)
-        parsed.append(fields['cov'])
-        parsed.append(fields['read_cov'])
-        cov_range = fields['cov_range']
-        if 'y' not in kwargs['meta'].plot:
-            kwargs['meta'].plot.update({'y': fields['cov_id']})
-        read_cov_range = fields['read_cov_range']
+        if file.endswith('.json'):
+            fields = parse_json_cov(file, **kwargs, cov_range=cov_range, read_cov_range=read_cov_range)
+        else:
+            fields = parse_bam(file, **kwargs, cov_range=cov_range, read_cov_range=read_cov_range)
+        if 'cov' in fields:
+            parsed.append(fields['cov'])
+            cov_range = fields['cov_range']
+            if 'y' not in kwargs['meta'].plot:
+                kwargs['meta'].plot.update({'y': fields['cov_id']})
+        if 'read_cov' in fields:
+            parsed.append(fields['read_cov'])
+            read_cov_range = fields['read_cov_range']
     return parsed
 
 
