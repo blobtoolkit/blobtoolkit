@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# pylint: disable=no-member, too-many-branches
+# pylint: disable=no-member, too-many-branches, too-many-nested-blocks
 
 """
 Add data to a BlobDir.
@@ -41,7 +41,6 @@ Examples:
 
 """
 
-import math
 from docopt import docopt
 import file_io
 import blob_db

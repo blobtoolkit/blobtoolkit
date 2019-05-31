@@ -109,6 +109,9 @@ class Metadata():
                         index = next(i for i, field in enumerate(parent)
                                      if field['id'] == required['id'])
                         parent = parent[index]
+                        for key in required.keys():
+                            if key not in ['children', 'data']:
+                                parent[key] = required[key]
                     except StopIteration:
                         parent.append(required)
                         parent = required
