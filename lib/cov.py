@@ -119,11 +119,9 @@ def apply_filter(ids, fastq_files, **kwargs):
     for seq_id in tqdm(ids):
         for read in samfile.fetch(seq_id):
             read_ids.add(read.query_name)
-            break
     samfile.close()
     if index_file:
         os.remove(index_file)
-    # read_ids = '\n'.join(list(read_ids))
     for fastq_file in fastq_files:
         path = Path(fastq_file)
         outfile = path.parent / (path.stem + '.' + suffix + path.suffix)
