@@ -19,7 +19,7 @@ def parse_busco(busco_file, identifiers):
         'command': lines[2].split(':')[1].strip(),
         'file': busco_file
     }
-    meta['set'] = re.search(r'-l.+\/(\w+_odb\d+)\/', meta['command'])[1]
+    meta['set'] = re.search(r'-l\s.*?\/*(\w+_odb\d+)\/', meta['command'])[1]
     meta['field_id'] = "%s_busco" % meta['set']
     columns = re.split(r'# |\t', lines[4])[1:]
     busco_index = columns.index('Busco id')
