@@ -7,6 +7,7 @@
 
 import os
 import math
+import sys
 from multiprocessing import Pool
 from pathlib import Path
 from collections import defaultdict
@@ -48,16 +49,17 @@ def parse_bam(bam_file, **kwargs):
     ids = identifiers.values
     lengths = kwargs['dependencies']['length'].values
     ncounts = kwargs['dependencies']['ncount'].values
-    base_name = Path(bam_file).stem.split('.')[-1]
-    f_char = Path(bam_file).suffix[1]
-    index_file = Path("%s.bai" % bam_file)
+    parts = bam_file.split('=')
+    base_name = parts[1]
+    f_char = Path(parts[0]).suffix[1]
+    index_file = Path("%s.bai" % parts[0])
     if not index_file.is_file():
-        pysam.index(bam_file)
+        pysam.index(parts[0])
     else:
         index_file = False
     stats = {}
-    print("Loading mapping data from %s" % bam_file)
-    with pysam.AlignmentFile(bam_file, "r%s" % f_char) as aln:
+    print("Loading mapping data from %s as %s" % (parts[0], parts[1]))
+    with pysam.AlignmentFile(parts[0], "r%s" % f_char) as aln:
         stats = {'mapped': aln.mapped,
                  'unmapped': aln.unmapped}
         _covs, _read_covs = calculate_coverage(aln, aln.mapped)
@@ -130,8 +132,9 @@ def apply_filter(ids, fastq_files, **kwargs):
 
 def parse_json_cov(json_file, **kwargs):
     """Parse coverage from JSON cov file."""
-    data = load_yaml(json_file)
-    base_name = Path(json_file).stem.split('.')[0]
+    parts = bam_file.split('=')
+    base_name = parts[1]
+    data = load_yaml(parts[0])
     covs = []
     if 'values' in data:
         for value in data['values']:
@@ -170,6 +173,27 @@ def parse_json_cov(json_file, **kwargs):
     return fields
 
 
+def base_names(files):
+    """Set file base names."""
+    names = {}
+    unique = True
+    for file in files:
+      if '=' in file:
+        parts = file.split('=')
+        name = parts[1]
+        names[name] = parts[0]
+      else:
+        name = Path(file).stem
+        if name in names:
+          unique = False
+        else:
+          names[name] = file
+    if not unique:
+      print('ERROR: Unable to set unique names for coverage files')
+      sys.exit(1)
+    return ["%s=%s" % (v,k) for k,v in names.items()]
+
+
 def parse(files, **kwargs):
     """Parse all BAM files."""
     parsed = []
@@ -181,8 +205,9 @@ def parse(files, **kwargs):
         read_cov_range = kwargs['meta'].field_meta('read_coverage')['range']
     else:
         read_cov_range = [math.inf, -math.inf]
-    for file in files:
-        if file.endswith('.json'):
+    names = base_names(files)
+    for file in names:
+        if '.json' in file:
             fields = parse_json_cov(file, **kwargs, cov_range=cov_range, read_cov_range=read_cov_range)
         else:
             fields = parse_bam(file, **kwargs, cov_range=cov_range, read_cov_range=read_cov_range)
