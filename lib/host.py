@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# pylint: disable=no-member, too-many-branches, too-many-locals, W0603
+# pylint: disable=no-member, too-many-branches, too-many-statements, too-many-locals, W0603
 
 """
 Host a collection of BlobDirs.
@@ -99,6 +99,10 @@ def main():
     if not path.exists():
         print("ERROR: Directory '%s' does not exist" % args['DIRECTORY'])
         exit(1)
+    if (path / 'meta.json').exists():
+        print("WARNING: Directory '%s' appears to be a BlobDir." % args['DIRECTORY'])
+        print("         Hosting the parent directory instead.")
+        path = path.resolve().parent
     test_port(args['--api-port'], 'BlobtoolKit API')
     test_port(args['--port'], 'BlobtoolKit viewer')
     api = start_api(viewer_dir,
