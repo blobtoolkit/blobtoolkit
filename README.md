@@ -95,6 +95,11 @@ To speed up coverage file processing, run commands using multiple threads:
 ./blobtools add --cov examples/assembly.reads.bam  --threads 16 tmp/dataset_2
 ```
 
+Field names are based on coverage filenames, to explicitly set a field name, add `=<fieldname>` immediately after the coverage filename:
+```
+./blobtools add --cov examples/assembly.reads.bam=library1 --threads 16 tmp/dataset_2
+```
+
 #### BLAST/Diamond hits
 
 Sequence similarity search results are used to assign taxonomy based on [BlobTools v1](https://github.com/DRL/blobtools) taxrules. In order to process taxonomic information, a local copy of the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) taxdump must be available:

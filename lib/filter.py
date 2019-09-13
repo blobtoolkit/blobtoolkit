@@ -83,18 +83,19 @@ def parse_params(args, meta):
 
 def filter_by_params(meta, directory, indices, params, invert_all):
     """Filter included set using params."""
+    all = indices[0:]
     for field_id, filters in params.items():
         field = fetch_field(directory, field_id, meta)
-        invert = invert_all
+        invert = False
         if filters.get('Inv'):
-            invert = not invert
+            invert = True
         if isinstance(field, Category):
             keys = field.keys
             if filters.get('Keys'):
                 keys = [int(x)
                         if x.isdigit() else field.keys.index(x)
                         for x in filters['Keys'].split(',')]
-                if invert:
+                if not invert:
                     keys = [i for i, x in enumerate(field.keys) if i not in keys]
                 keys = set(keys)
                 indices = [i for i in indices if field.values[i] in keys]
@@ -109,6 +110,9 @@ def filter_by_params(meta, directory, indices, params, invert_all):
                 indices = [i for i in indices if field.values[i] < low or field.values[i] > high]
             else:
                 indices = [i for i in indices if low <= field.values[i] <= high]
+    if invert_all:
+        inverted = [i for i in all if i not in indices]
+        return inverted
     return indices
 
 
