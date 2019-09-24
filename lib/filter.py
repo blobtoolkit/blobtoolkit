@@ -83,7 +83,7 @@ def parse_params(args, meta):
 
 def filter_by_params(meta, directory, indices, params, invert_all):
     """Filter included set using params."""
-    all = indices[0:]
+    all_indices = indices[0:]
     for field_id, filters in params.items():
         field = fetch_field(directory, field_id, meta)
         invert = False
@@ -111,7 +111,7 @@ def filter_by_params(meta, directory, indices, params, invert_all):
             else:
                 indices = [i for i in indices if low <= field.values[i] <= high]
     if invert_all:
-        inverted = [i for i in all if i not in indices]
+        inverted = [i for i in all_indices if i not in indices]
         return inverted
     return indices
 

@@ -24,7 +24,8 @@ class Metadata():
                  'similarity',
                  'static_plots',
                  'taxon',
-                 'version'
+                 'version',
+                 'revision'
                  ]
 
     def __init__(self, dataset_id, **kwargs):
@@ -38,6 +39,7 @@ class Metadata():
         self.record_type = 'record'
         self.records = 0
         self.version = 1
+        self.revision = 0
         self.update_data(**kwargs)
         self._field_list = self.list_fields()
         self._field_ids = list(self._field_list.keys())

@@ -70,15 +70,9 @@ def apply_taxrule(blast, taxdump, taxrule, identifiers, results=None):
                     category = "%s-undef" % taxdump.names[-category]
                 else:
                     category = 'no-hit'
-                #try:
                 values[index]['positions'][seq_id].append(
-                    # [category, hit['subject'], hit['start'], hit['end'], hit['score'], hit['file']]
                     [category]
                 )
-                #except KeyError:
-                #    values[index]['positions'][seq_id].append(
-                #        [category, hit['file']]
-                #    )
                 if index == 0:
                     try:
                         values[index]['hits'][seq_id].append(

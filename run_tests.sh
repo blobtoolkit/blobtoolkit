@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+git stash -k -u
+
 # lint code in lib directory
 echo "pylint --rcfile=.pylintrc lib -f parseable -r n" &&
 pylint --rcfile=.pylintrc lib -f parseable -r n &&
@@ -21,3 +23,5 @@ pycodestyle tests/unit_tests/* --max-line-length=120 &&
 # run tests and generate coverage report
 echo "py.test --ignore viewer --cov-config .coveragerc --doctest-modules --cov=lib --cov-report term-missing" &&
 py.test --ignore viewer --cov-config .coveragerc --doctest-modules --cov=lib --cov-report term-missing
+
+git stash pop

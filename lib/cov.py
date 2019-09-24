@@ -178,20 +178,20 @@ def base_names(files):
     names = {}
     unique = True
     for file in files:
-      if '=' in file:
-        parts = file.split('=')
-        name = parts[1]
-        names[name] = parts[0]
-      else:
-        name = Path(file).stem
-        if name in names:
-          unique = False
+        if '=' in file:
+            parts = file.split('=')
+            name = parts[1]
+            names[name] = parts[0]
         else:
-          names[name] = file
+            name = Path(file).stem
+            if name in names:
+                unique = False
+            else:
+                names[name] = file
     if not unique:
-      print('ERROR: Unable to set unique names for coverage files')
-      sys.exit(1)
-    return ["%s=%s" % (v,k) for k,v in names.items()]
+        print('ERROR: Unable to set unique names for coverage files')
+        sys.exit(1)
+    return ["%s=%s" % (v, k) for k, v in names.items()]
 
 
 def parse(files, **kwargs):
