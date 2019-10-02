@@ -14,6 +14,7 @@ docstrings.
 
 import gzip
 import pathlib
+import sys
 from itertools import groupby
 from subprocess import Popen, PIPE
 import yaml
@@ -102,6 +103,12 @@ def write_file(filename, data):
         content = ujson.dumps(data, indent=1, escape_forward_slashes=False)
     elif '.yaml' in filename:
         content = yaml.dump(data, indent=1)
+    elif filename == 'STDOUT':
+        sys.stdout.write(ujson.dumps(data, indent=1, escape_forward_slashes=False)+'\n')
+        return True
+    elif filename == 'STDOUT':
+        sys.stderr.write(ujson.dumps(data, indent=1, escape_forward_slashes=False)+'\n')
+        return True
     else:
         content = data
     if '.gz' in filename:

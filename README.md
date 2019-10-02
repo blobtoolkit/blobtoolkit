@@ -27,8 +27,9 @@ These install instructions assume a Unix/Linux system with standard development 
 
 1. Create and activate a Conda environment
 ```
-conda create -n blobtools2 -y python=3.6 docopt pyyaml ujson pysam tqdm nodejs seqtk
+conda create -n blobtools2 -y python=3.6 docopt pyyaml ujson tqdm nodejs seqtk
 conda activate blobtools2
+conda install -c conda-forge geckodriver selenium pysam
 ```
 
 2. Download and extract the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) taxdump:

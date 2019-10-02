@@ -8,7 +8,7 @@ Add data to a BlobDir.
 Usage:
     blobtools add [--busco TSV...] [--cov BAM...]  [--hits TSV...]  [--fasta FASTA]
                   [--key path=value...] [--link path=url...] [--taxid INT] [--skip-link-test]
-                  [--blobdb JSON] [--meta YAML] [--synonyms TSV...]
+                  [--blobdb JSON] [--meta YAML] [--synonyms TSV...] [--trnascan TSV...]
                   [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
                   [--threads INT] [--pileup-args key=value...] [--create] [--replace] DIRECTORY
 
@@ -31,6 +31,7 @@ Options:
     --taxrule bestsum|bestsumorder
                           Rule to use when assigning BLAST hits to taxa. [Default: bestsum]
     --threads INT         Number of threads to use for multithreaded tasks. [Default: 1]
+    --trnascan TSV        tRNAscan2-SE output
     --pileup-args key=val Key/value pairs to pass to samtools pileup.
     --create              Create a new BlobDir.
     --replace             Replace existing fields with matching ids.
@@ -51,6 +52,7 @@ import hits
 import key
 import link
 import taxid
+import trnascan
 import synonyms
 from field import Identifier
 from fetch import fetch_field, fetch_metadata, fetch_taxdump
@@ -58,6 +60,7 @@ from fetch import fetch_field, fetch_metadata, fetch_taxdump
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--blobdb', 'module': blob_db, 'depends': ['identifiers']},
           {'flag': '--busco', 'module': busco, 'depends': ['identifiers']},
+          {'flag': '--trnascan', 'module': trnascan, 'depends': ['identifiers']},
           {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
           {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
           {'flag': '--synonyms', 'module': synonyms, 'depends': ['identifiers']}]

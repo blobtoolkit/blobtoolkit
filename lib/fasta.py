@@ -4,6 +4,7 @@
 """Parse FASTA sequence into Fields."""
 
 import pathlib
+import statistics
 from collections import Counter, OrderedDict
 from tqdm import tqdm
 import file_io
@@ -108,3 +109,15 @@ def parse(file, **kwargs):
 def parent():
     """Set standard metadata for synonyms."""
     return []
+
+
+def summarise(indices, fields, **kwargs):
+    """Summarise assembly sequence stats."""
+    gcs = [fields['gc'].values[i] for i in indices]
+    lengths = [fields['length'].values[i] for i in indices]
+    gc_mean = sum([gc * length for gc, length in zip(gcs, lengths)]) / sum(lengths)
+    gc = float("%.4f" % gc_mean)
+    at = 1 - gc
+    ncount = sum([fields['ncount'].values[i] for i in indices])
+    span = sum(lengths)
+    return {'at': at, 'gc': gc,  'n': float("%.4f" % (ncount / span))}

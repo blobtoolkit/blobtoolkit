@@ -61,3 +61,45 @@ def parent():
     return [
         busco
     ]
+
+
+def busco_score(values, total):
+    """Calculate BUSCO score."""
+    fragmented = set()
+    buscos = defaultdict(int)
+    for contig in values:
+        for busco in contig:
+            if busco[1] == 'Fragmented':
+                fragmented.add(busco[0])
+            buscos[busco[0]] += 1
+    present = len(buscos.keys())
+    complete = present - len(fragmented)
+    duplicated = len([value for value in buscos.values() if value > 1])
+    scores = {
+        'c': complete,
+        'd': duplicated,
+        'm': total - present,
+        'f': len(fragmented),
+        't': total,
+        's': complete - duplicated
+    }
+    string = 'C:{:.1%}'.format(scores['c'] / total)
+    string += '[S:{:.1%},'.format(scores['s'] / total)
+    string += 'D:{:.1%}],'.format(scores['d'] / total)
+    string += 'F:{:.1%},'.format(scores['f'] / total)
+    string += 'M:{:.1%},'.format(scores['m'] / total)
+    string += 'n:{:d}'.format(total)
+    scores.update({'string': string})
+    return scores
+
+
+def summarise(indices, fields, **kwargs):
+    """Summarise BUSCOs."""
+    summary = {}
+    for lineage in fields['lineages']:
+        values = fields[lineage].expand_values()
+        values = [values[i] for i in indices]
+        total = fields[lineage].meta['count']
+        lineage = lineage.replace('_busco', '')
+        summary.update({lineage: busco_score(values, total)})
+    return summary

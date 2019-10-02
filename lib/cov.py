@@ -234,3 +234,39 @@ def parent():
     return [
         coverage
     ]
+
+
+def weighted_mean(values, weights, log=False):
+    """Calculate weighted mean and standard deviation."""
+    if log:
+        mean = sum([math.log10(value+0.01) * weight for value, weight in zip(values, weights)]) / sum(weights)
+        mean = 10 ** mean - 0.01
+    else:
+        mean = sum([value * weight for value, weight in zip(values, weights)]) / sum(weights)
+    return mean
+
+
+def summarise(indices, fields, **kwargs):
+    """Summarise coverage."""
+    summary = {}
+    for library in fields['libraries']:
+        stats = {}
+        covs = [fields["%s_cov" % library].values[i] for i in indices]
+        lengths = [fields['length'].values[i] for i in indices]
+        coverage = weighted_mean(covs, lengths, log=True)
+        read_covs = [fields["%s_read_cov" % library].values[i] for i in indices]
+        mapped = sum(read_covs)
+        read_cov_meta = fields["%s_read_cov" % library].meta
+        total = kwargs['meta'].reads[library]['Total reads']
+        platform = kwargs['meta'].reads[library]['platform']
+        strategy = kwargs['meta'].reads[library]['strategy']
+        stats.update({
+            'total': total,
+            'coverage': float("%.3f" % coverage),
+            'mapped': mapped,
+            'mappedPortion': float("%.3f" % (mapped / total)),
+            'platform': platform,
+            'strategy': strategy
+            })
+        summary.update({library: stats})
+    return summary

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-# pylint: disable=too-many-locals,too-many-branches
+# pylint: disable=too-many-locals,too-many-branches, unused-argument
 
 """Parse BLAST results into MultiArray Field."""
 
-from collections import defaultdict
+import math
+from collections import defaultdict, Counter
 import file_io
 from field import Category, MultiArray, Variable
 
@@ -229,3 +230,98 @@ def parent():
     return [
         blast
     ]
+
+
+def summarise(indices, fields, **kwargs):
+    """Summarise assembly sequence stats."""
+    summary = {}
+    lengths = [fields['length'].values[i] for i in indices]
+    gcs = [fields['gc'].values[i] for i in indices]
+    covs = [fields['cov'].values[i] for i in indices] if 'cov' in fields else []
+    summary.update({'total': length_stats(lengths, gcs, covs)})
+    hits = list(map(lambda x: fields['hits'].keys[x], [fields['hits'].values[i] for i in indices]))
+    counts = Counter(hits)
+    index = 0
+    limit = 9
+    other = []
+    other_gcs = []
+    other_covs = []
+    for key in sorted(counts.items(), key=lambda x: x[1], reverse=True):
+        taxon = key[0]
+        subset = [i for i, j in enumerate(hits) if j == taxon]
+        lengths = [fields['length'].values[indices[i]] for i in subset]
+        gcs = [fields['gc'].values[indices[i]] for i in subset]
+        covs = [fields['cov'].values[indices[i]] for i in subset] if 'cov' in fields else []
+        if len(counts.keys()) > limit and index >= limit:
+            other += lengths
+            other_gcs += gcs
+            other_covs += covs
+        else:
+            summary.update({taxon: length_stats(lengths, gcs, covs)})
+        index += 1
+    if other:
+        summary.update({'other': length_stats(other, other_gcs, other_covs)})
+    return summary
+
+
+def weighted_mean_sd(values, weights, log=False):
+    """Calculate weighted mean and standard deviation."""
+    if log:
+        weights = [weight for weight, value in zip(weights, values) if value > 0]
+        values = [value for value in values if value > 0]
+        mean = sum([math.log10(value+0.01) * weight for value, weight in zip(values, weights)]) / sum(weights)
+        variance = sum([weight * ((math.log10(value+0.01) - mean) ** 2)
+                        for value, weight in zip(values, weights)]
+                       ) / sum(weights)
+        st_dev = variance ** 0.5
+        upper = 10 ** (mean + 2 * st_dev) - 0.01
+        lower = 10 ** (mean - 2 * st_dev) - 0.01
+        mean = 10 ** mean - 0.01
+    else:
+        mean = sum([value * weight for value, weight in zip(values, weights)]) / sum(weights)
+        variance = sum([weight * ((value - mean) ** 2) for value, weight in zip(values, weights)]) / sum(weights)
+        st_dev = variance ** 0.5
+        upper = mean + 2 * st_dev
+        lower = mean - 2 * st_dev
+    return mean, st_dev, upper, lower
+
+
+def length_stats(lengths, gcs, covs):
+    """Calculate stats for a set of sequence lengths."""
+    span = sum(lengths)
+    count = len(lengths)
+    gc_mean, gc_dev, gc_upper, gc_lower = weighted_mean_sd(gcs, lengths)
+    stats = {'span': span,
+             'count': count,
+             'gc': [float("%.4f" % gc_mean),
+                    float("%.4f" % gc_dev),
+                    float("%.4f" % gc_lower),
+                    float("%.4f" % gc_upper),
+                    float("%.4f" % min(gcs)),
+                    float("%.4f" % max(gcs))]
+             }
+    if covs:
+        cov_mean, cov_dev, cov_upper, cov_lower = weighted_mean_sd(covs, lengths, log=True)
+        stats.update({'cov': [float("%.4f" % cov_mean),
+                              float("%.4f" % cov_dev),
+                              float("%.4f" % cov_lower),
+                              float("%.4f" % cov_upper),
+                              float("%.4f" % min(covs)),
+                              float("%.4f" % max(covs))]})
+    n50 = span * 0.5
+    n90 = span * 0.9
+    lengths.sort(reverse=True)
+    nlength = 0
+    ncount = 0
+    for length in lengths:
+        ncount += 1
+        nlength += length
+        if 'n50' not in stats and nlength > n50:
+            stats.update({'n50': length, 'l50': ncount})
+        if 'n90' not in stats and nlength > n90:
+            stats.update({'n90': length, 'l90': ncount})
+    if 'n50' not in stats:
+        stats.update({'n50': lengths[-1], 'l50': ncount})
+    if 'n90' not in stats:
+        stats.update({'n90': lengths[-1], 'l90': ncount})
+    return stats
