@@ -20,7 +20,6 @@ Options:
       --timeout INT       Time to wait for page load in seconds. Default (0) is no timeout. [Default: 0]
       --view STRING       Plot type (blob|cumulative|snail). [Default: blob]
 """
-
 import os
 import time
 from pathlib import Path
@@ -30,6 +29,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from pyvirtualdisplay import Display
 
 
 def file_ready(file_path):
@@ -71,7 +71,9 @@ def main():
                            'image/png, image/svg+xml, text/csv, text/plain, application/json')
 
     options = Options()
-    options.set_headless(headless=True)
+    options.set_headless(headless=False)
+    display = Display(visible=0, size=(800, 600))
+    display.start()
     driver = webdriver.Firefox(options=options, firefox_profile=profile)
     try:
         view = args['--view'][0]
