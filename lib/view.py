@@ -71,7 +71,7 @@ def main():
                            'image/png, image/svg+xml, text/csv, text/plain, application/json')
 
     options = Options()
-    options.headless = True
+    options.set_headless(headless=True)
     driver = webdriver.Firefox(options=options, firefox_profile=profile)
     try:
         view = args['--view'][0]
