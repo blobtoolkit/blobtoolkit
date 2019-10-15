@@ -70,7 +70,7 @@ def apply_taxrule(blast, taxdump, taxrule, identifiers, results=None):
                 elif category < 0:
                     category = "%s-undef" % taxdump.names[-category]
                 else:
-                    category = 'no-hit'
+                    category = 'undef'
                 values[index]['positions'][seq_id].append(
                     [category]
                 )
