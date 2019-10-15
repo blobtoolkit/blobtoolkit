@@ -29,7 +29,7 @@ Options:
     --synonyms TSV        TSV file containing current identifiers and synonyms.
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
     --taxrule bestsum|bestsumorder
-                          Rule to use when assigning BLAST hits to taxa. [Default: bestsum]
+                          Rule to use when assigning BLAST hits to taxa. [Default: bestsumorder]
     --threads INT         Number of threads to use for multithreaded tasks. [Default: 1]
     --trnascan TSV        tRNAscan2-SE output
     --pileup-args key=val Key/value pairs to pass to samtools pileup.
