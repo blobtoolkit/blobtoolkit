@@ -304,10 +304,10 @@ def length_stats(all_lengths, all_gcs, all_covs):
     """Calculate stats for a set of sequence lengths."""
     span = sum(all_lengths)
     count = len(all_lengths)
+    lengths = []
+    gcs = []
+    covs = []
     if all_covs:
-        lengths = []
-        gcs = []
-        covs = []
         for length, gc_value, cov in zip(all_lengths, all_gcs, all_covs):
             if cov >= 0.01:
                 lengths.append(length)
