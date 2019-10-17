@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# pylint: disable=too-many-locals,too-many-branches, unused-argument
+# pylint: disable=too-many-locals,too-many-branches, unused-argument, unused-variable
 
 """Parse BLAST results into MultiArray Field."""
 
@@ -265,55 +265,81 @@ def summarise(indices, fields, **kwargs):
 
 
 def weighted_mean_sd(values, weights, log=False):
-    """Calculate weighted mean and standard deviation."""
+    """Calculate weighted mean, median and standard deviation."""
+    weighted = []
+    total_weight = 0
+    total = 0
+    for weight, value in zip(weights, values):
+        if log:
+            value = math.log10(value) + 10
+        weighted.append({'weight': weight, 'value': value})
+        total_weight += weight
+        total += value * weight
+    mid = total_weight / 2
+    running_total = 0
+    median = 0
+    for entry in sorted(weighted, key=lambda i: i['value']):
+        running_total += entry['weight']
+        if running_total > mid:
+            median = entry['value']
+            break
+    mean = total / total_weight
+    if median == 0:
+        median = mean
+    variance = sum([entry['weight'] * ((entry['value'] - mean) ** 2)
+                    for entry in weighted]
+                   ) / total_weight
+    st_dev = variance ** 0.5
+    upper = mean + 2 * st_dev
+    lower = mean - 2 * st_dev
     if log:
-        weights = [weight for weight, value in zip(weights, values) if value > 0]
-        values = [value for value in values if value > 0]
-        mean = sum([math.log10(value+0.01) * weight for value, weight in zip(values, weights)]) / sum(weights)
-        variance = sum([weight * ((math.log10(value+0.01) - mean) ** 2)
-                        for value, weight in zip(values, weights)]
-                       ) / sum(weights)
-        st_dev = variance ** 0.5
-        upper = 10 ** (mean + 2 * st_dev) - 0.01
-        lower = 10 ** (mean - 2 * st_dev) - 0.01
-        mean = 10 ** mean - 0.01
-    else:
-        mean = sum([value * weight for value, weight in zip(values, weights)]) / sum(weights)
-        variance = sum([weight * ((value - mean) ** 2) for value, weight in zip(values, weights)]) / sum(weights)
-        st_dev = variance ** 0.5
-        upper = mean + 2 * st_dev
-        lower = mean - 2 * st_dev
-    return mean, st_dev, upper, lower
+        upper = 10 ** (upper - 10)
+        lower = 10 ** (lower - 10)
+        mean = 10 ** (mean - 10)
+        median = 10 ** (median - 10)
+    return mean, median, st_dev, upper, lower
 
 
-def length_stats(lengths, gcs, covs):
+def length_stats(all_lengths, all_gcs, all_covs):
     """Calculate stats for a set of sequence lengths."""
-    span = sum(lengths)
-    count = len(lengths)
-    gc_mean, gc_dev, gc_upper, gc_lower = weighted_mean_sd(gcs, lengths)
+    span = sum(all_lengths)
+    count = len(all_lengths)
+    if all_covs:
+        lengths = []
+        gcs = []
+        covs = []
+        for length, gc_value, cov in zip(all_lengths, all_gcs, all_covs):
+            if cov >= 0.01:
+                lengths.append(length)
+                gcs.append(gc_value)
+                covs.append(cov)
+    else:
+        lengths = all_lengths
+        gcs = all_gcs
+    gc_mean, gc_median, gc_dev, gc_upper, gc_lower = weighted_mean_sd(gcs, lengths)
     stats = {'span': span,
              'count': count,
              'gc': [float("%.4f" % gc_mean),
-                    float("%.4f" % gc_dev),
+                    float("%.4f" % gc_median),
                     float("%.4f" % gc_lower),
                     float("%.4f" % gc_upper),
                     float("%.4f" % min(gcs)),
                     float("%.4f" % max(gcs))]
              }
     if covs:
-        cov_mean, cov_dev, cov_upper, cov_lower = weighted_mean_sd(covs, lengths, log=True)
+        cov_mean, cov_median, cov_dev, cov_upper, cov_lower = weighted_mean_sd(covs, lengths, log=True)
         stats.update({'cov': [float("%.4f" % cov_mean),
-                              float("%.4f" % cov_dev),
+                              float("%.4f" % cov_median),
                               float("%.4f" % cov_lower),
                               float("%.4f" % cov_upper),
                               float("%.4f" % min(covs)),
                               float("%.4f" % max(covs))]})
     n50 = span * 0.5
     n90 = span * 0.9
-    lengths.sort(reverse=True)
+    all_lengths.sort(reverse=True)
     nlength = 0
     ncount = 0
-    for length in lengths:
+    for length in all_lengths:
         ncount += 1
         nlength += length
         if 'n50' not in stats and nlength > n50:
@@ -321,7 +347,7 @@ def length_stats(lengths, gcs, covs):
         if 'n90' not in stats and nlength > n90:
             stats.update({'n90': length, 'l90': ncount})
     if 'n50' not in stats:
-        stats.update({'n50': lengths[-1], 'l50': ncount})
+        stats.update({'n50': all_lengths[-1], 'l50': ncount})
     if 'n90' not in stats:
-        stats.update({'n90': lengths[-1], 'l90': ncount})
+        stats.update({'n90': all_lengths[-1], 'l90': ncount})
     return stats
