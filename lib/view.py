@@ -136,10 +136,10 @@ def main():
                     file_ready(file_name)
                 except Exception as err:
                     print(err)
-        driver.close()
+        driver.quit()
     except Exception as err:
         print(err)
-        driver.close()
+        driver.quit()
 
 
 if __name__ == '__main__':
