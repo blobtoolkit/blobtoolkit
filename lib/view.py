@@ -137,9 +137,11 @@ def main():
                 except Exception as err:
                     print(err)
         driver.quit()
+        display.popen.terminate()
     except Exception as err:
         print(err)
         driver.quit()
+        display.popen.terminate()
 
 
 if __name__ == '__main__':
