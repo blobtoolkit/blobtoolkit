@@ -315,6 +315,8 @@ def main():
                 nohit_span = summary_stats['hits']['no-hit']['span']
                 span = summary_stats['hits']['total']['span']
                 stats.update({'noHit': float("%.3f" % (nohit_span / span))})
+            else:
+                stats.update({'noHit': 0})
             if 'taxonomy' in summary_stats and 'target' in summary_stats['taxonomy']:
                 if summary_stats['taxonomy']['target'] in summary_stats['hits']:
                     target_span = summary_stats['hits'][summary_stats['taxonomy']['target']]['span']
@@ -323,6 +325,8 @@ def main():
                     target_span = summary_stats['hits']['target']['span']
                     stats.update({'target': float("%.3f" % (target_span / (span - nohit_span)))})
                     del summary_stats['hits']['target']
+                else:
+                    stats.update({'target': 0})
             ratio = summary_stats['hits']['total']['span'] / summary_stats['hits']['total']['n50']
             if ratio >= 100:
                 ratio = int(float('%.3g' % ratio))
