@@ -234,6 +234,7 @@ def parent():
 
 def summarise(indices, fields, **kwargs):
     """Summarise assembly sequence stats."""
+    taxonomy = kwargs['stats']['taxonomy']
     summary = {}
     lengths = [fields['length'].values[i] for i in indices]
     gcs = [fields['gc'].values[i] for i in indices]
@@ -256,6 +257,8 @@ def summarise(indices, fields, **kwargs):
             other += lengths
             other_gcs += gcs
             other_covs += covs
+            if 'target' in taxonomy and taxon == taxonomy['target']:
+                summary.update({'target': length_stats(lengths, gcs, covs)})
         else:
             summary.update({taxon: length_stats(lengths, gcs, covs)})
         index += 1

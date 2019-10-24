@@ -53,9 +53,9 @@ from fetch import fetch_field, fetch_metadata
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--fastq', 'module': cov, 'depends': ['identifiers'], 'requires': ['--cov']}]
 
-SUMMARY = [{'title': 'baseComposition', 'module': fasta, 'depends': ['gc', 'ncount', 'length']},
+SUMMARY = [{'title': 'taxonomy', 'module': taxid, 'depends': []},
+           {'title': 'baseComposition', 'module': fasta, 'depends': ['gc', 'ncount', 'length']},
            {'title': 'hits', 'module': hits, 'depends': ['length', 'gc']},
-           {'title': 'taxonomy', 'module': taxid, 'depends': []},
            {'title': 'busco', 'module': busco, 'depends': []},
            {'title': 'readMapping', 'module': cov, 'depends': ['length']}]
 
@@ -307,7 +307,7 @@ def main():
                         fields.update({"%s_cov" % library: fetch_field(args['DATASET'], "%s_cov" % library, meta)})
                         fields.update({field: fetch_field(args['DATASET'], field, meta)})
                 fields.update({'libraries': libraries})
-            summary_stats.update({section['title']: section['module'].summarise(indices, fields, **args, meta=meta)})
+            summary_stats.update({section['title']: section['module'].summarise(indices, fields, **args, meta=meta, stats=summary_stats)})
         stats = {}
         if 'hits' in summary_stats:
             nohit_span = 0
@@ -319,6 +319,10 @@ def main():
                 if summary_stats['taxonomy']['target'] in summary_stats['hits']:
                     target_span = summary_stats['hits'][summary_stats['taxonomy']['target']]['span']
                     stats.update({'target': float("%.3f" % (target_span / (span - nohit_span)))})
+                elif 'target' in summary_stats['hits']:
+                    target_span = summary_stats['hits']['target']['span']
+                    stats.update({'target': float("%.3f" % (target_span / (span - nohit_span)))})
+                    del summary_stats['hits']['target']
             ratio = summary_stats['hits']['total']['span'] / summary_stats['hits']['total']['n50']
             if ratio >= 100:
                 ratio = int(float('%.3g' % ratio))
