@@ -6,9 +6,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/blobtoolkit/blobtools2/badge.svg?branch=master)](https://coveralls.io/github/blobtoolkit/blobtools2?branch=master)
 [![DOI](https://zenodo.org/badge/150091036.svg)](https://zenodo.org/badge/latestdoi/150091036)
 
-
 A new implementation of [BlobTools](https://github.com/DRL/blobtools) with support for interactive data exploration via the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer).
 
+More information and tutorials are available at [blobtoolkit.genomehubs.org/blobtools2/](https://blobtoolkit.genomehubs.org/blobtools2/)
 
 ## About
 
@@ -27,9 +27,10 @@ These install instructions assume a Unix/Linux system with standard development 
 
 1. Create and activate a Conda environment
 ```
-conda create -n blobtools2 -y python=3.6 docopt pyyaml ujson tqdm nodejs seqtk
+conda create -n blobtools2 -y python=3.6 docopt pyyaml ujson tqdm nodejs
 conda activate blobtools2
-conda install -c conda-forge geckodriver selenium pysam
+conda install -c conda-forge -c bioconda -y geckodriver selenium pyvirtualdisplay pysam seqtk
+sudo apt-get install xvfb
 ```
 
 2. Download and extract the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) taxdump:
