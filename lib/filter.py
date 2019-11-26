@@ -311,9 +311,9 @@ def main():
         stats = {}
         if 'hits' in summary_stats:
             nohit_span = 0
+            span = summary_stats['hits']['total']['span']
             if 'no-hit' in summary_stats['hits']:
                 nohit_span = summary_stats['hits']['no-hit']['span']
-                span = summary_stats['hits']['total']['span']
                 stats.update({'noHit': float("%.3f" % (nohit_span / span))})
             else:
                 stats.update({'noHit': 0})
