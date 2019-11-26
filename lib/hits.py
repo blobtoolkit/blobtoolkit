@@ -249,6 +249,7 @@ def summarise(indices, fields, **kwargs):
     other_covs = []
     for key in sorted(counts.items(), key=lambda x: x[1], reverse=True):
         taxon = key[0]
+        print(taxon)
         subset = [i for i, j in enumerate(hits) if j == taxon]
         lengths = [fields['length'].values[indices[i]] for i in subset]
         gcs = [fields['gc'].values[indices[i]] for i in subset]
@@ -319,16 +320,16 @@ def length_stats(all_lengths, all_gcs, all_covs):
     else:
         lengths = all_lengths
         gcs = all_gcs
-    gc_mean, gc_median, gc_dev, gc_upper, gc_lower = weighted_mean_sd(gcs, lengths)
     stats = {'span': span,
-             'count': count,
-             'gc': [float("%.4f" % gc_mean),
-                    float("%.4f" % gc_median),
-                    float("%.4f" % gc_lower),
-                    float("%.4f" % gc_upper),
-                    float("%.4f" % min(gcs)),
-                    float("%.4f" % max(gcs))]
-             }
+             'count': count}
+    if gcs:
+        gc_mean, gc_median, gc_dev, gc_upper, gc_lower = weighted_mean_sd(gcs, lengths)
+        stats.update({'gc': [float("%.4f" % gc_mean),
+                             float("%.4f" % gc_median),
+                             float("%.4f" % gc_lower),
+                             float("%.4f" % gc_upper),
+                             float("%.4f" % min(gcs)),
+                             float("%.4f" % max(gcs))]})
     if covs:
         cov_mean, cov_median, cov_dev, cov_upper, cov_lower = weighted_mean_sd(covs, lengths, log=True)
         stats.update({'cov': [float("%.4f" % cov_mean),
