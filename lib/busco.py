@@ -93,7 +93,7 @@ def busco_score(values, total):
     return scores
 
 
-def summarise(indices, fields, **kwargs):
+def summarise(indices, fields, **kwargs):  # pylint: disable=unused-argument
     """Summarise BUSCOs."""
     summary = {}
     for lineage in fields['lineages']:

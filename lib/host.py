@@ -39,6 +39,8 @@ def test_port(port, service):
         try:
             skt.bind(('', port))
         except OSError:
+            if service == 'test':
+                return False
             print("ERROR: Port %d already in use, unable to host %s." % (port, service))
             print("       Use: `lsof -nP -iTCP:%d | grep LISTEN` to find the associated process." % port)
             print("       It may take ~30s for this port to become available when restarting %s." % service)

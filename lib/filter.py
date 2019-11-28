@@ -307,7 +307,11 @@ def main():
                         fields.update({"%s_cov" % library: fetch_field(args['DATASET'], "%s_cov" % library, meta)})
                         fields.update({field: fetch_field(args['DATASET'], field, meta)})
                 fields.update({'libraries': libraries})
-            summary_stats.update({section['title']: section['module'].summarise(indices, fields, **args, meta=meta, stats=summary_stats)})
+            summary_stats.update({section['title']: section['module'].summarise(indices,
+                                                                                fields,
+                                                                                **args,
+                                                                                meta=meta,
+                                                                                stats=summary_stats)})
         stats = {}
         if 'hits' in summary_stats:
             nohit_span = 0
