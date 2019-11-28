@@ -6,18 +6,20 @@
 Generate plots using BlobToolKit Viewer.
 
 Usage:
-  blobtools view [--format STRING...] [--host STRING] [--out PATH]
+  blobtools view [--format STRING...] [--host STRING] [--interactive] [--out PATH]
   [--param STRING...] [--ports RANGE] [--prefix STRING] [--preview STRING...]
-  [--timeout INT] [--view STRING...] DATASET
+  [--remote] [--timeout INT] [--view STRING...] DATASET
 
 Options:
       --format STRING     Image format (svg|png). [Default: png]
       --host STRING       Hostname. [Default: http://localhost]
-      --ports RANGE       Port range for viewer and API. [Default: 8000-8099]
+      --interactive       Start interactive session (opens dataset in Firefox). [Default: False]
       --out PATH          Directory for outfiles. [Default: .]
       --param key=value   Query string parameter.
+      --ports RANGE       Port range for viewer and API. [Default: 8000-8099]
       --prefix STRING     URL prefix. [Default: view]
       --preview STRING    Field name.
+      --remote            Start viewer for remote session. [Default: False]
       --timeout INT       Time to wait for page load in seconds. Default (0) is no timeout. [Default: 0]
       --view STRING       Plot type (blob|cumulative|snail). [Default: blob]
 """
@@ -33,6 +35,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from pyvirtualdisplay import Display
+from tqdm import tqdm
 from host import test_port
 
 
@@ -78,7 +81,6 @@ def test_loc(args):
             if not port:
                 port = i
             break
-    print("api: %d, viewer: %d" % (api_port, port))
     directory = Path(__file__).resolve().parent.parent
     cmd = "%s/blobtools host --port %d --api-port %d %s" % (directory, port, api_port, parent)
     process = Popen(shlex.split(cmd),
@@ -86,8 +88,11 @@ def test_loc(args):
                     stderr=PIPE,
                     encoding='ascii')
     loc = "%s:%d/%s/dataset/%s" % (args['--host'], port, args['--prefix'], dataset)
-    print("Waiting 15 seconds for Viewer to start...")
-    for i in range(1, 15):
+    for i in tqdm(range(0, 15),
+                  unit='s',
+                  ncols=75,
+                  desc='Initializing viewer',
+                  bar_format="{desc} |{bar}| {n_fmt}/{total_fmt} seconds"):
         poll = process.poll()
         if poll is None:
             time.sleep(1)
@@ -95,114 +100,187 @@ def test_loc(args):
             print("ERROR: Viewer quit unexpectedly")
             print("Unable to run: %s" % cmd)
             exit(1)
-    return loc, process
+    return loc, process, port, api_port
 
 
-def main():
-    """Entrypoint for blobtools view."""
-    args = docopt(__doc__)
-    loc, viewer = test_loc(args)
-    try:  # pylint: disable=too-many-nested-blocks
-        qstr = "staticThreshold=Infinity"
-        qstr += "&nohitThreshold=Infinity"
-        qstr += "&plotGraphics=svg"
-        if args['--format'] == 'svg':
-            qstr += "&svgThreshold=Infinity"
-        shape = 'square'
-        for param in args['--param']:
-            qstr += "&%s" % str(param)
-            key, value = param.split('=')
-            if key == 'plotShape':
-                shape = value
+def firefox_driver(args):
+    """Start firefox."""
+    outdir = os.path.abspath(args['--out'])
+    os.makedirs(Path(outdir), exist_ok=True)
 
-        timeout = int(args['--timeout'])
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference('browser.download.folderList', 2)
+    profile.set_preference('browser.download.manager.showWhenStarting', False)
+    profile.set_preference('browser.download.dir', outdir)
+    profile.set_preference('browser.download.lastDir', args['--out'])
+    profile.set_preference('browser.helperApps.neverAsk.saveToDisk',
+                           'image/png, image/svg+xml, text/csv, text/plain, application/json')
 
-        outdir = os.path.abspath(args['--out'])
-        os.makedirs(Path(outdir), exist_ok=True)
+    options = Options()
+    options.set_headless(headless=not args['--interactive'])
+    display = Display(visible=0, size=(800, 600))
+    display.start()
+    driver = webdriver.Firefox(options=options, firefox_profile=profile)
+    return driver, display
 
-        profile = webdriver.FirefoxProfile()
-        profile.set_preference('browser.download.folderList', 2)
-        profile.set_preference('browser.download.manager.showWhenStarting', False)
-        profile.set_preference('browser.download.dir', outdir)
-        profile.set_preference('browser.download.lastDir', args['--out'])
-        profile.set_preference('browser.helperApps.neverAsk.saveToDisk',
-                               'image/png, image/svg+xml, text/csv, text/plain, application/json')
 
-        options = Options()
-        options.set_headless(headless=True)
-        display = Display(visible=0, size=(800, 600))
-        display.start()
-        driver = webdriver.Firefox(options=options, firefox_profile=profile)
+def static_view(args, loc, viewer):
+    """Generate static images."""
+    qstr = "staticThreshold=Infinity"
+    qstr += "&nohitThreshold=Infinity"
+    qstr += "&plotGraphics=svg"
+    if args['--format'] == 'svg':
+        qstr += "&svgThreshold=Infinity"
+    shape = 'square'
+    for param in args['--param']:
+        qstr += "&%s" % str(param)
+        key, value = param.split('=')
+        if key == 'plotShape':
+            shape = value
+
+    timeout = int(args['--timeout'])
+    outdir = os.path.abspath(args['--out'])
+    driver, display = firefox_driver(args)
+    try:
+        view = args['--view'][0]
+        if args['--preview']:
+            qstr += '#Filters'
+        url = "%s/%s?%s" % (loc, view, qstr)
+        print("Loading %s" % url)
         try:
-            view = args['--view'][0]
-            if args['--preview']:
-                qstr += '#Filters'
-            url = "%s/%s?%s" % (loc, view, qstr)
-            print("Loading %s" % url)
-            try:
-                driver.get(url)
-            except Exception as err:
-                print(err)
+            driver.get(url)
+        except Exception as err:
+            print(err)
 
-            for next_view in args['--view']:
-                if next_view != view:
-                    view = next_view
-                    url = "%s/%s?%s" % (loc, view, qstr)
-                    print("Navigating to %s" % url)
-                    try:
-                        driver.get(url)
-                    except Exception as err:
-                        print(err)
-                for fmt in args['--format']:
-                    file = "%s.%s" % (args['DATASET'], view)
-                    if view == 'blob':
-                        file += ".%s" % shape
-                    elif view == 'busco':
-                        view = "all_%s" % view
-                        if fmt not in ('csv', 'json'):
-                            fmt = 'json'
-                    file += ".%s" % fmt
-                    print("Fetching %s" % file)
-                    el_id = "%s_save_%s" % (view, fmt)
-                    print("waiting for element %s" % el_id)
-                    unstable = True
-                    while unstable:
-                        try:
-                            element = WebDriverWait(driver, timeout).until(
-                                EC.visibility_of_element_located((By.ID, el_id))
-                            )
-                            element.click()
-                            unstable = False
-                            file_name = "%s/%s" % (outdir, file)
-                            print("waiting for file '%s'" % file_name)
-                            file_ready(file_name)
-                        except Exception as err:
-                            time.sleep(1)
-
-            for preview in args['--preview']:
-                print("Creating %s preview" % preview)
-                for fmt in args['--format']:
-                    el_id = "%s_preview_save_%s" % (preview, fmt)
-                    file = "%s.%s.preview.%s" % (args['DATASET'], preview, fmt)
+        for next_view in args['--view']:
+            if next_view != view:
+                view = next_view
+                url = "%s/%s?%s" % (loc, view, qstr)
+                print("Navigating to %s" % url)
+                try:
+                    driver.get(url)
+                except Exception as err:
+                    print(err)
+            for fmt in args['--format']:
+                file = "%s.%s" % (args['DATASET'], view)
+                if view == 'blob':
+                    file += ".%s" % shape
+                elif view == 'busco':
+                    view = "all_%s" % view
+                    if fmt not in ('csv', 'json'):
+                        fmt = 'json'
+                file += ".%s" % fmt
+                print("Fetching %s" % file)
+                el_id = "%s_save_%s" % (view, fmt)
+                print("waiting for element %s" % el_id)
+                unstable = True
+                while unstable:
                     try:
                         element = WebDriverWait(driver, timeout).until(
                             EC.visibility_of_element_located((By.ID, el_id))
                         )
                         element.click()
+                        unstable = False
                         file_name = "%s/%s" % (outdir, file)
                         print("waiting for file '%s'" % file_name)
                         file_ready(file_name)
                     except Exception as err:
-                        print(err)
-            driver.quit()
-            display.popen.terminate()
-            os.killpg(os.getpgid(viewer.pid), 15)
+                        time.sleep(1)
+
+        for preview in args['--preview']:
+            print("Creating %s preview" % preview)
+            for fmt in args['--format']:
+                el_id = "%s_preview_save_%s" % (preview, fmt)
+                file = "%s.%s.preview.%s" % (args['DATASET'], preview, fmt)
+                try:
+                    element = WebDriverWait(driver, timeout).until(
+                        EC.visibility_of_element_located((By.ID, el_id))
+                    )
+                    element.click()
+                    file_name = "%s/%s" % (outdir, file)
+                    print("waiting for file '%s'" % file_name)
+                    file_ready(file_name)
+                except Exception as err:
+                    print(err)
+        driver.quit()
+        display.popen.terminate()
+        os.killpg(os.getpgid(viewer.pid), 15)
+    except Exception as err:
+        print(err)
+        driver.quit()
+        display.popen.terminate()
+        os.killpg(os.getpgid(viewer.pid), 15)
+    return True
+
+
+def interactive_view(args, loc, viewer):
+    """View dataset in Firefox."""
+    driver, display = firefox_driver(args)
+    qstr = ''
+    for param in args['--param']:
+        qstr += "&%s" % str(param)
+    try:
+        view = args['--view'][0]
+        if args['--preview']:
+            qstr += '#Filters'
+        url = "%s/%s?%s" % (loc, view, qstr)
+        print("Loading %s" % url)
+        try:
+            driver.get(url)
         except Exception as err:
             print(err)
-            driver.quit()
-            display.popen.terminate()
-            os.killpg(os.getpgid(viewer.pid), 15)
+        poll = viewer.poll()
+        while poll is None:
+            time.sleep(5)
+            poll = viewer.poll()
+        driver.quit()
+        display.popen.terminate()
+        os.killpg(os.getpgid(viewer.pid), 15)
     except Exception as err:
+        print(err)
+        driver.quit()
+        display.popen.terminate()
+        os.killpg(os.getpgid(viewer.pid), 15)
+    return True
+
+
+def remote_view(args, loc, viewer, port, api_port):
+    """View dataset remotely."""
+    qstr = ''
+    for param in args['--param']:
+        qstr += "&%s" % str(param)
+    try:
+        view = args['--view'][0]
+        if args['--preview']:
+            qstr += '#Filters'
+        url = "%s/%s?%s" % (loc, view, qstr)
+        print("Open dataset at %s" % url)
+        print("For remote access use:")
+        print("    ssh -L %d:127.0.0.1:%d -L %d:127.0.0.1:%d username@remote_host" % (port,
+                                                                                      port,
+                                                                                      api_port,
+                                                                                      api_port))
+        while True:
+            time.sleep(5)
+        os.killpg(os.getpgid(viewer.pid), 15)
+    except Exception as err:
+        print(err)
+        os.killpg(os.getpgid(viewer.pid), 15)
+    return True
+
+
+def main():
+    """Entrypoint for blobtools view."""
+    args = docopt(__doc__)
+    loc, viewer, port, api_port = test_loc(args)
+    try:
+        if args['--interactive']:
+            interactive_view(args, loc, viewer)
+        elif args['--remote']:
+            remote_view(args, loc, viewer, port, api_port)
+        else:
+            static_view(args, loc, viewer)
+    except Exception:
         os.killpg(os.getpgid(viewer.pid), 15)
 
 

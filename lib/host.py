@@ -125,6 +125,7 @@ def main():
     ready = False
     url = "http://%s:%d" % (args['--hostname'], int(args['--port']))
     while True:
+        time.sleep(1)
         if api.poll() is not None:
             for line in api.stderr.readlines():
                 print(line.strip())
@@ -147,7 +148,7 @@ def main():
         elif not ready:
             print("Visit %s to use the interactive BlobToolKit Viewer." % url)
             ready = True
-        time.sleep(2)
+        time.sleep(1)
 
 
 if __name__ == '__main__':
