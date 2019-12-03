@@ -249,7 +249,6 @@ def summarise(indices, fields, **kwargs):
     other_covs = []
     for key in sorted(counts.items(), key=lambda x: x[1], reverse=True):
         taxon = key[0]
-        print(taxon)
         subset = [i for i, j in enumerate(hits) if j == taxon]
         lengths = [fields['length'].values[indices[i]] for i in subset]
         gcs = [fields['gc'].values[indices[i]] for i in subset]
