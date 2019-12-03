@@ -51,11 +51,14 @@ def file_ready(file_path):
 def test_loc(args):
     """See if dataset needs to be hosted and, if so, find an empty port."""
     info = args['--host'].split(':')
+    dataset = Path(args['DATASET']).name
     if len(info) >= 2 and info[1] != '//localhost':
-        return "%s/%s/dataset/%s" % (args['--host'], args['--prefix'], args['DATASET'])
+        loc = "%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset)
+        return loc, None, None, None
     if len(info) == 1 and info[0] != 'localhost':
         # need to add test for http vs https
-        return "http://%s/%s/dataset/%s" % (args['--host'], args['--prefix'], args['DATASET'])
+        loc = "http://%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset)
+        return loc, None, None, None
     if len(info) == 3:
         port = info[2]
         available = test_port(port, 'test')
@@ -64,7 +67,8 @@ def test_loc(args):
             print("       Unable to connect to %s" % args['--host'])
             exit(1)
         else:
-            return "%s/%s/dataset/%s" % (args['--host'], args['--prefix'], args['DATASET'])
+            loc = "%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset)
+            return loc, None, None, None
     if not Path(args['DATASET']).exists():
         print("ERROR: DATASET '%s' must be a valid path to begin hosting.")
         exit(1)
@@ -86,7 +90,8 @@ def test_loc(args):
     process = Popen(shlex.split(cmd),
                     stdout=PIPE,
                     stderr=PIPE,
-                    encoding='ascii')
+                    encoding='ascii',
+                    preexec_fn=os.setsid)
     loc = "%s:%d/%s/dataset/%s" % (args['--host'], port, args['--prefix'], dataset)
     for i in tqdm(range(0, 15),
                   unit='s',
@@ -97,6 +102,8 @@ def test_loc(args):
         if poll is None:
             time.sleep(1)
         else:
+            print(process.stdout.read())
+            print(process.stderr.read())
             print("ERROR: Viewer quit unexpectedly")
             print("Unable to run: %s" % cmd)
             exit(1)
@@ -117,7 +124,8 @@ def firefox_driver(args):
                            'image/png, image/svg+xml, text/csv, text/plain, application/json')
 
     options = Options()
-    options.set_headless(headless=not args['--interactive'])
+    # options.set_headless(headless=not args['--interactive'])
+    options.set_headless(headless=False)
     display = Display(visible=0, size=(800, 600))
     display.start()
     driver = webdriver.Firefox(options=options, firefox_profile=profile)
@@ -204,12 +212,14 @@ def static_view(args, loc, viewer):
                     print(err)
         driver.quit()
         display.popen.terminate()
-        os.killpg(os.getpgid(viewer.pid), 15)
+        if viewer is not None:
+            os.killpg(os.getpgid(viewer.pid), 15)
     except Exception as err:
         print(err)
         driver.quit()
         display.popen.terminate()
-        os.killpg(os.getpgid(viewer.pid), 15)
+        if viewer is not None:
+            os.killpg(os.getpgid(viewer.pid), 15)
     return True
 
 
@@ -280,7 +290,8 @@ def main():
             remote_view(args, loc, viewer, port, api_port)
         else:
             static_view(args, loc, viewer)
-    except Exception:
+    except Exception as err:
+        print(err)
         os.killpg(os.getpgid(viewer.pid), 15)
 
 
