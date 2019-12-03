@@ -15,6 +15,8 @@ docstrings.
 import gzip
 import pathlib
 import sys
+import io
+import csv
 from itertools import groupby
 from subprocess import Popen, PIPE
 import yaml
@@ -90,7 +92,7 @@ def load_yaml(filename):
     return content
 
 
-def write_file(filename, data):
+def write_file(filename, data):  # pylint: disable=too-many-branches
     """
     Write a file, use suffix to determine type and compression.
 
@@ -109,6 +111,15 @@ def write_file(filename, data):
     elif filename == 'STDOUT':
         sys.stderr.write(ujson.dumps(data, indent=1, escape_forward_slashes=False)+'\n')
         return True
+    elif '.csv' in filename or '.tsv' in filename:
+        output = io.StringIO()
+        if '.csv' in filename:
+            writer = csv.writer(output, quoting=csv.QUOTE_NONNUMERIC)
+        else:
+            writer = csv.writer(output, delimiter='\t')
+        for row in data:
+            writer.writerow(row)
+        content = output.getvalue()
     else:
         content = data
     if '.gz' in filename:
