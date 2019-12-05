@@ -85,14 +85,26 @@ wget "ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/nt_v5.??.tar.gz" -P nt_v5/ && \
 4. Download and format the UniProt reference_proteomes as a diamond database:
 ```
 mkdir -p uniprot
+
+# fetch latest reference proteome database
+wget -q -O uniprot/reference_proteomes.tar.gz \
+  ftp.ebi.ac.uk/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/$(curl \
+    -vs ftp.ebi.ac.uk/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/ 2>&1 | \
+    awk '/tar.gz/ {print $9}')
+
 cd uniprot
 
+tar xf reference_proteomes.tar.gz
+
+# extract and concatenate protein FASTA files
 touch reference_proteomes.fasta.gz
 find . -mindepth 2 | grep "fasta.gz" | grep -v 'DNA' | grep -v 'additional' | xargs cat >> reference_proteomes.fasta.gz
 
+# extract and concatenate taxid mapping files
 echo "accession\taccession.version\ttaxid\tgi" > reference_proteomes.taxid_map
 zcat */*.idmapping.gz | grep "NCBI_TaxID" | awk '{print $1 "\t" $1 "\t" $3 "\t" 0}' >> reference_proteomes.taxid_map
 
+# make diamond blast db with taxonomic information included
 diamond makedb -p 16 --in reference_proteomes.fasta.gz --taxonmap reference_proteomes.taxid_map --taxonnodes ../taxdump/nodes.dmp -d reference_proteomes.dmnd
 
 cd -
