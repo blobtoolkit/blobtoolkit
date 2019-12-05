@@ -14,39 +14,36 @@ More information and tutorials are available at [blobtoolkit.genomehubs.org/blob
 
 Similar to [BlobTools v1](https://github.com/DRL/blobtools), **BlobTools2** is a command line tool designed to aid genome assembly QC and contaminant/cobiont detection and filtering. In addition to supporting interactive visualisation, a motivation for this reimplementation was to provide greater flexibility to include new types of information, such as [BUSCO](https://busco.ezlab.org) results and [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) hit distributions.
 
-**BlobTools2** supports command-line filtering of datasets, assembly files and read files based on values or categories assigned to assembly contigs/scaffolds through the `blobtools filter` command. Interactive filters and selections made using the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer) can be reproduced on the command line and used to generate new, filtered datasets which retain all fields from the original dataset.
+**BlobTools2** supports command-line filtering of datasets, assembly files and read files based on values or categories assigned to assembly contigs/scaffolds through the `blobtools filter` command. Interactive filters and selections made using the [BlobToolKit Viewer](https://github.com/blobtoolkit/viewer) can be reproduced on the command line and used to generate new, filtered datasets which retain all fields from the original dataset.
 
 **BlobTools2** is built around a file-based data structure, with data for each field contained in a separate `JSON` file within a directory (`BlobDir`) containing a single `meta.json` file with metadata for each field and the dataset as a whole. Additional fields can be added to an existing `BlobDir` using the `blobtools add` command, which parses an input to generate one or more additional `JSON` files and updates the dataset metadata. Fields are treated as generic datatypes, `Variable` (e.g. gc content, length and coverage), `Category` (e.g. taxonomic assignment based on BLAST hits) alongside `Array` and `MultiArray` datatypes to store information such as start, end, [NCBI](https://www.ncbi.nlm.nih.gov) taxid and bitscore for a set of blast hits to a single sequence. Support for new analyses can be added to **BlobTools2** by creating a new python module with an appropriate `parse` function.
 
-To learn more about the BlobTools approach, take a look at the papers by [Laetsch DR and Blaxter ML, 2017](https://f1000research.com/articles/6-1287/v1) and [Kumar et al., 2013](https://dx.doi.org/10.3389%2Ffgene.2013.00237). **BlobTools2** is intended to to become a more flexible replacement for [BlobTools v1](https://github.com/DRL/blobtools) but not all of the functionality has been added yet. If you need functions that are not yet ready in **BlobTools2**, please continue to use (and cite!) Dom Laetsch's [previous version](https://github.com/DRL/blobtools) and submit a feature request on the [issue tracker](https://github.com/blobtoolkit/blobtools2/issues) if you'd like to see it added.
+BlobToolKit is described in our [bioRxiv preprint](https://www.biorxiv.org/content/10.1101/844852v1):
+
+> BlobToolKit – Interactive quality assessment of genome assemblies
+> Richard Challis, Edward Richards, Jeena Rajan, Guy Cochrane, Mark Blaxter
+> bioRxiv 844852; doi: https://doi.org/10.1101/844852
+
+To learn more about the development of the BlobTools approach, take a look at the papers by [Laetsch DR and Blaxter ML, 2017](https://f1000research.com/articles/6-1287/v1) and [Kumar et al., 2013](https://dx.doi.org/10.3389%2Ffgene.2013.00237).
 
 
 ## Installing
 
-These install instructions assume a Unix/Linux system with standard development tools and [Conda](https://conda.io/docs/user-guide/install/index.html) installed. Installing the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer) as described below also requires `libpng-dev`.
+These install instructions assume a Unix/Linux system with standard development tools and [Conda](https://conda.io/docs/user-guide/install/index.html) installed. Installing the [BlobToolKit Viewer](https://github.com/blobtoolkit/viewer) as described below also requires `libpng-dev`.
 
 1. Create and activate a Conda environment
 ```
 conda create -n blobtools2 -y python=3.6 docopt pyyaml ujson tqdm nodejs
 conda activate blobtools2
-conda install -c conda-forge -c bioconda -y geckodriver selenium pyvirtualdisplay pysam seqtk
-sudo apt-get install xvfb
+conda install -c bioconda -y pysam seqtk
 ```
 
-2. Download and extract the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) taxdump:
-```
-mkdir -p taxdump
-cd taxdump
-curl -L ftp://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz | tar xzf -
-cd ..
-```
-
-3. Clone this repository:
+2. Clone this repository:
 ```
 git clone https://github.com/blobtoolkit/blobtools2
 ```
 
-4. Clone and install the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer):
+3. Clone and install the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer):
 ```
 git clone https://github.com/blobtoolkit/viewer
 cd viewer
@@ -54,6 +51,59 @@ npm install
 cd ..
 ```
 
+4. Analysed datasets can be viewed interactively in any web browser. Programmatic access to the Viewer via the `blobtools view` command requires additional dependencies:
+```
+conda install -c conda-forge -y geckodriver selenium pyvirtualdisplay
+sudo apt-get install firefox xvfb
+```
+
+## Additional dependencies
+When run as part of the [blobtoolkit/insdc-pipeline](https://github.com/blobtoolkit/insdc-pipeline), all databases and dependencies to run analyses required to generate input files are fetched automatically. To run analyses independently, the following software/databases should also be installed.
+
+1. Additional software used in analyses:
+```
+conda install -c bioconda -y blast=2.9 busco diamond minimap2
+```
+
+2. Download and extract the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) new_taxdump:
+```
+mkdir -p taxdump
+cd taxdump
+curl -L ftp://ftp.ncbi.nih.gov/pub/taxonomy/new_taxdump/new_taxdump.tar.gz | tar xzf -
+cd -
+```
+
+3. Download the NCBI nucleotide database, version 5:
+```
+mkdir -p nt_v5
+wget "ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/nt_v5.??.tar.gz" -P nt_v5/ && \
+        for file in nt_v5/*.tar.gz; \
+            do tar xf $file -C nt_v5 && rm $file; \
+        done
+```
+
+4. Download and format the UniProt reference_proteomes as a diamond database:
+```
+mkdir -p uniprot
+cd uniprot
+
+touch reference_proteomes.fasta.gz
+find . -mindepth 2 | grep "fasta.gz" | grep -v 'DNA' | grep -v 'additional' | xargs cat >> reference_proteomes.fasta.gz
+
+echo "accession\taccession.version\ttaxid\tgi" > reference_proteomes.taxid_map
+zcat */*.idmapping.gz | grep "NCBI_TaxID" | awk '{print $1 "\t" $1 "\t" $3 "\t" 0}' >> reference_proteomes.taxid_map
+
+diamond makedb -p 16 --in reference_proteomes.fasta.gz --taxonmap reference_proteomes.taxid_map --taxonnodes ../taxdump/nodes.dmp -d reference_proteomes.dmnd
+
+cd -
+```
+
+5. Download any BUSCO lineages that you wish to use:
+```
+mkdir -p busco
+wget -q -O eukaryota_odb9.gz "https://busco.ezlab.org/datasets/eukaryota_odb9.tar.gz" \
+        && tar xf eukaryota_odb9.gz -C busco
+```
 
 ## Examples
 
@@ -109,6 +159,34 @@ Sequence similarity search results are used to assign taxonomy based on [BlobToo
 ```
 ./blobtools add --hits examples/blast.out --hits examples/diamond.out --taxdump ../taxdump --taxrule bestsumorder tmp/dataset_2
 ```
+
+Similarity search outputs must be in tabular format, as generated by the following commands:
+
+BLAST
+```
+blastn \
+ -query assembly.fasta \
+ -db nt_v5 \
+ -outfmt "6 qseqid staxids bitscore std" \
+ -max_target_seqs 10 \
+ -max_hsps 1 \
+ -evalue 1e-25 \
+ --num_threads 16
+```
+
+Diamond
+```
+diamond blastx \
+ --query assembly.fasta \
+ --db reference_proteomes.dmnd \
+ --outfmt 6 qseqid staxids bitscore qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore \
+ --sensitive \
+ --max-target-seqs 1 \
+ --evalue 1e-25 \
+ --threads 16
+```
+
+Running These searches using the [blobtoolkit/insdc-pipeline](https://github.com/blobtoolkit/insdc-pipeline) has advantages as long sequences are broken into chunks before running BLAST to avoid taxonomic inference of long scaffolds being based on a small region of high similarity. Closely related taxa can be automatically filtered out of both Diamond and BLAST databases prior to searching to avoid all hits matching existing records that may share sources of non-target DNA.
 
 #### BUSCO results
 
