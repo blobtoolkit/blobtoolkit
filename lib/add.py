@@ -9,8 +9,9 @@ Usage:
     blobtools add [--busco TSV...] [--cov BAM...]  [--hits TSV...]  [--fasta FASTA]
                   [--key path=value...] [--link path=url...] [--taxid INT] [--skip-link-test]
                   [--blobdb JSON] [--meta YAML] [--synonyms TSV...] [--trnascan TSV...]
-                  [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder]
-                  [--threads INT] [--pileup-args key=value...] [--create] [--replace] DIRECTORY
+                  [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder[=prefix]]
+                  [--threads INT] [--evalue NUMBER] [--bitscore NUMBER] [--hit-count INT]
+                  [--pileup-args key=value...] [--create] [--replace] DIRECTORY
 
 Arguments:
     DIRECTORY             Existing Blob directory.
@@ -28,9 +29,13 @@ Options:
     --blobdb JSON         Blobtools v1 blobDB.
     --synonyms TSV        TSV file containing current identifiers and synonyms.
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
-    --taxrule bestsum|bestsumorder
-                          Rule to use when assigning BLAST hits to taxa. [Default: bestsumorder]
+    --taxrule bestsum|bestsumorder[=prefix]
+                          Rule to use when assigning BLAST hits to taxa.
+                          An alternate prefix may be specified. [Default: bestsumorder]
     --threads INT         Number of threads to use for multithreaded tasks. [Default: 1]
+    --evalue FLOAT        Set evalue cutoff when parsing hits file. [Default: 1]
+    --bitscore FLOAT      Set bitscore cutoff when parsing hits file. [Default: 1]
+    --hit-count INT       Number of hits to parse when inferring taxonomy. [Default: 10]
     --trnascan TSV        tRNAscan2-SE output
     --pileup-args key=val Key/value pairs to pass to samtools pileup.
     --create              Create a new BlobDir.
@@ -64,7 +69,7 @@ FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
           {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
           {'flag': '--synonyms', 'module': synonyms, 'depends': ['identifiers']}]
-PARAMS = set(['--taxrule', '--threads', '--pileup-args'])
+PARAMS = set(['--taxrule', '--threads', '--pileup-args', '--evalue', '--bitscore', '--hit-count'])
 
 
 def has_field_warning(meta, field_id):

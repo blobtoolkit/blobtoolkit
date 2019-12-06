@@ -10,23 +10,28 @@ import file_io
 from field import Category, MultiArray, Variable
 
 
-def parse_blast(blast_file, results=None, index=0):
+def parse_blast(blast_file, results=None, index=0, evalue=1, bitscore=1):
     """Parse file into dict of lists."""
     if results is None:
         results = defaultdict(list)
     for line in file_io.stream_file(blast_file):
         row = line.rstrip().split('\t')
+        score = float(row[2])
+        if score < bitscore:
+            continue
+        if evalue < float(row[13]):
+            continue
         seq_id, *offset = row[0].split('_-_')
         offset = int(offset[0]) if offset else 0
         try:
             hit = {'subject': row[4],
-                   'score': float(row[2]),
+                   'score': score,
                    'start': int(row[9])+offset,
                    'end': int(row[10])+offset,
                    'file': index}
         except IndexError:
             hit = {'subject': row[3],
-                   'score': float(row[2]),
+                   'score': score,
                    'start': None,
                    'end': None,
                    'file': index}
@@ -38,12 +43,12 @@ def parse_blast(blast_file, results=None, index=0):
     return results
 
 
-def apply_taxrule(blast, taxdump, taxrule, identifiers, results=None):
+def apply_taxrule(blast, taxdump, taxrule, prefix, hit_count, identifiers, results=None):
     """Apply taxrule to parsed BLAST results."""
     if results is None:
         blank = [None] * len(identifiers.values)
         results = [
-            {'field_id': "%s_%s" % (taxrule, rank), 'values': blank[:], 'data': {
+            {'field_id': "%s_%s" % (prefix, rank), 'values': blank[:], 'data': {
                 'cindex': blank[:], 'score': blank[:], 'positions': blank[:],
                 'hits': blank[:]
             }}
@@ -83,7 +88,7 @@ def apply_taxrule(blast, taxdump, taxrule, identifiers, results=None):
                         values[index]['hits'][seq_id].append(
                             [category, hit['file']]
                         )
-                if len(values[index]['positions'][seq_id]) < 10:
+                if len(values[index]['positions'][seq_id]) <= hit_count:
                     cat_scores[category] += hit['score']
             top_cat = max(cat_scores, key=cat_scores.get)
             values[index]['category'][seq_id] = top_cat
@@ -199,23 +204,35 @@ def parse(files, **kwargs):
     blast = None
     fields = []
     identifiers = kwargs['dependencies']['identifiers']
-    if kwargs['--taxrule'] == 'bestsum':
+    try:
+        taxrule, prefix = kwargs['--taxrule'].split('=')
+    except ValueError:
+        taxrule = kwargs['--taxrule']
+        prefix = taxrule
+    if taxrule == 'bestsum':
         for index, file in enumerate(files):
-            blast = parse_blast(file, blast, index)
-        results = apply_taxrule(blast, kwargs['taxdump'], kwargs['--taxrule'], identifiers)
-        fields = create_fields(results, kwargs['--taxrule'], files)
-    elif kwargs['--taxrule'] == 'bestsumorder':
+            blast = parse_blast(file, blast, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
+        results = apply_taxrule(blast,
+                                kwargs['taxdump'],
+                                taxrule,
+                                prefix,
+                                int(kwargs['--hit-count']),
+                                identifiers)
+        fields = create_fields(results, prefix, files)
+    elif taxrule == 'bestsumorder':
         results = None
         for index, file in enumerate(files):
-            blast = parse_blast(file, None, index)
+            blast = parse_blast(file, None, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
             results = apply_taxrule(blast,
                                     kwargs['taxdump'],
-                                    kwargs['--taxrule'],
+                                    taxrule,
+                                    prefix,
+                                    int(kwargs['--hit-count']),
                                     identifiers,
                                     results)
-        fields = create_fields(results, kwargs['--taxrule'], files)
+        fields = create_fields(results, prefix, files)
     if 'cat' not in kwargs['meta'].plot:
-        kwargs['meta'].plot.update({'cat': "%s_phylum" % kwargs['--taxrule']})
+        kwargs['meta'].plot.update({'cat': "%s_phylum" % prefix})
     return fields
 
 
