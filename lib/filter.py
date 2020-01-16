@@ -257,8 +257,18 @@ def main():
                 continue
             field['module'].apply_filter(ids, args[field['flag']], **args)
     if args['--table']:
-        field_ids = args['--table-fields'].split(',')
+        full_field_ids = args['--table-fields'].split(',')
         expanded_ids = ['index', 'identifiers']
+        field_ids = []
+        alt_ids = {field_id: field_id for field_id in expanded_ids}
+        for full_id in full_field_ids:
+            try:
+                field_id, alt_id = full_id.split('=')
+                field_ids.append(field_id)
+                alt_ids[field_id] = alt_id
+            except ValueError:
+                field_ids.append(full_id)
+                alt_ids[full_id] = full_id
         fields = {'identifiers': fetch_field(args['DATASET'], 'identifiers', meta)}
         for field_id in field_ids:
             if field_id == 'plot':
@@ -269,7 +279,7 @@ def main():
             else:
                 expanded_ids.append(field_id)
                 fields[field_id] = fetch_field(args['DATASET'], field_id, meta)
-        table = [expanded_ids]
+        table = [[alt_ids[field_id] for field_id in expanded_ids]]
         for i in indices:
             record = []
             for field_id in expanded_ids:
