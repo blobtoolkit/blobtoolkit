@@ -92,7 +92,7 @@ def load_yaml(filename):
     return content
 
 
-def write_file(filename, data):  # pylint: disable=too-many-branches
+def write_file(filename, data, plain=False):  # pylint: disable=too-many-branches
     """
     Write a file, use suffix to determine type and compression.
 
@@ -111,6 +111,8 @@ def write_file(filename, data):  # pylint: disable=too-many-branches
     elif filename == 'STDOUT':
         sys.stderr.write(ujson.dumps(data, indent=1, escape_forward_slashes=False)+'\n')
         return True
+    elif plain:
+        content = '\n'.join(data)
     elif '.csv' in filename or '.tsv' in filename:
         output = io.StringIO()
         if '.csv' in filename:

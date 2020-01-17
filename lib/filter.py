@@ -11,7 +11,8 @@ Usage:
                      [--fasta FASTA] [--fastq FASTQ...] [--suffix STRING]
                      [--cov BAM] [--summary FILENAME] [--summary-rank RANK]
                      [--table FILENAME] [--table-fields STRING]
-                     [--taxdump DIRECTORY] [--taxrule STRING] DATASET
+                     [--taxdump DIRECTORY] [--taxrule STRING] [--text TXT] [--text-header]
+                     [--text-delimiter STRING] [--text-id-column INT] DATASET
 
 Arguments:
     DATASET                   Existing BlobDir dataset directory.
@@ -26,6 +27,10 @@ Options:
     --fasta FASTA             FASTA format assembly file to be filtered.
     --fastq FASTQ             FASTQ format read file to be filtered (requires --cov).
     --cov BAM                 BAM/SAM/CRAM read alignment file.
+    --text TXT                generic text file to be filtered.
+    --text-delimiter STRING   text file delimiter. [Default: whitespace]
+    --text-id-column INT      index of column containing identifiers (1-based). [Default: 1]
+    --text-header             Flag to indicate first row of text file contains field names. [Default: False]
     --suffix STRING           String to be added to filtered filename. [Default: filtered]
     --summary FILENAME        Generate a JSON-format summary of the filtered dataset.
     --summary-rank RANK       Taxonomic level for summary. [Default: phylum]
@@ -48,13 +53,18 @@ import cov
 import fasta
 import hits
 import taxid
+import text
 # from taxdump import Taxdump
 from field import Identifier, Variable, Category, MultiArray
 # from dataset import Metadata
 from fetch import fetch_field, fetch_metadata
 
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
-          {'flag': '--fastq', 'module': cov, 'depends': ['identifiers'], 'requires': ['--cov']}]
+          {'flag': '--fastq', 'module': cov, 'depends': ['identifiers'], 'requires': ['--cov']},
+          {'flag': '--text',
+           'module': text,
+           'depends': ['identifiers'],
+           'requires': ['--text-delimiter', '--text-header', '--text-id-column']}]
 
 SUMMARY = [{'title': 'taxonomy', 'module': taxid, 'depends': []},
            {'title': 'baseComposition', 'module': fasta, 'depends': ['gc', 'ncount', 'length']},
@@ -249,7 +259,7 @@ def main():
             requirements = True
             if field.get('requires'):
                 for flag in field['requires']:
-                    if not args[flag]:
+                    if flag not in args:
                         print("WARN: '%s' must be set to use option '%s'"
                               % (flag, field['flag']))
                         requirements = False

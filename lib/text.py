@@ -3,6 +3,7 @@
 
 import re
 import math
+import pathlib
 from collections import defaultdict
 import file_io
 from field import Variable, Category, Array, MultiArray
@@ -131,7 +132,7 @@ def rows_to_results(rows, id_rows, types, array, field_name):
     return results
 
 
-def results_to_fields(results, types, cols, headers, text_file, identifiers):
+def results_to_fields(results, types, cols, headers, text_file, delimiter, identifiers):
     """Convert results to fields."""
     fields = []
     field_types = {'Variable': Variable,
@@ -160,6 +161,7 @@ def results_to_fields(results, types, cols, headers, text_file, identifiers):
                 'active': False,
                 'file': text_file,
                 'id_column': id_column,
+                'delimiter': delimiter,
                 'datatype': array_type
                 },
             'parents': []
@@ -193,19 +195,21 @@ def results_to_fields(results, types, cols, headers, text_file, identifiers):
             kwargs.update({'type': types[key].lower()})
 
         if kwargs['type'] == 'variable':
-            values = []
+            vals = []
             is_float = False
             for ident in identifiers.values:
                 value = results[key][ident] if ident in results[key] else blank
-                values.append(value)
+                vals.append(value)
                 if kwargs['type'] == 'variable' and not is_float:
                     try:
                         int(value)
                     except ValueError:
                         is_float = True
             min_max = [math.inf, -math.inf]
-            for value in values:
+            values = []
+            for value in vals:
                 value = float(value) if is_float else int(value)
+                values.append(value)
                 min_max = [min(min_max[0], value), max(min_max[1], value)]
             kwargs['meta'].update({'range': min_max})
             if is_float:
@@ -238,19 +242,19 @@ def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
     data = file_io.read_file(text_file)
     lines = data.split('\n')
     if delimiter == 'whitespace':
-        delimiter = re.compile(r'\s+')
+        delimit = re.compile(r'\s+')
     else:
-        delimiter = re.compile(r"%s" % delimiter)
+        delimit = re.compile(r"%s" % delimiter)
     columns = columns.split(',')
     if header:
         header_row = lines.pop(0).replace('"', '')
         columns = parse_header_row(delimiter, header_row, columns)
-    cols, headers, types, width = map_fields(delimiter, lines[0].replace('"', ''), columns)
-    rows, id_rows, array, ids = parse_rows(delimiter, lines, width, no_array, cols, types, headers)
+    cols, headers, types, width = map_fields(delimit, lines[0].replace('"', ''), columns)
+    rows, id_rows, array, ids = parse_rows(delimit, lines, width, no_array, cols, types, headers)
     # if not identifiers.validate_list(list(ids)):
     #     exit('ERROR: contig names in the text file did not match dataset identifiers.')
     results = rows_to_results(rows, id_rows, types, array, field_name)
-    fields = results_to_fields(results, types, cols, headers, text_file, identifiers)
+    fields = results_to_fields(results, types, cols, headers, text_file, delimiter, identifiers)
     meta = {'file': text_file}
     return fields
     # results = defaultdict(list)
@@ -279,6 +283,35 @@ def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
     #                             parents=['children']
     #                             )
     # return trnascan_field
+
+
+def apply_filter(ids, text_file, **kwargs):
+    """Filter Text file."""
+    suffix = kwargs['--suffix']
+    path = pathlib.Path(text_file)
+    outfile = str(path.parent / (path.stem + '.' + suffix + path.suffix))
+    data = file_io.read_file(text_file)
+    lines = data.split('\n')
+    delimiter = kwargs['--text-delimiter']
+    if delimiter == 'whitespace':
+        delimit = re.compile(r'\s+')
+    else:
+        delimit = re.compile(r"%s" % delimiter)
+    id_col = int(kwargs['--text-id-column'])-1
+    output = []
+    if kwargs['--text-header']:
+        header_row = lines.pop(0)
+        header_row.rstrip()
+        output.append(header_row)
+    for line in lines:
+        line = line
+        row = re.split(delimit, line.replace('"', ''))
+        try:
+            if row[id_col] in ids:
+                output.append(line)
+        except IndexError:
+            output.append(line)
+    file_io.write_file(outfile, output, plain=True)
 
 
 def parse(files, **kwargs):
