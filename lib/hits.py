@@ -10,36 +10,42 @@ import file_io
 from field import Category, MultiArray, Variable
 
 
-def parse_blast(blast_file, results=None, index=0, evalue=1, bitscore=1):
+def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
     """Parse file into dict of lists."""
     if results is None:
         results = defaultdict(list)
     for line in file_io.stream_file(blast_file):
         row = line.rstrip().split('\t')
-        score = float(row[2])
+        score = float(row[cols['bitscore']])
         if score < bitscore:
             continue
-        if evalue < float(row[13]):
+        if evalue < float(row[cols['evalue']]):
             continue
-        seq_id, *offset = row[0].split('_-_')
+        seq_id, *offset = row[cols['qseqid']].split('_-_')
         offset = int(offset[0]) if offset else 0
         try:
-            hit = {'subject': row[4],
+            hit = {'subject': row[cols['sseqid']],
                    'score': score,
-                   'start': int(row[9])+offset,
-                   'end': int(row[10])+offset,
+                   'start': int(row[cols['sstart']])+offset,
+                   'end': int(row[cols['send']])+offset,
                    'file': index}
         except IndexError:
-            hit = {'subject': row[3],
+            hit = {'subject': row[cols['sseqid']],
                    'score': score,
                    'start': None,
                    'end': None,
                    'file': index}
         try:
-            hit.update({'taxid': int(row[1])})
+            taxid = row[cols['staxids']]
+            try:
+                taxid, *rest = taxid.split(';')
+            except ValueError:
+                pass
+            hit.update({'taxid': int(taxid)})
         except ValueError:
             hit.update({'taxid': 0})
         results[seq_id].append(hit)
+    print(results)
     return results
 
 
@@ -209,9 +215,17 @@ def parse(files, **kwargs):
     except ValueError:
         taxrule = kwargs['--taxrule']
         prefix = taxrule
+    cols = {}
+    columns = kwargs['--hits-cols'].split(',')
+    for column in columns:
+        try:
+            index, name = column.split('=')
+            cols[name] = int(index) - 1
+        except ValueError:
+            exit('ERROR: --hits-cols contains an invalid value.')
     if taxrule == 'bestsum':
         for index, file in enumerate(files):
-            blast = parse_blast(file, blast, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
+            blast = parse_blast(file, cols, blast, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
         results = apply_taxrule(blast,
                                 kwargs['taxdump'],
                                 taxrule,
@@ -222,7 +236,7 @@ def parse(files, **kwargs):
     elif taxrule == 'bestsumorder':
         results = None
         for index, file in enumerate(files):
-            blast = parse_blast(file, None, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
+            blast = parse_blast(file, cols, None, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
             results = apply_taxrule(blast,
                                     kwargs['taxdump'],
                                     taxrule,

@@ -6,7 +6,7 @@
 Add data to a BlobDir.
 
 Usage:
-    blobtools add [--busco TSV...] [--cov BAM...] [--hits TSV...] [--fasta FASTA]
+    blobtools add [--busco TSV...] [--cov BAM...] [--hits TSV...] [--fasta FASTA] [--hits-cols LIST]
                   [--key path=value...] [--link path=url...] [--taxid INT] [--skip-link-test]
                   [--blobdb JSON] [--meta YAML] [--synonyms TSV...] [--trnascan TSV...]
                   [--text TXT...] [--text-delimiter STRING] [--text-cols LIST] [--text-header]
@@ -22,6 +22,8 @@ Options:
     --cov BAM             BAM/SAM/CRAM read alignment file.
     --fasta FASTA         FASTA sequence file.
     --hits TSV            Tabular BLAST/Diamond output file.
+    --hits-cols LIST      Comma separated list of <column number>=<field name>.
+                          [Default: 1=qseqid,2=staxids,3=bitscore,5=sseqid,10=sstart,11=send,14=evalue]
     --taxid INT           Add ranks to metadata for a taxid.
     --key path=value      Set a metadata key to value.
     --link path=URL       Link to an external resource.
