@@ -44,6 +44,8 @@ Options:
                           Text file delimiter. [Default: whitespace]
     --text-cols LIST      Comma separated list of <column number>[=<field name>].
     --text-header         Flag to indicate first row of text file contains field names.
+    --text-no-array       Flag to prevent fields in files with duplicate identifiers being
+                          loaded as array fields.
     --trnascan TSV        tRNAscan2-SE output
     --pileup-args key=val Key/value pairs to pass to samtools pileup.
     --create              Create a new BlobDir.
