@@ -132,7 +132,7 @@ def apply_filter(ids, fastq_files, **kwargs):
 
 def parse_json_cov(json_file, **kwargs):
     """Parse coverage from JSON cov file."""
-    parts = bam_file.split('=')
+    parts = json_file.split('=')
     base_name = parts[1]
     data = load_yaml(parts[0])
     covs = []

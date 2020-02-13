@@ -86,7 +86,7 @@ def load_yaml(filename):
     if '.json' in filename:
         content = ujson.loads(data)
     elif '.yaml' in filename:
-        content = yaml.load(data)
+        content = yaml.full_load(data)
     else:
         content = data
     return content

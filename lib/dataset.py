@@ -49,6 +49,8 @@ class Metadata():
         for key, value in kwargs.items():
             if key == 'id':
                 key = 'dataset_id'
+            if key == 'assembly' and 'level' in value:
+                setattr(self, 'record_type', value['level'])
             setattr(self, key, value)
 
     def list_fields(self):
