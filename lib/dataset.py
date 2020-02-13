@@ -36,6 +36,7 @@ class Metadata():
         self.links = {}
         self.assembly = {}
         self.plot = {}
+        self.taxon = {}
         self.record_type = 'record'
         self.records = 0
         self.version = 1

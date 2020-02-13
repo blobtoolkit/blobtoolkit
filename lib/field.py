@@ -228,17 +228,20 @@ class Array(Field):
     def __init__(self, field_id, **kwargs):
         """Init Array class."""
         self.category_slot = None
-        exists = 'category_slot' in kwargs and kwargs['category_slot'] is not None
-        if exists and not kwargs.get('keys'):
+        if 'meta' not in kwargs:
+            kwargs['meta'] = {}
+        if 'category_slot' in kwargs:
+            self.category_slot = kwargs['category_slot']
+        if self.category_slot is not None and not kwargs.get('keys'):
             slot = kwargs['category_slot']
             cat_values = [value[slot] for value in kwargs['values']]
             keys = kwargs.get('fixed_keys', [])
             kwargs['keys'], values = self._collapse_values(cat_values, keys)
             for index, value in enumerate(kwargs['values']):
                 value[slot] = values[index]
+            kwargs['meta'].update({'category_slot': kwargs['category_slot']})
+        kwargs['meta'].update({'headers': kwargs['headers']})
         kwargs['type'] = 'array'
-        if 'meta' not in kwargs:
-            kwargs['meta'] = {}
         kwargs['meta']['type'] = kwargs['type']
         super().__init__(field_id, **kwargs)
 

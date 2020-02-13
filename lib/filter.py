@@ -11,7 +11,8 @@ Usage:
                      [--fasta FASTA] [--fastq FASTQ...] [--suffix STRING]
                      [--cov BAM] [--summary FILENAME] [--summary-rank RANK]
                      [--table FILENAME] [--table-fields STRING]
-                     [--taxdump DIRECTORY] [--taxrule STRING] DATASET
+                     [--taxdump DIRECTORY] [--taxrule STRING] [--text TXT] [--text-header]
+                     [--text-delimiter STRING] [--text-id-column INT] DATASET
 
 Arguments:
     DATASET                   Existing BlobDir dataset directory.
@@ -26,6 +27,10 @@ Options:
     --fasta FASTA             FASTA format assembly file to be filtered.
     --fastq FASTQ             FASTQ format read file to be filtered (requires --cov).
     --cov BAM                 BAM/SAM/CRAM read alignment file.
+    --text TXT                generic text file to be filtered.
+    --text-delimiter STRING   text file delimiter. [Default: whitespace]
+    --text-id-column INT      index of column containing identifiers (1-based). [Default: 1]
+    --text-header             Flag to indicate first row of text file contains field names. [Default: False]
     --suffix STRING           String to be added to filtered filename. [Default: filtered]
     --summary FILENAME        Generate a JSON-format summary of the filtered dataset.
     --summary-rank RANK       Taxonomic level for summary. [Default: phylum]
@@ -48,13 +53,18 @@ import cov
 import fasta
 import hits
 import taxid
+import text
 # from taxdump import Taxdump
 from field import Identifier, Variable, Category, MultiArray
 # from dataset import Metadata
 from fetch import fetch_field, fetch_metadata
 
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
-          {'flag': '--fastq', 'module': cov, 'depends': ['identifiers'], 'requires': ['--cov']}]
+          {'flag': '--fastq', 'module': cov, 'depends': ['identifiers'], 'requires': ['--cov']},
+          {'flag': '--text',
+           'module': text,
+           'depends': ['identifiers'],
+           'requires': ['--text-delimiter', '--text-header', '--text-id-column']}]
 
 SUMMARY = [{'title': 'taxonomy', 'module': taxid, 'depends': []},
            {'title': 'baseComposition', 'module': fasta, 'depends': ['gc', 'ncount', 'length']},
@@ -249,7 +259,7 @@ def main():
             requirements = True
             if field.get('requires'):
                 for flag in field['requires']:
-                    if not args[flag]:
+                    if flag not in args:
                         print("WARN: '%s' must be set to use option '%s'"
                               % (flag, field['flag']))
                         requirements = False
@@ -257,8 +267,18 @@ def main():
                 continue
             field['module'].apply_filter(ids, args[field['flag']], **args)
     if args['--table']:
-        field_ids = args['--table-fields'].split(',')
+        full_field_ids = args['--table-fields'].split(',')
         expanded_ids = ['index', 'identifiers']
+        field_ids = []
+        alt_ids = {field_id: field_id for field_id in expanded_ids}
+        for full_id in full_field_ids:
+            try:
+                field_id, alt_id = full_id.split('=')
+                field_ids.append(field_id)
+                alt_ids[field_id] = alt_id
+            except ValueError:
+                field_ids.append(full_id)
+                alt_ids[full_id] = full_id
         fields = {'identifiers': fetch_field(args['DATASET'], 'identifiers', meta)}
         for field_id in field_ids:
             if field_id == 'plot':
@@ -269,7 +289,7 @@ def main():
             else:
                 expanded_ids.append(field_id)
                 fields[field_id] = fetch_field(args['DATASET'], field_id, meta)
-        table = [expanded_ids]
+        table = [[alt_ids[field_id] for field_id in expanded_ids]]
         for i in indices:
             record = []
             for field_id in expanded_ids:

@@ -6,10 +6,11 @@
 Add data to a BlobDir.
 
 Usage:
-    blobtools add [--busco TSV...] [--cov BAM...]  [--hits TSV...]  [--fasta FASTA]
+    blobtools add [--busco TSV...] [--cov BAM...] [--hits TSV...] [--fasta FASTA] [--hits-cols LIST]
                   [--key path=value...] [--link path=url...] [--taxid INT] [--skip-link-test]
                   [--blobdb JSON] [--meta YAML] [--synonyms TSV...] [--trnascan TSV...]
-                  [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder[=prefix]]
+                  [--text TXT...] [--text-delimiter STRING] [--text-cols LIST] [--text-header]
+                  [--text-no-array] [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder[=prefix]]
                   [--threads INT] [--evalue NUMBER] [--bitscore NUMBER] [--hit-count INT]
                   [--pileup-args key=value...] [--create] [--replace] DIRECTORY
 
@@ -21,6 +22,8 @@ Options:
     --cov BAM             BAM/SAM/CRAM read alignment file.
     --fasta FASTA         FASTA sequence file.
     --hits TSV            Tabular BLAST/Diamond output file.
+    --hits-cols LIST      Comma separated list of <column number>=<field name>.
+                          [Default: 1=qseqid,2=staxids,3=bitscore,5=sseqid,10=sstart,11=send,14=evalue]
     --taxid INT           Add ranks to metadata for a taxid.
     --key path=value      Set a metadata key to value.
     --link path=URL       Link to an external resource.
@@ -36,6 +39,11 @@ Options:
     --evalue FLOAT        Set evalue cutoff when parsing hits file. [Default: 1]
     --bitscore FLOAT      Set bitscore cutoff when parsing hits file. [Default: 1]
     --hit-count INT       Number of hits to parse when inferring taxonomy. [Default: 10]
+    --text TXT            Generic text file.
+    --text-delimiter STRING
+                          Text file delimiter. [Default: whitespace]
+    --text-cols LIST      Comma separated list of <column number>[=<field name>].
+    --text-header         Flag to indicate first row of text file contains field names.
     --trnascan TSV        tRNAscan2-SE output
     --pileup-args key=val Key/value pairs to pass to samtools pileup.
     --create              Create a new BlobDir.
@@ -54,6 +62,7 @@ import busco
 import cov
 import fasta
 import hits
+import text
 import key
 import link
 import taxid
@@ -65,6 +74,7 @@ from fetch import fetch_field, fetch_metadata, fetch_taxdump
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--blobdb', 'module': blob_db, 'depends': ['identifiers']},
           {'flag': '--busco', 'module': busco, 'depends': ['identifiers']},
+          {'flag': '--text', 'module': text, 'depends': ['identifiers']},
           {'flag': '--trnascan', 'module': trnascan, 'depends': ['identifiers']},
           {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
           {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
@@ -100,7 +110,7 @@ def main():
             parents = field['module'].parent()
             parsed = field['module'].parse(
                 args[field['flag']],
-                **{key: args[key] for key in PARAMS},
+                **{key: args[key] for key in args.keys()},
                 taxdump=taxdump,
                 dependencies=dependencies,
                 meta=meta)
