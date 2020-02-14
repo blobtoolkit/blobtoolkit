@@ -15,7 +15,7 @@ def add(taxid, taxdump, meta):
             meta.taxon.update({rank: value})
     else:
         print("WARN: '%s' was not found in the taxdump." % taxid)
-    return True
+    return meta.taxon
 
 
 def summarise(indices, fields, **kwargs):
