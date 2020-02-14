@@ -91,7 +91,7 @@ def test_loc(args):
                     stdout=PIPE,
                     stderr=PIPE,
                     encoding='ascii',
-                    preexec_fn=os.setsid)
+                    start_new_session=True)
     loc = "%s:%d/%s/dataset/%s" % (args['--host'], port, args['--prefix'], dataset)
     for i in tqdm(range(0, 15),
                   unit='s',

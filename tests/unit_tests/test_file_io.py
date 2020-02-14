@@ -7,7 +7,7 @@ from lib import file_io
 
 VALUE = ['record1', 'record2', 'record3', 'record4', 'record5']
 EXAMPLE_JSON = '[\n "record1",\n "record2",\n "record3",\n "record4",\n "record5"\n]'
-EXAMPLE_YAML = '[record1, record2, record3, record4, record5]\n'
+EXAMPLE_YAML = '- record1\n- record2\n- record3\n- record4\n- record5\n'
 
 
 def test_read_file_that_exists():

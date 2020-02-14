@@ -176,6 +176,7 @@ ARRAY_ID = 'test_array'
 ARRAY_DATA = (
     {
         'keys': ['first', 'second'],
+        'headers': ['cat', 'val1', 'val2', 'val3'],
         'values': [
             [1, 23, 67, 12],
             [0, 48, 96, 16],
@@ -187,6 +188,7 @@ ARRAY_DATA = (
 ARRAY_VALUES_ONLY = (
     {
         'category_slot': 0,
+        'headers': ['cat', 'val1', 'val2', 'val3'],
         'values': [
             ['second', 23, 67, 12],
             ['first', 48, 96, 16],
