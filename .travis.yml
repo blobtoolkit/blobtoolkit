@@ -1,10 +1,11 @@
 language: python
 python:
-  - "3.6"
+  - "3.6.6"
 install:
   - pip install -r requirements.txt
 script:
-  - "pylint --rcfile=.pylintrc lib -f parseable -r n && \
+  - "pylint --version
+     pylint --rcfile=.pylintrc lib -f parseable -r n && \
      pycodestyle lib --max-line-length=120 && \
      pydocstyle lib && \
      pylint --rcfile=.pylintrc_tests tests/unit_tests/* -f parseable -r n && \
