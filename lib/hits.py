@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# pylint: disable=too-many-locals,too-many-branches, unused-argument, unused-variable
+# pylint: disable=too-many-locals,too-many-branches,unused-argument,unused-variable,too-many-arguments
 
 """Parse BLAST results into MultiArray Field."""
 

@@ -7,28 +7,38 @@ import file_io
 from field import MultiArray
 
 
-def parse_busco(busco_file, identifiers):
+def parse_busco(busco_file, identifiers):  # pylint: disable=too-many-locals
     """Parse BUSCO results into a MultiArray."""
     data = file_io.read_file(busco_file)
     lines = data.split('\n')
-    rows = [re.split('\t', line) for line in lines[5:]]
+    version = lines[0].split(':')[1].strip()
     meta = {
-        'version': lines[0].split(':')[1].strip(),
+        'version': version,
         'set': re.split(r':|\(|\)', lines[1])[1].strip(),
         'count': int(re.split(r':|\(|\)', lines[1])[5].strip()),
-        'command': lines[2].split(':')[1].strip(),
         'file': busco_file
-    }
-    meta['set'] = re.search(r'-l\s.*?\/*(\w+_odb\d+)\/', meta['command'])[1]
+        }
+    version = int(version.split('.')[0])
+    if version < 4:
+        rows = [re.split('\t', line) for line in lines[5:]]
+        meta['set'] = re.search(r'-l\s.*?\/*(\w+_odb\d+)\/', lines[2].split(':')[1].strip())[1]
+        columns = re.split(r'# |\t', lines[4])[1:]
+        contig_index = columns.index('Contig')
+    else:
+        rows = [re.split('\t', line) for line in lines[3:]]
+        columns = re.split(r'# |\t', lines[2])[1:]
+        contig_index = columns.index('Sequence')
     meta['field_id'] = "%s_busco" % meta['set']
-    columns = re.split(r'# |\t', lines[4])[1:]
     busco_index = columns.index('Busco id')
     status_index = columns.index('Status')
-    contig_index = columns.index('Contig')
     results = defaultdict(list)
     for row in rows:
         if len(row) > contig_index:
-            results[row[contig_index]].append([row[busco_index], row[status_index]])
+            if version < 4:
+                contig = row[contig_index]
+            else:
+                contig = row[contig_index].split(':')[0]
+            results[contig].append([row[busco_index], row[status_index]])
     if not identifiers.validate_list(list(results.keys())):
         raise UserWarning('Contig names in the Busco file did not match dataset identifiers.')
     values = [results[id] if id in results else [] for id in identifiers.values]
