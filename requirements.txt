@@ -1,5 +1,6 @@
 coveralls>=1.5
 docopt>=0.6.2
+geckodriver>=0.24.0
 mock>=2
 pycodestyle>=2.4
 pydocstyle>=2.1.1
@@ -10,5 +11,6 @@ pytest-mock>=1.10
 pytest>=3.7.4
 pyvirtualdisplay>=0.2.4
 pyyaml>=5.3
+selenium>=3.141.0
 tqdm>=4.23.4
 ujson>=1.35
