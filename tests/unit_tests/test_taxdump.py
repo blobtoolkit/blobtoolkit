@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=wrong-import-position
 import pytest
+
 from lib import Taxdump
 
 TAXON_ID = 3888

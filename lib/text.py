@@ -3,12 +3,13 @@
 
 """Parse text files into fields."""
 
-import re
 import math
 import pathlib
+import re
 from collections import defaultdict
+
 import file_io
-from field import Variable, Category, Array, MultiArray
+from field import Array, Category, MultiArray, Variable
 
 
 def parse_header_row(delimiter, header_row, columns):

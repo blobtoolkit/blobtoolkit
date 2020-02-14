@@ -12,14 +12,16 @@ Further tests are implemented in a separate file using pytest
 docstrings.
 """
 
+import csv
 import gzip
+import io
 import pathlib
 import sys
-import io
-import csv
 from itertools import groupby
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
+
 import yaml
+
 import ujson
 
 

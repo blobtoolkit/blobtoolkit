@@ -28,14 +28,16 @@ import shlex
 import time
 from pathlib import Path
 from subprocess import PIPE, Popen
+
 from docopt import docopt
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from pyvirtualdisplay import Display
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from tqdm import tqdm
+
 from host import test_port
 
 

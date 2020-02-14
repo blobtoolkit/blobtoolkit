@@ -19,15 +19,15 @@ Options:
     --viewer DIRECTORY    Path to BlobToolKit viewer. [Default: ../viewer]
 """
 
-import socket
-import shlex
 import os
+import shlex
 import signal
+import socket
 import time
 from pathlib import Path
 from subprocess import PIPE, Popen
-from docopt import docopt
 
+from docopt import docopt
 
 PIDS = []
 

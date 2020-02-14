@@ -6,7 +6,9 @@
 import pathlib
 import statistics
 from collections import Counter, OrderedDict
+
 from tqdm import tqdm
+
 import file_io
 from field import Identifier, Variable
 from run_external import seqtk_subseq

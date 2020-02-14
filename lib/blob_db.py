@@ -4,12 +4,13 @@
 # pylint: disable=too-many-locals
 
 import math
-from pathlib import Path
 from collections import defaultdict
-import file_io
+from pathlib import Path
+
 import cov
+import file_io
 import hits
-from field import Identifier, Variable, Category, MultiArray
+from field import Category, Identifier, MultiArray, Variable
 
 
 def field_name_from_path(path):

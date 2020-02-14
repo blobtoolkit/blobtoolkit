@@ -5,14 +5,16 @@
 
 """Parse base and read coverage into Variable Field."""
 
-import os
 import math
+import os
 import sys
+from collections import defaultdict
 from multiprocessing import Pool
 from pathlib import Path
-from collections import defaultdict
+
 import pysam
 from tqdm import tqdm
+
 from field import Variable
 from file_io import load_yaml
 from run_external import seqtk_subseq

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Functions to fetch data and metadata."""
 
-import os
 import glob
+import os
 from pathlib import Path
+
 import file_io
-from taxdump import Taxdump
-from field import Field, Identifier, Category, Variable, Array, MultiArray
 from dataset import Metadata
+from field import Array, Category, Field, Identifier, MultiArray, Variable
+from taxdump import Taxdump
 
 TYPES = {
     'identifier': Identifier,

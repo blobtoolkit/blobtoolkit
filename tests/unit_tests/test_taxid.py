@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # pylint: disable=wrong-import-position
 import pytest
-from lib import taxid, Taxdump, Metadata
+
+from lib import Metadata, Taxdump, taxid
 
 TAXON_ID = 3702
 DATASET_ID = 'DS1'

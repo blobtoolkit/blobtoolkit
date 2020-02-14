@@ -5,7 +5,8 @@
 """Parse BLAST results into MultiArray Field."""
 
 import math
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
+
 import file_io
 from field import Category, MultiArray, Variable
 

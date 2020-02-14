@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=wrong-import-position
 import pytest
+
 from lib import Array, Category, Field, Identifier, Variable
 
 FIELD_ID = 'test_field'

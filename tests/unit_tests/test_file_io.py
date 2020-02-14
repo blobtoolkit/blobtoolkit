@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from os.path import abspath
 import binascii
-from lib import file_io
+from os.path import abspath
 
+from lib import file_io
 
 VALUE = ['record1', 'record2', 'record3', 'record4', 'record5']
 EXAMPLE_JSON = '[\n "record1",\n "record2",\n "record3",\n "record4",\n "record5"\n]'

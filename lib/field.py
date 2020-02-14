@@ -5,9 +5,9 @@ Field Class module.
 Generic, identifier, variable, category, and array field types.
 """
 
+import numbers
 from collections import OrderedDict
 from functools import reduce
-import numbers
 from operator import add
 
 

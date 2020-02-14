@@ -2,9 +2,9 @@
 """Add links to metadata."""
 
 import re
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import urlopen
-from urllib.error import HTTPError, URLError
 
 
 def _expand_link(url, values, identifiers):

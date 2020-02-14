@@ -58,20 +58,21 @@ Examples:
 """
 
 from docopt import docopt
-import file_io
+
 import blob_db
 import busco
 import cov
 import fasta
+import file_io
 import hits
-import text
 import key
 import link
-import taxid
-import trnascan
 import synonyms
-from field import Identifier
+import taxid
+import text
+import trnascan
 from fetch import fetch_field, fetch_metadata, fetch_taxdump
+from field import Identifier
 
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--blobdb', 'module': blob_db, 'depends': ['identifiers']},

@@ -2,6 +2,7 @@
 """Parse BUSCO results into MultiArray Field."""
 
 from pathlib import Path
+
 import file_io
 from field import Array
 

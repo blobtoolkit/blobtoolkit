@@ -42,22 +42,24 @@ Options:
     --taxrule STRING          Taxrule used when processing hits. [Default: bestsumorder]
 """
 
+import math
 import re
 import urllib
-import math
 from collections import defaultdict
+
 from docopt import docopt
-import file_io
+
 import busco
 import cov
 import fasta
+import file_io
 import hits
 import taxid
 import text
-# from taxdump import Taxdump
-from field import Identifier, Variable, Category, MultiArray
 # from dataset import Metadata
 from fetch import fetch_field, fetch_metadata
+# from taxdump import Taxdump
+from field import Category, Identifier, MultiArray, Variable
 
 FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--fastq', 'module': cov, 'depends': ['identifiers'], 'requires': ['--cov']},

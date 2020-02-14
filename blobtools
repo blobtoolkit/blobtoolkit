@@ -41,9 +41,11 @@ examples:
 
 import os
 from subprocess import call
+
 from docopt import docopt
 
-__version__ = "blobtools v2.0.0alpha"
+__version__ = "blobtools v2.2.0"
+
 MAINDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
 LIBDIR = os.path.abspath(os.path.join(MAINDIR, 'lib/'))
 
