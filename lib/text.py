@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# pylint: disable=too-many-locals,too-many-branches,too-many-arguments,too-many-statements,too-many-nested-blocks
+
 """Parse text files into fields."""
 
 import re
@@ -250,12 +252,12 @@ def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
         header_row = lines.pop(0).replace('"', '')
         columns = parse_header_row(delimiter, header_row, columns)
     cols, headers, types, width = map_fields(delimit, lines[0].replace('"', ''), columns)
-    rows, id_rows, array, ids = parse_rows(delimit, lines, width, no_array, cols, types, headers)
+    rows, id_rows, array = parse_rows(delimit, lines, width, no_array, cols, types, headers)[:3]
     # if not identifiers.validate_list(list(ids)):
     #     exit('ERROR: contig names in the text file did not match dataset identifiers.')
     results = rows_to_results(rows, id_rows, types, array, field_name)
     fields = results_to_fields(results, types, cols, headers, text_file, delimiter, identifiers)
-    meta = {'file': text_file}
+    # meta = {'file': text_file}
     return fields
     # results = defaultdict(list)
     # for line in lines:
