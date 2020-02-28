@@ -32,8 +32,9 @@ Options:
     --blobdb JSON         Blobtools v1 blobDB.
     --synonyms TSV        TSV file containing current identifiers and synonyms.
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
-    --taxrule bestsum|bestsumorder[=prefix]
-                          Rule to use when assigning BLAST hits to taxa.
+    --taxrule rulename[=prefix]
+                          Rule to use when assigning BLAST hits to taxa (bestsum, bestsumorder,
+                          bestdistsum, bestdistsumorder).
                           An alternate prefix may be specified. [Default: bestsumorder]
     --threads INT         Number of threads to use for multithreaded tasks. [Default: 1]
     --evalue FLOAT        Set evalue cutoff when parsing hits file. [Default: 1]
@@ -80,7 +81,7 @@ FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
           {'flag': '--text', 'module': text, 'depends': ['identifiers']},
           {'flag': '--trnascan', 'module': trnascan, 'depends': ['identifiers']},
           {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
-          {'flag': '--hits', 'module': hits, 'depends': ['identifiers']},
+          {'flag': '--hits', 'module': hits, 'depends': ['identifiers', 'length']},
           {'flag': '--synonyms', 'module': synonyms, 'depends': ['identifiers']}]
 PARAMS = set(['--taxrule', '--threads', '--pileup-args', '--evalue', '--bitscore', '--hit-count'])
 

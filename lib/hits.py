@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-# pylint: disable=too-many-locals,too-many-branches,unused-argument,unused-variable,too-many-arguments
+# pylint: disable=too-many-locals,too-many-branches,unused-argument,unused-variable
+# pylint: disable=too-many-arguments,too-many-statements
 
 """Parse BLAST results into MultiArray Field."""
 
@@ -46,12 +47,23 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
         except ValueError:
             hit.update({'taxid': 0})
         results[seq_id].append(hit)
-    print(results)
     return results
 
 
-def apply_taxrule(blast, taxdump, taxrule, prefix, hit_count, identifiers, results=None):
+def chunk_size(value):
+    """Calculate nice value for chunk size."""
+    mag = math.floor(math.log10(value))
+    first = int(str(value)[:2]) + 1
+    size = first * pow(10, mag-1)
+    return size
+
+
+def apply_taxrule(blast, taxdump, taxrule, prefix, hit_count, identifiers, lengths, results=None):
     """Apply taxrule to parsed BLAST results."""
+    chunk = 100000
+    max_chunks = 10
+    overlap = 500
+    segment = chunk + overlap
     if results is None:
         blank = [None] * len(identifiers.values)
         results = [
@@ -68,10 +80,25 @@ def apply_taxrule(blast, taxdump, taxrule, prefix, hit_count, identifiers, resul
         'positions': defaultdict(list),
         'hits': defaultdict(list)
         } for rank in taxdump.list_ranks()]
+    length_dict = {}
+    if 'dist' in taxrule:
+        for i, seq_id in enumerate(identifiers.values):
+            my_chunk = chunk
+            if lengths[i] > segment:
+                segments = (lengths[i] + chunk) // chunk
+                if segments > max_chunks:
+                    my_chunk = chunk_size(lengths[i] / max_chunks)
+                    segments = max_chunks
+            length_dict.update({seq_id: {'length': lengths[i],
+                                         'segments': segments,
+                                         'chunk': my_chunk
+                                         }})
     for seq_id, hits in blast.items():
         sorted_hits = sorted(hits, key=lambda k: k['score'], reverse=True)
         for index, rank in enumerate(taxdump.list_ranks()):
             cat_scores = defaultdict(float)
+            if 'dist' in taxrule:
+                dist_scores = defaultdict(lambda: defaultdict(float))
             for hit in sorted_hits:
                 try:
                     category = taxdump.ancestors[hit['taxid']][rank]
@@ -95,12 +122,40 @@ def apply_taxrule(blast, taxdump, taxrule, prefix, hit_count, identifiers, resul
                         values[index]['hits'][seq_id].append(
                             [category, hit['file']]
                         )
-                if len(values[index]['positions'][seq_id]) <= hit_count:
-                    cat_scores[category] += hit['score']
-            top_cat = max(cat_scores, key=cat_scores.get)
-            values[index]['category'][seq_id] = top_cat
-            values[index]['score'][seq_id] = cat_scores.get(top_cat)
-            values[index]['cindex'][seq_id] = len(cat_scores.keys()) - 1
+                # diverge here for dist taxrules
+                if 'dist' in taxrule:
+                    segment = 0
+                    if length_dict[seq_id]['segments'] > 0:
+                        segment = hit['start'] // length_dict[seq_id]['chunk']
+                    dist_scores[segment][category] += hit['score']
+                else:
+                    if len(values[index]['positions'][seq_id]) <= hit_count:
+                        cat_scores[category] += hit['score']
+            if 'dist' in taxrule:
+                segments = dict(dist_scores).keys()
+                cat_freqs = defaultdict(int)
+                cat_scores = defaultdict(float)
+                for segment in segments:
+                    seg_cat = max(dist_scores[segment], key=dist_scores[segment].get)
+                    seg_score = dist_scores[segment].get(seg_cat)
+                    cat_freqs[seg_cat] += 1
+                    cat_scores[seg_cat] += seg_score
+                max_cat = None
+                max_freq = 0
+                max_score = 0
+                for cat, freq in cat_freqs.items():
+                    if freq > max_freq or (freq == max_freq and cat_scores[cat] > max_score):
+                        max_cat = cat
+                        max_freq = freq
+                        max_score = cat_scores[cat]
+                values[index]['category'][seq_id] = max_cat
+                values[index]['score'][seq_id] = max_score
+                values[index]['cindex'][seq_id] = len(cat_freqs.keys()) - 1
+            else:
+                top_cat = max(cat_scores, key=cat_scores.get)
+                values[index]['category'][seq_id] = top_cat
+                values[index]['score'][seq_id] = cat_scores.get(top_cat)
+                values[index]['cindex'][seq_id] = len(cat_scores.keys()) - 1
     for index, rank in enumerate(taxdump.list_ranks()):
         if not identifiers.validate_list(list(values[index]['category'].keys())):
             raise UserWarning('Contig names in the hits file do not match dataset identifiers.')
@@ -211,11 +266,13 @@ def parse(files, **kwargs):
     blast = None
     fields = []
     identifiers = kwargs['dependencies']['identifiers']
+    lengths = kwargs['dependencies']['length'].values
     try:
         taxrule, prefix = kwargs['--taxrule'].split('=')
     except ValueError:
         taxrule = kwargs['--taxrule']
         prefix = taxrule
+    print(taxrule)
     cols = {}
     columns = kwargs['--hits-cols'].split(',')
     for column in columns:
@@ -224,17 +281,7 @@ def parse(files, **kwargs):
             cols[name] = int(index) - 1
         except ValueError:
             exit('ERROR: --hits-cols contains an invalid value.')
-    if taxrule == 'bestsum':
-        for index, file in enumerate(files):
-            blast = parse_blast(file, cols, blast, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
-        results = apply_taxrule(blast,
-                                kwargs['taxdump'],
-                                taxrule,
-                                prefix,
-                                int(kwargs['--hit-count']),
-                                identifiers)
-        fields = create_fields(results, prefix, files)
-    elif taxrule == 'bestsumorder':
+    if taxrule.endswith('order'):
         results = None
         for index, file in enumerate(files):
             blast = parse_blast(file, cols, None, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
@@ -244,7 +291,19 @@ def parse(files, **kwargs):
                                     prefix,
                                     int(kwargs['--hit-count']),
                                     identifiers,
+                                    lengths,
                                     results)
+        fields = create_fields(results, prefix, files)
+    else:
+        for index, file in enumerate(files):
+            blast = parse_blast(file, cols, blast, index, float(kwargs['--evalue']), float(kwargs['--bitscore']))
+        results = apply_taxrule(blast,
+                                kwargs['taxdump'],
+                                taxrule,
+                                prefix,
+                                int(kwargs['--hit-count']),
+                                lengths,
+                                identifiers)
         fields = create_fields(results, prefix, files)
     if 'cat' not in kwargs['meta'].plot:
         kwargs['meta'].plot.update({'cat': "%s_phylum" % prefix})

@@ -6,7 +6,7 @@
 Filter a BlobDir.
 
 Usage:
-    blobtools filter [--param STRING...] [--query-string STRING]  [--json JSON]
+    blobtools filter [--param STRING...] [--query-string STRING] [--json JSON]
                      [--list TXT] [--invert] [--output DIRECTORY]
                      [--fasta FASTA] [--fastq FASTQ...] [--suffix STRING]
                      [--cov BAM] [--summary FILENAME] [--summary-rank RANK]
