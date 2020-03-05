@@ -8,20 +8,21 @@ Generate plots using BlobToolKit Viewer.
 Usage:
   blobtools view [--format STRING...] [--host STRING] [--interactive] [--out PATH]
   [--param STRING...] [--ports RANGE] [--prefix STRING] [--preview STRING...]
-  [--remote] [--timeout INT] [--view STRING...] DATASET
+  [--geckodriver-log PATH] [--remote] [--timeout INT] [--view STRING...] DATASET
 
 Options:
-      --format STRING     Image format (svg|png). [Default: png]
-      --host STRING       Hostname. [Default: http://localhost]
-      --interactive       Start interactive session (opens dataset in Firefox). [Default: False]
-      --out PATH          Directory for outfiles. [Default: .]
-      --param key=value   Query string parameter.
-      --ports RANGE       Port range for viewer and API. [Default: 8000-8099]
-      --prefix STRING     URL prefix. [Default: view]
-      --preview STRING    Field name.
-      --remote            Start viewer for remote session. [Default: False]
-      --timeout INT       Time to wait for page load in seconds. Default (0) is no timeout. [Default: 0]
-      --view STRING       Plot type (blob|cumulative|snail). [Default: blob]
+      --format STRING         Image format (svg|png). [Default: png]
+      --host STRING           Hostname. [Default: http://localhost]
+      --interactive           Start interactive session (opens dataset in Firefox). [Default: False]
+      --out PATH              Directory for outfiles. [Default: .]
+      --param key=value       Query string parameter.
+      --ports RANGE           Port range for viewer and API. [Default: 8000-8099]
+      --prefix STRING         URL prefix. [Default: view]
+      --preview STRING        Field name.
+      --geckodriver-log PATH  Path to geckodriver logfile for debugging. [Default: /dev/null]
+      --remote                Start viewer for remote session. [Default: False]
+      --timeout INT           Time to wait for page load in seconds. Default (0) is no timeout. [Default: 0]
+      --view STRING           Plot type (blob|cumulative|snail). [Default: blob]
 """
 import os
 import shlex
@@ -130,7 +131,7 @@ def firefox_driver(args):
     options.set_headless(headless=False)
     display = Display(visible=0, size=(800, 600))
     display.start()
-    driver = webdriver.Firefox(options=options, firefox_profile=profile)
+    driver = webdriver.Firefox(options=options, firefox_profile=profile, service_log_path=args['--geckodriver-log'])
     return driver, display
 
 
@@ -298,4 +299,6 @@ def main():
 
 
 if __name__ == '__main__':
+    if not os.path.exists(os.environ["HOME"]):
+        os.mkdir(os.environ["HOME"])
     main()
