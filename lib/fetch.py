@@ -51,7 +51,7 @@ def fetch_metadata(path_to_dataset, **kwargs):
         os.makedirs(path_to_dataset)
     if kwargs.get('--meta'):
         new_meta = file_io.load_yaml(kwargs['--meta'])
-        if kwargs['--replace']:
+        if kwargs['--fasta'] and kwargs['--replace']:
             files = glob.glob("%s/*" % kwargs['DIRECTORY'])
             for file in files:
                 os.remove(file)
