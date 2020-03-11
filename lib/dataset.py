@@ -17,7 +17,7 @@ class Metadata():
                  'origin',
                  'parents',
                  'plot',
-                 'busco'
+                 'busco',
                  'reads',
                  'record_type',
                  'records',

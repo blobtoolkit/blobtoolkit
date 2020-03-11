@@ -89,6 +89,8 @@ def apply_taxrule(blast, taxdump, taxrule, prefix, hit_count, identifiers, lengt
                 if segments > max_chunks:
                     my_chunk = chunk_size(lengths[i] / max_chunks)
                     segments = max_chunks
+            else:
+                segments = 1
             length_dict.update({seq_id: {'length': lengths[i],
                                          'segments': segments,
                                          'chunk': my_chunk
