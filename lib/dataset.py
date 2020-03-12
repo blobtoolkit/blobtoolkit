@@ -64,6 +64,26 @@ class Metadata():
         """Return true if a field_id is present."""
         return field_id in self._field_ids
 
+    def remove_field(self, field_id):
+        """Remove field and all descendants from dataset."""
+        field_ids = []
+        if self.has_field(field_id):
+            meta = self.field_meta(field_id)
+            field_ids = [field_id]
+            field_ids += self.field_descendant_list(field_id, True)
+            self.fields[:] = [d for d in self.fields if d.get('id') not in field_ids]
+            self._field_list = self.list_fields()
+            self._field_ids = list(self._field_list.keys())
+            if meta.get('parent'):
+                parent_meta = self.field_meta(meta['parent'])
+                if 'children' in parent_meta:
+                    parent_meta['children'][:] = [d for d in parent_meta['children'] if d.get('id') != field_id]
+                if 'data' in parent_meta:
+                    parent_meta['data'][:] = [d for d in parent_meta['data'] if d.get('id') != field_id]
+                if not parent_meta.get('children', None) and not parent_meta.get('data', None):
+                    field_ids += self.remove_field(parent_meta['id'])
+        return field_ids
+
     def field_meta(self, field_id):
         """Return full metadata for a field."""
         if not self.has_field(field_id):
@@ -72,6 +92,22 @@ class Metadata():
         if meta.get('parent'):
             meta = self.add_parent_meta(meta, meta['parent'])
         return meta
+
+    def field_descendant_list(self, field_id, full=False):
+        """Return list of descendant fields for a field."""
+        descendants = []
+        meta = self.field_meta(field_id)
+        if meta.get('children'):
+            for child in meta['children']:
+                descendants += self.field_descendant_list(child['id'])
+                if full:
+                    descendants.append(child['id'])
+        else:
+            descendants.append(meta['id'])
+            if meta.get('data'):
+                for child in meta['data']:
+                    descendants.append(child['id'])
+        return descendants
 
     def field_parent_list(self, field_id):
         """Return list of parent fields for a field."""

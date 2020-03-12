@@ -447,3 +447,12 @@ def length_stats(all_lengths, all_gcs, all_covs):
     if 'n90' not in stats:
         stats.update({'n90': all_lengths[-1], 'l90': ncount})
     return stats
+
+
+def remove_from_meta(meta):
+    """Delete all hits fields."""
+    field_ids = []
+    if meta.has_field('taxonomy'):
+        field_ids += meta.remove_field('taxonomy')
+        meta.plot.pop('cat', None)
+    return field_ids

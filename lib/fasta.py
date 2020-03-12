@@ -123,3 +123,18 @@ def summarise(indices, fields, **kwargs):
     ncount = sum([fields['ncount'].values[i] for i in indices])
     span = sum(lengths)
     return {'at': at, 'gc': gc,  'n': float("%.4f" % (ncount / span))}
+
+
+def remove_from_meta(meta):
+    """Delete all fasta-derived fields."""
+    field_ids = []
+    if meta.has_field('gc'):
+        field_ids += meta.remove_field('gc')
+        meta.plot.pop('x', None)
+    if meta.has_field('length'):
+        field_ids += meta.remove_field('length')
+        meta.plot.pop('z', None)
+    if meta.has_field('ncount'):
+        field_ids += meta.remove_field('ncount')
+    meta.assembly.pop('file', None)
+    return field_ids

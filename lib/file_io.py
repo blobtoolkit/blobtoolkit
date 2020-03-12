@@ -3,7 +3,7 @@
 # pylint: disable=c-extension-no-member
 
 """
-Example module with functions to read, write and parse files.
+Read, write and parse files.
 
 Simple tests are included in docstrings and run using doctest.
 
@@ -15,6 +15,7 @@ docstrings.
 import csv
 import gzip
 import io
+import os
 import pathlib
 import sys
 from itertools import groupby
@@ -139,6 +140,12 @@ def write_file(filename, data, plain=False):  # pylint: disable=too-many-branche
         except IOError:
             return False
     return True
+
+
+def delete_file(file):
+    """Delete a file if exists."""
+    if os.path.exists(file):
+        os.remove(file)
 
 
 if __name__ == '__main__':

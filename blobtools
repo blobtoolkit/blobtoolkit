@@ -11,6 +11,7 @@ commands:
     filter          filter a BlobDir
     host            host interactive view of all BlobDirs in a directory
     replace         call blobtools add with --replace flag
+    remove          remove one or more fields from a BlobDir
     view            generate plots using BlobToolKit Viewer
     -h, --help      show this
     -v, --version   show version number
@@ -64,6 +65,8 @@ if __name__ == '__main__':
         exit(call(['python', LIBDIR + '/host.py'] + ARGV))
     elif ARGS['<command>'] == 'replace':
         exit(call(['python', LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>']))
+    elif ARGS['<command>'] == 'remove':
+        exit(call(['python', LIBDIR + '/remove.py'] + ARGV))
     elif ARGS['<command>'] == 'view':
         exit(call(['python', LIBDIR + '/view.py'] + ARGV))
     else:

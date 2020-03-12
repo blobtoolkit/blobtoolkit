@@ -114,3 +114,11 @@ def summarise(indices, fields, **kwargs):  # pylint: disable=unused-argument
         lineage = lineage.replace('_busco', '')
         summary.update({lineage: busco_score(values, total)})
     return summary
+
+
+def remove_from_meta(meta):
+    """Delete all BUSCO fields."""
+    field_ids = []
+    if meta.has_field('busco'):
+        field_ids = meta.remove_field('busco')
+    return field_ids

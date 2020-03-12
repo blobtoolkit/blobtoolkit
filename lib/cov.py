@@ -272,3 +272,13 @@ def summarise(indices, fields, **kwargs):
             })
         summary.update({library: stats})
     return summary
+
+
+def remove_from_meta(meta):
+    """Delete all coverage fields."""
+    field_ids = []
+    if meta.has_field('coverage'):
+        field_ids += meta.remove_field('coverage')
+        meta.plot.pop('y', None)
+    meta.reads = {}
+    return field_ids
