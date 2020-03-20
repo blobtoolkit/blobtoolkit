@@ -56,18 +56,18 @@ if __name__ == '__main__':
                   options_first=True)
     ARGV = [ARGS['<command>']] + ARGS['<args>']
     if ARGS['<command>'] == 'add':
-        exit(call(['python', LIBDIR + '/add.py'] + ARGV))
+        exit(call([LIBDIR + '/add.py'] + ARGV))
     elif ARGS['<command>'] == 'create':
-        exit(call(['python', LIBDIR + '/add.py'] + ['add', '--create'] + ARGS['<args>']))
+        exit(call([LIBDIR + '/add.py'] + ['add', '--create'] + ARGS['<args>']))
     elif ARGS['<command>'] == 'filter':
-        exit(call(['python', LIBDIR + '/filter.py'] + ARGV))
+        exit(call([LIBDIR + '/filter.py'] + ARGV))
     elif ARGS['<command>'] == 'host':
-        exit(call(['python', LIBDIR + '/host.py'] + ARGV))
+        exit(call([LIBDIR + '/host.py'] + ARGV))
     elif ARGS['<command>'] == 'replace':
-        exit(call(['python', LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>']))
+        exit(call([LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>']))
     elif ARGS['<command>'] == 'remove':
-        exit(call(['python', LIBDIR + '/remove.py'] + ARGV))
+        exit(call([LIBDIR + '/remove.py'] + ARGV))
     elif ARGS['<command>'] == 'view':
-        exit(call(['python', LIBDIR + '/view.py'] + ARGV))
+        exit(call([LIBDIR + '/view.py'] + ARGV))
     else:
         exit(call([os.path.join(MAINDIR, './blobtools'), '-h']))
