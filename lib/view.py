@@ -26,6 +26,7 @@ Options:
 """
 import os
 import shlex
+import sys
 import time
 from pathlib import Path
 from subprocess import PIPE, Popen
@@ -105,10 +106,10 @@ def test_loc(args):
         if poll is None:
             time.sleep(1)
         else:
-            print(process.stdout.read())
-            print(process.stderr.read())
-            print("ERROR: Viewer quit unexpectedly")
-            print("Unable to run: %s" % cmd)
+            print(process.stdout.read(), file=sys.stderr)
+            print(process.stderr.read(), file=sys.stderr)
+            print("ERROR: Viewer quit unexpectedly", file=sys.stderr)
+            print("Unable to run: %s" % cmd, file=sys.stderr)
             exit(1)
     return loc, process, port, api_port
 
@@ -128,7 +129,7 @@ def firefox_driver(args):
 
     options = Options()
     # options.set_headless(headless=not args['--interactive'])
-    options.set_headless(headless=False)
+    options.headless=False
     display = Display(visible=0, size=(800, 600))
     display.start()
     driver = webdriver.Firefox(options=options, firefox_profile=profile, service_log_path=args['--geckodriver-log'])
