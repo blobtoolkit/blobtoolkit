@@ -141,7 +141,7 @@ def main():
     for string in args['--link']:
         link.add(string, meta, dependencies['identifiers'].values, args['--skip-link-test'])
     for string in args['--key']:
-        key.add(string, meta)
+        key.add(string, meta, args['--replace'])
     if args['--taxid']:
         if not taxdump:
             taxdump = fetch_taxdump(args['--taxdump'])

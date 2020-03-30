@@ -7,6 +7,7 @@ usage: blobtools [<command>] [<args>...] [-h|--help] [--version]
 
 commands:
     add             add data to a BlobDir
+    calc            field-based calculations
     create          create a new BlobDir
     filter          filter a BlobDir
     host            host interactive view of all BlobDirs in a directory
@@ -57,6 +58,8 @@ if __name__ == '__main__':
     ARGV = [ARGS['<command>']] + ARGS['<args>']
     if ARGS['<command>'] == 'add':
         exit(call([LIBDIR + '/add.py'] + ARGV))
+    elif ARGS['<command>'] == 'calc':
+        exit(call([LIBDIR + '/calc.py'] + ARGV))
     elif ARGS['<command>'] == 'create':
         exit(call([LIBDIR + '/add.py'] + ['add', '--create'] + ARGS['<args>']))
     elif ARGS['<command>'] == 'filter':
