@@ -266,7 +266,7 @@ def summarise(indices, fields, **kwargs):
             'total': total,
             'coverage': float("%.3f" % coverage),
             'mapped': mapped,
-            'mappedPortion': float("%.3f" % (mapped / total)),
+            'mappedPortion': float("%.3f" % (mapped / int(total))),
             'platform': platform,
             'strategy': strategy
             })

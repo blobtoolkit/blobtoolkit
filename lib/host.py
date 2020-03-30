@@ -127,9 +127,13 @@ def main():
     while True:
         time.sleep(1)
         if api.poll() is not None:
+            for line in api.stdout.readlines():
+                print(line.strip())
             for line in api.stderr.readlines():
                 print(line.strip())
             if viewer.poll() is not None:
+                for line in viewer.stdout.readlines():
+                    print(line.strip())
                 for line in viewer.stderr.readlines():
                     print(line.strip())
                 try:
@@ -138,6 +142,8 @@ def main():
                     pass
             break
         elif viewer.poll() is not None:
+            for line in viewer.stdout.readlines():
+                print(line.strip())
             for line in viewer.stderr.readlines():
                 print(line.strip())
             try:
