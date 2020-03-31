@@ -129,7 +129,7 @@ def firefox_driver(args):
 
     options = Options()
     # options.set_headless(headless=not args['--interactive'])
-    options.headless=False
+    options.headless = False
     display = Display(visible=0, size=(800, 600))
     display.start()
     driver = webdriver.Firefox(options=options, firefox_profile=profile, service_log_path=args['--geckodriver-log'])
