@@ -29,11 +29,13 @@ To learn more about the development of the BlobTools approach, take a look at th
 
 ## Installing
 
+The most up to date instructions can be found at [blobtoolkit.genomehubs.org/install/](https://blobtoolkit.genomehubs.org/install/).
+
 These install instructions assume a Unix/Linux system with standard development tools and [Conda](https://conda.io/docs/user-guide/install/index.html) installed. Installing the [BlobToolKit Viewer](https://github.com/blobtoolkit/viewer) as described below also requires `libpng-dev`.
 
 1. Create and activate a Conda environment
 ```
-conda create -n blobtools2 -y python=3.6 docopt pyyaml ujson tqdm nodejs
+conda create -n blobtools2 -y python=3.6 docopt pyyaml ujson tqdm nodejs=10
 conda activate blobtools2
 conda install -c bioconda -y pysam seqtk
 ```
