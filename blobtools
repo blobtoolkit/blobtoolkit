@@ -42,7 +42,8 @@ examples:
 """
 
 import os
-from subprocess import call
+import signal
+from subprocess import Popen
 
 from docopt import docopt
 
@@ -57,20 +58,25 @@ if __name__ == '__main__':
                   options_first=True)
     ARGV = [ARGS['<command>']] + ARGS['<args>']
     if ARGS['<command>'] == 'add':
-        exit(call([LIBDIR + '/add.py'] + ARGV))
+        PROC = Popen([LIBDIR + '/add.py'] + ARGV)
     elif ARGS['<command>'] == 'calc':
-        exit(call([LIBDIR + '/calc.py'] + ARGV))
+        PROC = Popen([LIBDIR + '/calc.py'] + ARGV)
     elif ARGS['<command>'] == 'create':
-        exit(call([LIBDIR + '/add.py'] + ['add', '--create'] + ARGS['<args>']))
+        PROC = Popen([LIBDIR + '/add.py'] + ['add', '--create'] + ARGS['<args>'])
     elif ARGS['<command>'] == 'filter':
-        exit(call([LIBDIR + '/filter.py'] + ARGV))
+        PROC = Popen([LIBDIR + '/filter.py'] + ARGV)
     elif ARGS['<command>'] == 'host':
-        exit(call([LIBDIR + '/host.py'] + ARGV))
+        PROC = Popen([LIBDIR + '/host.py'] + ARGV)
     elif ARGS['<command>'] == 'replace':
-        exit(call([LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>']))
+        PROC = Popen([LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>'])
     elif ARGS['<command>'] == 'remove':
-        exit(call([LIBDIR + '/remove.py'] + ARGV))
+        PROC = Popen([LIBDIR + '/remove.py'] + ARGV)
     elif ARGS['<command>'] == 'view':
-        exit(call([LIBDIR + '/view.py'] + ARGV))
+        PROC = Popen([LIBDIR + '/view.py'] + ARGV)
     else:
-        exit(call([os.path.join(MAINDIR, './blobtools'), '-h']))
+        PROC = Popen([os.path.join(MAINDIR, './blobtools'), '-h'])
+
+    try:
+        PROC.wait()
+    except KeyboardInterrupt:
+        PROC.send_signal(signal.SIGINT)

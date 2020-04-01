@@ -26,6 +26,7 @@ Options:
 """
 import os
 import shlex
+import signal
 import sys
 import time
 from pathlib import Path
@@ -94,8 +95,7 @@ def test_loc(args):
     process = Popen(shlex.split(cmd),
                     stdout=PIPE,
                     stderr=PIPE,
-                    encoding='ascii',
-                    start_new_session=True)
+                    encoding='ascii')
     loc = "%s:%d/%s/dataset/%s" % (args['--host'], port, args['--prefix'], dataset)
     for i in tqdm(range(0, 15),
                   unit='s',
@@ -217,13 +217,13 @@ def static_view(args, loc, viewer):
         driver.quit()
         display.popen.terminate()
         if viewer is not None:
-            os.killpg(os.getpgid(viewer.pid), 15)
+            viewer.send_signal(signal.SIGINT)
     except Exception as err:
         print(err)
         driver.quit()
         display.popen.terminate()
         if viewer is not None:
-            os.killpg(os.getpgid(viewer.pid), 15)
+            viewer.send_signal(signal.SIGINT)
     return True
 
 
@@ -249,12 +249,12 @@ def interactive_view(args, loc, viewer):
             poll = viewer.poll()
         driver.quit()
         display.popen.terminate()
-        os.killpg(os.getpgid(viewer.pid), 15)
+        viewer.send_signal(signal.SIGINT)
     except Exception as err:
         print(err)
         driver.quit()
         display.popen.terminate()
-        os.killpg(os.getpgid(viewer.pid), 15)
+        viewer.send_signal(signal.SIGINT)
     return True
 
 
@@ -276,10 +276,11 @@ def remote_view(args, loc, viewer, port, api_port):
                                                                                       api_port))
         while True:
             time.sleep(5)
-        os.killpg(os.getpgid(viewer.pid), 15)
+        viewer.send_signal(signal.SIGINT)
     except Exception as err:
+        print('remote exception')
         print(err)
-        os.killpg(os.getpgid(viewer.pid), 15)
+        viewer.send_signal(signal.SIGINT)
     return True
 
 
@@ -294,9 +295,12 @@ def main():
             remote_view(args, loc, viewer, port, api_port)
         else:
             static_view(args, loc, viewer)
-    except Exception as err:
-        print(err)
-        os.killpg(os.getpgid(viewer.pid), 15)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        time.sleep(1)
+        viewer.send_signal(signal.SIGINT)
+        time.sleep(1)
 
 
 if __name__ == '__main__':

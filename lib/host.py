@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# pylint: disable=no-member, too-many-branches, too-many-statements, too-many-locals, W0603
+# pylint: disable=no-member, too-many-branches, too-many-statements, too-many-locals, W0603, W0703
 
 """
 Host a collection of BlobDirs.
@@ -160,10 +160,12 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except Exception as err:
+    except KeyboardInterrupt:
+        pass
+    finally:
         for pid in PIDS:
+            print(pid)
             try:
                 os.kill(pid, signal.SIGTERM)
             except ProcessLookupError:
                 pass
-        raise err
