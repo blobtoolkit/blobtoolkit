@@ -24,7 +24,10 @@ def parse_busco(busco_file, identifiers):  # pylint: disable=too-many-locals
         rows = [re.split('\t', line) for line in lines[5:]]
         meta['set'] = re.search(r'-l\s.*?\/*(\w+_odb\d+)\/', lines[2].split(':')[1].strip())[1]
         columns = re.split(r'# |\t', lines[4])[1:]
-        contig_index = columns.index('Contig')
+        try:
+            contig_index = columns.index('Contig')
+        except ValueError:
+            contig_index = columns.index('Sequence')
     else:
         rows = [re.split('\t', line) for line in lines[3:]]
         columns = re.split(r'# |\t', lines[2])[1:]
