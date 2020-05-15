@@ -214,16 +214,16 @@ def static_view(args, loc, viewer):
                     file_ready(file_name)
                 except Exception as err:
                     print(err)
-        driver.quit()
-        display.popen.terminate()
         if viewer is not None:
             viewer.send_signal(signal.SIGINT)
+        driver.quit()
+        display.popen.terminate()
     except Exception as err:
         print(err)
-        driver.quit()
-        display.popen.terminate()
         if viewer is not None:
             viewer.send_signal(signal.SIGINT)
+        driver.quit()
+        display.popen.terminate()
     return True
 
 

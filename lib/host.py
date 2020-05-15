@@ -20,16 +20,30 @@ Options:
 """
 
 import os
+import psutil
 import shlex
 import signal
 import socket
 import time
+
 from pathlib import Path
 from subprocess import PIPE, Popen
 
 from docopt import docopt
 
 PIDS = []
+
+
+def kill_child_processes(parent_pid, sig=signal.SIGTERM):
+    """Kill all child processes."""
+    try:
+        parent = psutil.Process(parent_pid)
+    except psutil.NoSuchProcess:
+        return
+    children = parent.children(recursive=True)
+    for process in children:
+        process.send_signal(sig)
+    parent.send_signal(sig)
 
 
 def test_port(port, service):
@@ -164,8 +178,4 @@ if __name__ == '__main__':
         pass
     finally:
         for pid in PIDS:
-            print(pid)
-            try:
-                os.kill(pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
+            kill_child_processes(pid, signal.SIGTERM)
