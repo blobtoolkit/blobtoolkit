@@ -21,8 +21,11 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
         score = float(row[cols['bitscore']])
         if score < bitscore:
             continue
-        if evalue < float(row[cols['evalue']]):
-            continue
+        if len(row) == 4:
+            cols['sseqid'] = 3
+        else:
+            if evalue < float(row[cols['evalue']]):
+                continue
         seq_id, *offset = row[cols['qseqid']].split('_-_')
         offset = int(offset[0]) if offset else 0
         try:
