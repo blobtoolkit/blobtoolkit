@@ -287,9 +287,11 @@ def main():
                 for axis in ['x', 'z', 'y', 'cat']:
                     if axis in meta.plot:
                         expanded_ids.append(meta.plot[axis])
+                        alt_ids.update({meta.plot[axis]:meta.plot[axis]})
                         fields[meta.plot[axis]] = fetch_field(args['DATASET'], meta.plot[axis], meta)
             else:
                 expanded_ids.append(field_id)
+                alt_ids.update({field_id: field_id})
                 fields[field_id] = fetch_field(args['DATASET'], field_id, meta)
         table = [[alt_ids[field_id] for field_id in expanded_ids]]
         for i in indices:
