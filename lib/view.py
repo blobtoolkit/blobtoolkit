@@ -70,15 +70,15 @@ def test_loc(args):
         if available:
             print("ERROR: No service running on port %s" % port)
             print("       Unable to connect to %s" % args['--host'])
-            exit(1)
+            sys.exit(1)
         else:
             loc = "%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset)
             return loc, None, None, None
     if not Path(args['DATASET']).exists():
         print("ERROR: DATASET '%s' must be a valid path to begin hosting.")
-        exit(1)
+        sys.exit(1)
     dataset = Path(args['DATASET']).name
-    parent = Path(args['DATASET']).resolve().absolute().parent
+    parent = Path(args['DATASET']).resolve().absolute()
     port_range = args['--ports'].split('-')
     api_port = False
     port = False
@@ -110,7 +110,7 @@ def test_loc(args):
             print(process.stderr.read(), file=sys.stderr)
             print("ERROR: Viewer quit unexpectedly", file=sys.stderr)
             print("Unable to run: %s" % cmd, file=sys.stderr)
-            exit(1)
+            sys.exit(1)
     return loc, process, port, api_port
 
 

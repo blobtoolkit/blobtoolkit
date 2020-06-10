@@ -1,6 +1,7 @@
 coveralls>=1.5
 docopt>=0.6.2
 mock>=2
+psutil>=5.7.0
 pycodestyle>=2.4
 pydocstyle>=2.1.1
 pylint>=2.2.2

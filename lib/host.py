@@ -20,14 +20,16 @@ Options:
 """
 
 import os
-import psutil
 import shlex
 import signal
 import socket
+import sys
 import time
 
 from pathlib import Path
 from subprocess import PIPE, Popen
+
+import psutil
 
 from docopt import docopt
 
@@ -58,7 +60,7 @@ def test_port(port, service):
             print("ERROR: Port %d already in use, unable to host %s." % (port, service))
             print("       Use: `lsof -nP -iTCP:%d | grep LISTEN` to find the associated process." % port)
             print("       It may take ~30s for this port to become available when restarting %s." % service)
-            exit(1)
+            sys.exit(1)
     return True
 
 
@@ -107,14 +109,14 @@ def main():
     viewer_dir.resolve().absolute()
     if not viewer_dir.exists():
         print("ERROR: Viewer could not be found at '%s'" % args['--viewer'])
-        exit(1)
+        sys.exit(1)
     elif not (viewer_dir / 'package.json').exists():
         print("ERROR: Directory '%s' does not appear to contain the viewer code" % args['--viewer'])
-        exit(1)
+        sys.exit(1)
     path = Path(args['DIRECTORY'])
     if not path.exists():
         print("ERROR: Directory '%s' does not exist" % args['DIRECTORY'])
-        exit(1)
+        sys.exit(1)
     if (path / 'meta.json').exists():
         print("WARNING: Directory '%s' appears to be a BlobDir." % args['DIRECTORY'])
         print("         Hosting the parent directory instead.")
@@ -155,7 +157,7 @@ def main():
                 except ProcessLookupError:
                     pass
             break
-        elif viewer.poll() is not None:
+        if viewer.poll() is not None:
             for line in viewer.stdout.readlines():
                 print(line.strip())
             for line in viewer.stderr.readlines():
@@ -165,7 +167,7 @@ def main():
             except ProcessLookupError:
                 pass
             break
-        elif not ready:
+        if not ready:
             print("Visit %s to use the interactive BlobToolKit Viewer." % url)
             ready = True
         time.sleep(1)

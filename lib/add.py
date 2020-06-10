@@ -58,6 +58,8 @@ Examples:
 
 """
 
+import sys
+
 from docopt import docopt
 
 import blob_db
@@ -75,7 +77,7 @@ import trnascan
 from fetch import fetch_field, fetch_metadata, fetch_taxdump
 from field import Identifier
 
-FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
+FIELDS = [{'flag': '--fasta', 'module': fasta, 'optional': ['identifiers']},
           {'flag': '--blobdb', 'module': blob_db, 'depends': ['identifiers']},
           {'flag': '--busco', 'module': busco, 'depends': ['identifiers']},
           {'flag': '--text', 'module': text, 'depends': ['identifiers']},
@@ -105,13 +107,23 @@ def main():
     dependencies = {}
     for field in FIELDS:
         if args[field['flag']]:
-            for dep in field['depends']:
-                if dep not in dependencies or not dependencies[dep]:
-                    dependencies[dep] = fetch_field(args['DIRECTORY'], dep, meta)
+            if 'depends' in field:
+                for dep in field['depends']:
+                    if dep not in dependencies or not dependencies[dep]:
+                        dependencies[dep] = fetch_field(args['DIRECTORY'], dep, meta)
+            for dep_key, dep_value in dependencies.items():
+                if not dep_value:
+                    print("ERROR: '%s.json' was not found in the BlobDir." % dep_key)
+                    print("ERROR: You may need to rebuild the BlobDir to run this command.")
+                    sys.exit(1)
             if field['flag'] == '--hits':
                 if not taxdump:
                     taxdump = fetch_taxdump(args['--taxdump'])
             parents = field['module'].parent()
+            if 'optional' in field:
+                for dep in field['optional']:
+                    if dep not in dependencies or not dependencies[dep]:
+                        dependencies[dep] = fetch_field(args['DIRECTORY'], dep, meta)
             parsed = field['module'].parse(
                 args[field['flag']],
                 **{key: args[key] for key in args.keys()},
