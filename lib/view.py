@@ -217,13 +217,13 @@ def static_view(args, loc, viewer):
         if viewer is not None:
             viewer.send_signal(signal.SIGINT)
         driver.quit()
-        display.popen.terminate()
+        display.sendstop()
     except Exception as err:
         print(err)
         if viewer is not None:
             viewer.send_signal(signal.SIGINT)
         driver.quit()
-        display.popen.terminate()
+        display.sendstop()
     return True
 
 
@@ -248,12 +248,12 @@ def interactive_view(args, loc, viewer):
             time.sleep(5)
             poll = viewer.poll()
         driver.quit()
-        display.popen.terminate()
+        display.sendstop()
         viewer.send_signal(signal.SIGINT)
     except Exception as err:
         print(err)
         driver.quit()
-        display.popen.terminate()
+        display.sendstop()
         viewer.send_signal(signal.SIGINT)
     return True
 
