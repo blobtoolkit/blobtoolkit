@@ -307,8 +307,8 @@ def parse(files, **kwargs):
                                 taxrule,
                                 prefix,
                                 int(kwargs['--hit-count']),
-                                lengths,
-                                identifiers)
+                                identifiers,
+                                lengths)
         fields = create_fields(results, prefix, files)
     if 'cat' not in kwargs['meta'].plot:
         kwargs['meta'].plot.update({'cat': "%s_phylum" % prefix})
