@@ -47,34 +47,32 @@ from subprocess import Popen
 
 from docopt import docopt
 
-__version__ = "blobtools v2.3.2"
+__version__ = "blobtools v2.3.3"
 
-MAINDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ''))
-LIBDIR = os.path.abspath(os.path.join(MAINDIR, 'lib/'))
+MAINDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ""))
+LIBDIR = os.path.abspath(os.path.join(MAINDIR, "lib/"))
 
-if __name__ == '__main__':
-    ARGS = docopt(__doc__,
-                  version=__version__,
-                  options_first=True)
-    ARGV = [ARGS['<command>']] + ARGS['<args>']
-    if ARGS['<command>'] == 'add':
-        PROC = Popen([LIBDIR + '/add.py'] + ARGV)
-    elif ARGS['<command>'] == 'calc':
-        PROC = Popen([LIBDIR + '/calc.py'] + ARGV)
-    elif ARGS['<command>'] == 'create':
-        PROC = Popen([LIBDIR + '/add.py'] + ['add', '--create'] + ARGS['<args>'])
-    elif ARGS['<command>'] == 'filter':
-        PROC = Popen([LIBDIR + '/filter.py'] + ARGV)
-    elif ARGS['<command>'] == 'host':
-        PROC = Popen([LIBDIR + '/host.py'] + ARGV)
-    elif ARGS['<command>'] == 'replace':
-        PROC = Popen([LIBDIR + '/add.py'] + ['add', '--replace'] + ARGS['<args>'])
-    elif ARGS['<command>'] == 'remove':
-        PROC = Popen([LIBDIR + '/remove.py'] + ARGV)
-    elif ARGS['<command>'] == 'view':
-        PROC = Popen([LIBDIR + '/view.py'] + ARGV)
+if __name__ == "__main__":
+    ARGS = docopt(__doc__, version=__version__, options_first=True)
+    ARGV = [ARGS["<command>"]] + ARGS["<args>"]
+    if ARGS["<command>"] == "add":
+        PROC = Popen([LIBDIR + "/add.py"] + ARGV)
+    elif ARGS["<command>"] == "calc":
+        PROC = Popen([LIBDIR + "/calc.py"] + ARGV)
+    elif ARGS["<command>"] == "create":
+        PROC = Popen([LIBDIR + "/add.py"] + ["add", "--create"] + ARGS["<args>"])
+    elif ARGS["<command>"] == "filter":
+        PROC = Popen([LIBDIR + "/filter.py"] + ARGV)
+    elif ARGS["<command>"] == "host":
+        PROC = Popen([LIBDIR + "/host.py"] + ARGV)
+    elif ARGS["<command>"] == "replace":
+        PROC = Popen([LIBDIR + "/add.py"] + ["add", "--replace"] + ARGS["<args>"])
+    elif ARGS["<command>"] == "remove":
+        PROC = Popen([LIBDIR + "/remove.py"] + ARGV)
+    elif ARGS["<command>"] == "view":
+        PROC = Popen([LIBDIR + "/view.py"] + ARGV)
     else:
-        PROC = Popen([os.path.join(MAINDIR, './blobtools'), '-h'])
+        PROC = Popen([os.path.join(MAINDIR, "./blobtools"), "-h"])
 
     try:
         PROC.wait()
