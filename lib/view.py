@@ -58,11 +58,11 @@ def test_loc(args):
     info = args['--host'].split(':')
     dataset = Path(args['DATASET']).name
     if len(info) >= 2 and info[1] != '//localhost':
-        loc = "%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset)
+        loc = "%s/%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset, dataset)
         return loc, None, None, None
     if len(info) == 1 and info[0] != 'localhost':
         # need to add test for http vs https
-        loc = "http://%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset)
+        loc = "http://%s/%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset, dataset)
         return loc, None, None, None
     if len(info) == 3:
         port = info[2]
@@ -72,7 +72,7 @@ def test_loc(args):
             print("       Unable to connect to %s" % args['--host'])
             sys.exit(1)
         else:
-            loc = "%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset)
+            loc = "%s/%s/%s/dataset/%s" % (args['--host'], args['--prefix'], dataset, dataset)
             return loc, None, None, None
     if not Path(args['DATASET']).exists():
         print("ERROR: DATASET '%s' must be a valid path to begin hosting.")
@@ -96,7 +96,7 @@ def test_loc(args):
                     stdout=PIPE,
                     stderr=PIPE,
                     encoding='ascii')
-    loc = "%s:%d/%s/dataset/%s" % (args['--host'], port, args['--prefix'], dataset)
+    loc = "%s:%d/%s/%s/dataset/%s" % (args['--host'], port, args['--prefix'], dataset, dataset)
     for i in tqdm(range(0, 15),
                   unit='s',
                   ncols=75,
@@ -249,12 +249,14 @@ def interactive_view(args, loc, viewer):
             poll = viewer.poll()
         driver.quit()
         display.stop()
-        viewer.send_signal(signal.SIGINT)
+        if viewer is not None:
+            viewer.send_signal(signal.SIGINT)
     except Exception as err:
         print(err)
         driver.quit()
         display.stop()
-        viewer.send_signal(signal.SIGINT)
+        if viewer is not None:
+            viewer.send_signal(signal.SIGINT)
     return True
 
 
@@ -276,11 +278,13 @@ def remote_view(args, loc, viewer, port, api_port):
                                                                                       api_port))
         while True:
             time.sleep(5)
-        viewer.send_signal(signal.SIGINT)
+        if viewer is not None:
+            viewer.send_signal(signal.SIGINT)
     except Exception as err:
         print('remote exception')
         print(err)
-        viewer.send_signal(signal.SIGINT)
+        if viewer is not None:
+            viewer.send_signal(signal.SIGINT)
     return True
 
 
@@ -299,7 +303,8 @@ def main():
         pass
     finally:
         time.sleep(1)
-        viewer.send_signal(signal.SIGINT)
+        if viewer is not None:
+            viewer.send_signal(signal.SIGINT)
         time.sleep(1)
 
 
