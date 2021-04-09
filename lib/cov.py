@@ -54,9 +54,9 @@ def parse_bam(bam_file, **kwargs):
     parts = bam_file.split('=')
     base_name = parts[1]
     f_char = Path(parts[0]).suffix[1]
-    index_file = Path("%s.bai" % parts[0])
+    index_file = Path("%s.csi" % parts[0])
     if not index_file.is_file():
-        pysam.index(parts[0])
+        pysam.index("-c", "-m", "14", parts[0])
     else:
         index_file = False
     stats = {}
@@ -114,7 +114,7 @@ def apply_filter(ids, fastq_files, **kwargs):
     bam_file = kwargs['--cov']
     read_ids = set()
     filetype_letter = Path(bam_file).suffix[1]
-    index_file = Path("%s.bai" % bam_file)
+    index_file = Path("%s.csi" % bam_file)
     if not index_file.is_file():
         pysam.index(bam_file)
     else:
