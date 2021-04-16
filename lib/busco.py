@@ -11,13 +11,16 @@ from field import MultiArray
 def parse_busco(busco_file, identifiers):  # pylint: disable=too-many-locals
     """Parse BUSCO results into a MultiArray."""
     data = file_io.read_file(busco_file)
+    if not data:
+        print("WARNING file %s is empty" % busco_file)
+        return None
     lines = data.split("\n")
     version = lines[0].split(":")[1].strip()
     desc = re.split(r":\s*|\(|\)\s*|,\s*", lines[1])
     meta = {
         "version": version,
         "set": desc[1].strip(),
-        "count": max(int(desc[5].strip()), int(desc[7].strip())),
+        "count": int(desc[7].strip()),
         "file": busco_file,
     }
     version = int(version.split(".")[0])
@@ -47,9 +50,19 @@ def parse_busco(busco_file, identifiers):  # pylint: disable=too-many-locals
                 contig = row[contig_index].split(":")[0]
             results[contig].append([row[busco_index], row[status_index]])
     if not identifiers.validate_list(list(results.keys())):
-        raise UserWarning(
-            "Contig names in the Busco file did not match dataset identifiers."
-        )
+        # try removing _\d+ suffix added by prokka-based busco
+        res = {}
+        for contig, values in results.items():
+            ctg = re.sub(r"_\d+$", "", contig)
+            if ctg not in res:
+                res[ctg] = values
+            else:
+                res[ctg] += values
+        results = res
+        if not identifiers.validate_list(list(results.keys())):
+            raise UserWarning(
+                "Contig names in the Busco file did not match dataset identifiers."
+            )
     values = [results[id] if id in results else [] for id in identifiers.values]
     busco_field = MultiArray(
         meta["field_id"],
@@ -66,9 +79,9 @@ def parse(files, **kwargs):
     """Parse all BUSCO files."""
     parsed = []
     for file in files:
-        parsed.append(
-            parse_busco(file, identifiers=kwargs["dependencies"]["identifiers"])
-        )
+        busco = parse_busco(file, identifiers=kwargs["dependencies"]["identifiers"])
+        if busco is not None:
+            parsed.append(busco)
     return parsed
 
 
