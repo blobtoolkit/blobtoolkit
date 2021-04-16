@@ -6,7 +6,8 @@
 Add data to a BlobDir.
 
 Usage:
-    blobtools add [--busco TSV...] [--cov BAM...] [--hits TSV...] [--fasta FASTA] [--hits-cols LIST]
+    blobtools add [--bed BED...] [--beddir DIRECTORY]
+                  [--busco TSV...] [--cov BAM...] [--hits TSV...] [--fasta FASTA] [--hits-cols LIST]
                   [--key path=value...] [--link path=url...] [--taxid INT] [--skip-link-test]
                   [--blobdb JSON] [--meta YAML] [--synonyms TSV...] [--trnascan TSV...]
                   [--text TXT...] [--text-delimiter STRING] [--text-cols LIST] [--text-header]
@@ -18,6 +19,8 @@ Arguments:
     DIRECTORY             Existing Blob directory.
 
 Options:
+    --bed BED             BED format file.
+    --beddir DIRECTORY    Directory containing one or more BED format files.
     --busco TSV           BUSCO full_table.tsv output file.
     --cov BAM             BAM/SAM/CRAM read alignment file.
     --fasta FASTA         FASTA sequence file.
@@ -62,6 +65,7 @@ import sys
 
 from docopt import docopt
 
+import bed
 import blob_db
 import busco
 import cov
@@ -77,21 +81,30 @@ import trnascan
 from fetch import fetch_field, fetch_metadata, fetch_taxdump
 from field import Identifier
 
-FIELDS = [{'flag': '--fasta', 'module': fasta, 'optional': ['identifiers']},
-          {'flag': '--blobdb', 'module': blob_db, 'depends': ['identifiers']},
-          {'flag': '--busco', 'module': busco, 'depends': ['identifiers']},
-          {'flag': '--text', 'module': text, 'depends': ['identifiers']},
-          {'flag': '--trnascan', 'module': trnascan, 'depends': ['identifiers']},
-          {'flag': '--cov', 'module': cov, 'depends': ['identifiers', 'length', 'ncount']},
-          {'flag': '--hits', 'module': hits, 'depends': ['identifiers', 'length']},
-          {'flag': '--synonyms', 'module': synonyms, 'depends': ['identifiers']}]
-PARAMS = set(['--taxrule', '--threads', '--pileup-args', '--evalue', '--bitscore', '--hit-count'])
+FIELDS = [
+    {"flag": "--bed", "module": bed, "optional": ["identifiers"]},
+    {"flag": "--beddir", "module": bed, "optional": ["identifiers"]},
+    {"flag": "--fasta", "module": fasta, "optional": ["identifiers"]},
+    {"flag": "--blobdb", "module": blob_db, "depends": ["identifiers"]},
+    {"flag": "--busco", "module": busco, "depends": ["identifiers"]},
+    {"flag": "--text", "module": text, "depends": ["identifiers"]},
+    {"flag": "--trnascan", "module": trnascan, "depends": ["identifiers"]},
+    {"flag": "--cov", "module": cov, "depends": ["identifiers", "length", "ncount"]},
+    {"flag": "--hits", "module": hits, "depends": ["identifiers", "length"]},
+    {"flag": "--synonyms", "module": synonyms, "depends": ["identifiers"]},
+]
+PARAMS = set(
+    ["--taxrule", "--threads", "--pileup-args", "--evalue", "--bitscore", "--hit-count"]
+)
 
 
 def has_field_warning(meta, field_id):
     """Warn if dataset has existing field with same id."""
     if meta.has_field(field_id):
-        print("WARN: Field \'%s\' is already present in dataset, not overwriting." % field_id)
+        print(
+            "WARN: Field '%s' is already present in dataset, not overwriting."
+            % field_id
+        )
         print("WARN: Use '--replace' flag to overwrite existing field.")
         return 1
     return 0
@@ -100,66 +113,77 @@ def has_field_warning(meta, field_id):
 def main():
     """Entrypoint for blobtools add."""
     args = docopt(__doc__)
-    meta = fetch_metadata(args['DIRECTORY'], **args)
-    if args['--fasta']:
-        meta.assembly.update({'file': args['--fasta']})
+    meta = fetch_metadata(args["DIRECTORY"], **args)
+    if args["--fasta"]:
+        meta.assembly.update({"file": args["--fasta"]})
     taxdump = None
     dependencies = {}
     for field in FIELDS:
-        if args[field['flag']]:
-            if 'depends' in field:
-                for dep in field['depends']:
+        if args[field["flag"]]:
+            if "depends" in field:
+                for dep in field["depends"]:
                     if dep not in dependencies or not dependencies[dep]:
-                        dependencies[dep] = fetch_field(args['DIRECTORY'], dep, meta)
+                        dependencies[dep] = fetch_field(args["DIRECTORY"], dep, meta)
             for dep_key, dep_value in dependencies.items():
                 if not dep_value:
                     print("ERROR: '%s.json' was not found in the BlobDir." % dep_key)
-                    print("ERROR: You may need to rebuild the BlobDir to run this command.")
+                    print(
+                        "ERROR: You may need to rebuild the BlobDir to run this command."
+                    )
                     sys.exit(1)
-            if field['flag'] == '--hits':
+            if field["flag"] == "--hits":
                 if not taxdump:
-                    taxdump = fetch_taxdump(args['--taxdump'])
-            parents = field['module'].parent()
-            if 'optional' in field:
-                for dep in field['optional']:
+                    taxdump = fetch_taxdump(args["--taxdump"])
+            parents = field["module"].parent()
+            if "optional" in field:
+                for dep in field["optional"]:
                     if dep not in dependencies or not dependencies[dep]:
-                        dependencies[dep] = fetch_field(args['DIRECTORY'], dep, meta)
-            parsed = field['module'].parse(
-                args[field['flag']],
+                        dependencies[dep] = fetch_field(args["DIRECTORY"], dep, meta)
+            parsed = field["module"].parse(
+                args[field["flag"]],
                 **{key: args[key] for key in args.keys()},
                 taxdump=taxdump,
                 dependencies=dependencies,
-                meta=meta)
+                meta=meta
+            )
             if not isinstance(parsed, list):
                 parsed = [parsed]
             for data in parsed:
-                if not args['--replace']:
+                if not args["--replace"]:
                     if has_field_warning(meta, data.field_id):
                         continue
                 for parent in data.parents:
-                    if 'range' in parent:
-                        parent_meta = meta.field_meta(parent['id'])
-                        if parent_meta and 'range' in parent_meta:
-                            parent['range'][0] = min(parent['range'][0], parent_meta['range'][0])
-                            parent['range'][1] = max(parent['range'][1], parent_meta['range'][1])
-                meta.add_field(parents+data.parents, **data.meta)
+                    if "range" in parent:
+                        parent_meta = meta.field_meta(parent["id"])
+                        if parent_meta and "range" in parent_meta:
+                            parent["range"][0] = min(
+                                parent["range"][0], parent_meta["range"][0]
+                            )
+                            parent["range"][1] = max(
+                                parent["range"][1], parent_meta["range"][1]
+                            )
+                meta.add_field(parents + data.parents, **data.meta)
                 if isinstance(data, Identifier):
                     meta.records = len(data.values)
-                json_file = "%s/%s.json" % (args['DIRECTORY'], data.field_id)
+                json_file = "%s/%s.json" % (args["DIRECTORY"], data.field_id)
                 file_io.write_file(json_file, data.values_to_dict())
                 dependencies[data.field_id] = data
-    if 'identifiers' not in dependencies:
-        dependencies['identifiers'] = fetch_field(args['DIRECTORY'], 'identifiers', meta)
-    for string in args['--link']:
-        link.add(string, meta, dependencies['identifiers'].values, args['--skip-link-test'])
-    for string in args['--key']:
-        key.add(string, meta, args['--replace'])
-    if args['--taxid']:
+    if "identifiers" not in dependencies:
+        dependencies["identifiers"] = fetch_field(
+            args["DIRECTORY"], "identifiers", meta
+        )
+    for string in args["--link"]:
+        link.add(
+            string, meta, dependencies["identifiers"].values, args["--skip-link-test"]
+        )
+    for string in args["--key"]:
+        key.add(string, meta, args["--replace"])
+    if args["--taxid"]:
         if not taxdump:
-            taxdump = fetch_taxdump(args['--taxdump'])
-        taxid.add(args['--taxid'], taxdump, meta)
-    file_io.write_file("%s/meta.json" % args['DIRECTORY'], meta.to_dict())
+            taxdump = fetch_taxdump(args["--taxdump"])
+        taxid.add(args["--taxid"], taxdump, meta)
+    file_io.write_file("%s/meta.json" % args["DIRECTORY"], meta.to_dict())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

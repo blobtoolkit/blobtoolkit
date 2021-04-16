@@ -11,12 +11,12 @@ from field import Array, Category, Field, Identifier, MultiArray, Variable
 from taxdump import Taxdump
 
 TYPES = {
-    'identifier': Identifier,
-    'category': Category,
-    'variable': Variable,
-    'array': Array,
-    'multiarray': MultiArray,
-    'field': Field
+    "identifier": Identifier,
+    "category": Category,
+    "variable": Variable,
+    "array": Array,
+    "multiarray": MultiArray,
+    "field": Field,
 }
 
 
@@ -30,8 +30,8 @@ def fetch_field(path_to_dataset, field_id, meta=None):
     try:
         data = file_io.load_yaml("%s/%s.json" % (path_to_dataset, field_id))
         if data is not None:
-            data.update({'meta': field_meta})
-        field = TYPES[field_meta['type']](field_id, **data)
+            data.update({"meta": field_meta})
+        field = TYPES[field_meta["type"]](field_id, **data)
     except TypeError:
         field = False
     except KeyError:
@@ -45,25 +45,29 @@ def fetch_metadata(path_to_dataset, **kwargs):
 
     fetch_metadata('tests/files/dataset')
     """
-    dataset_id = path_to_dataset.split('/').pop()
+    dataset_id = path_to_dataset.split("/").pop()
     new_meta = {}
+    meta = None
     if not os.path.exists(path_to_dataset):
         os.makedirs(path_to_dataset)
-    if kwargs.get('--meta'):
-        new_meta = file_io.load_yaml(kwargs['--meta'])
-        if kwargs['--fasta'] and kwargs['--replace']:
-            files = glob.glob("%s/*" % kwargs['DIRECTORY'])
+    if kwargs.get("--meta"):
+        new_meta = file_io.load_yaml(kwargs["--meta"])
+        if (kwargs["--bed"] or kwargs["--fasta"]) and kwargs["--replace"]:
+            files = glob.glob("%s/*" % kwargs["DIRECTORY"])
             for file in files:
                 os.remove(file)
     try:
-        meta = kwargs['meta']
+        meta = kwargs["meta"]
     except KeyError:
-        meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
-    if not meta:
+        try:
+            meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
+        except ValueError:
+            pass
+    if meta is None:
         meta = {}
-    if 'id' not in meta:
-        meta['id'] = dataset_id
-        meta['name'] = dataset_id
+    if "id" not in meta:
+        meta["id"] = dataset_id
+        meta["name"] = dataset_id
     for key, value in new_meta.items():
         if isinstance(value, dict):
             try:
@@ -81,9 +85,9 @@ def fetch_taxdump(path_to_taxdump):
     """Load Taxdump from file."""
     json_file = "%s/taxdump.json" % path_to_taxdump
     if not Path(json_file).exists():
-        print('Parsing taxdump')
+        print("Parsing taxdump")
     else:
-        print('Loading parsed taxdump')
+        print("Loading parsed taxdump")
     data = file_io.load_yaml(json_file)
     if data is None:
         taxdump = Taxdump(path_to_taxdump)
@@ -93,6 +97,7 @@ def fetch_taxdump(path_to_taxdump):
     return taxdump
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
