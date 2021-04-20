@@ -37,7 +37,7 @@ Options:
     --taxdump DIRECTORY   Location of NCBI new_taxdump directory.
     --taxrule rulename[=prefix]
                           Rule to use when assigning BLAST hits to taxa (bestsum, bestsumorder,
-                          bestdistsum, bestdistsumorder).
+                          bestdistsum, bestdistsumorder, blastp).
                           An alternate prefix may be specified. [Default: bestsumorder]
     --threads INT         Number of threads to use for multithreaded tasks. [Default: 1]
     --evalue FLOAT        Set evalue cutoff when parsing hits file. [Default: 1]
