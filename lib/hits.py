@@ -49,7 +49,6 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
                 "title": parts[1],
             }
         else:
-            continue
             try:
                 hit = {
                     "subject": row[cols["sseqid"]],
