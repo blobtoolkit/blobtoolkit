@@ -5,7 +5,7 @@
 
 import math
 import sys
-from collections import Counter, OrderedDict
+from collections import Counter, OrderedDict, defaultdict
 from glob import glob
 from os import path
 from pathlib import Path
@@ -14,28 +14,48 @@ from tolkein import tofile
 from tqdm import tqdm
 
 import file_io
-from field import Identifier, Variable
+from field import Identifier, MultiArray, Variable
 from run_external import seqtk_subseq
 
 SETTINGS = {
     "gc": {
         "meta": {
             "preload": True,
-            "scale": "scaleLinear",
             "name": "GC",
-            "datatype": "float",
+            "scale": "scaleLinear",
             "type": "variable",
-        }
+            "datatype": "float",
+        },
+        "parents": [
+            {
+                "id": "gc_stats",
+                "scale": "scaleLinear",
+                "type": "variable",
+                "datatype": "float",
+            },
+            "children",
+        ],
+        "plot_axis": "x",
     },
     "length": {
         "meta": {
             "preload": True,
-            "scale": "scaleLog",
             "name": "Length",
             "clamp": 1,
+            "scale": "scaleLog",
             "datatype": "integer",
             "type": "variable",
-        }
+        },
+        "parents": [
+            {
+                "id": "length_stats",
+                "scale": "scaleLog",
+                "datatype": "integer",
+                "type": "variable",
+            },
+            "children",
+        ],
+        "plot_axis": "z",
     },
     "cov": {
         "meta": {
@@ -59,27 +79,54 @@ SETTINGS = {
     },
     "n": {
         "meta": {
-            "scale": "scaleLinear",
             "name": "N",
+            "scale": "scaleLinear",
             "datatype": "float",
             "type": "variable",
-        }
+        },
+        "parents": [
+            {
+                "id": "n_stats",
+                "scale": "scaleLinear",
+                "datatype": "float",
+                "type": "variable",
+            },
+            "children",
+        ],
     },
     "masked": {
         "meta": {
-            "scale": "scaleLinear",
             "name": "Masked",
+            "scale": "scaleLinear",
             "datatype": "float",
             "type": "variable",
-        }
+        },
+        "parents": [
+            {
+                "id": "masked_stats",
+                "scale": "scaleLinear",
+                "datatype": "float",
+                "type": "variable",
+            },
+            "children",
+        ],
     },
     "ncount": {
         "meta": {
-            "scale": "scaleLinear",
             "name": "N count",
+            "scale": "scaleLinear",
             "datatype": "integer",
             "type": "variable",
-        }
+        },
+        "parents": [
+            {
+                "id": "ncount_stats",
+                "scale": "scaleLinear",
+                "datatype": "integer",
+                "type": "variable",
+            },
+            "children",
+        ],
     },
 }
 
@@ -96,6 +143,19 @@ def parse_full_bed(filename):
     return parsed
 
 
+def parse_window_bed(filename):
+    """Parse a BED file containing multiple values per sequence."""
+    parsed = defaultdict(list)
+    with tofile.open_file_handle(filename) as fh:
+        for line in fh:
+            row = line.strip().split("\t")
+            parsed[row[0]].append((int(row[1]), float(row[4])))
+    windowed = {}
+    for seq_id, arr in parsed.items():
+        windowed[seq_id] = [tup[1] for tup in sorted(arr, key=lambda tup: tup[0])]
+    return windowed
+
+
 def parse(files, **kwargs):
     if isinstance(files, str) and path.isdir(files):
         print("Reading all BED files in %s" % files)
@@ -109,7 +169,7 @@ def parse(files, **kwargs):
         field = filepath.name.split(".")[-2]
         filenames[field] = filepath.name
         if field.endswith("_windows"):
-            windows[field.replace("_windows", "")] = filename
+            windows[field.replace("_windows", "")] = parse_window_bed(filename)
         else:
             full[field] = parse_full_bed(filename)
     identifiers = kwargs["dependencies"]["identifiers"]
@@ -191,6 +251,29 @@ def parse(files, **kwargs):
                         parents=parents,
                     )
                 )
+                if field in windows:
+                    window_values = []
+                    for seq_id in identifiers.values:
+                        values = windows[field][seq_id] if seq_id in data else []
+                        if meta["datatype"] == "integer":
+                            values = [[int(value)] for value in values]
+                        else:
+                            values = [[value] for value in values]
+                        window_values.append(values)
+                    parsed.append(
+                        MultiArray(
+                            "%s_windows" % field,
+                            meta={
+                                "field_id": "%s_windows" % field,
+                                "name": "%s windows" % meta["name"],
+                                "type": "multiarray",
+                                "datatype": meta["datatype"],
+                            },
+                            values=window_values,
+                            parents=parents,
+                            headers=[field],
+                        )
+                    )
     return parsed
 
 

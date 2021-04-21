@@ -112,6 +112,7 @@ def apply_taxrule(
                     "score": blank[:],
                     "positions": blank[:],
                     "hits": blank[:],
+                    "windows": blank[:],
                 },
             }
             for rank in taxdump.list_ranks()
@@ -123,6 +124,7 @@ def apply_taxrule(
             "score": defaultdict(float),
             "positions": defaultdict(list),
             "hits": defaultdict(list),
+            "windows": defaultdict(list),
         }
         for rank in taxdump.list_ranks()
     ]
@@ -192,11 +194,13 @@ def apply_taxrule(
                 segments = dict(dist_scores).keys()
                 cat_freqs = defaultdict(int)
                 cat_scores = defaultdict(float)
+                values[index]["windows"][seq_id] = []
                 for segment in segments:
                     seg_cat = max(dist_scores[segment], key=dist_scores[segment].get)
                     seg_score = dist_scores[segment].get(seg_cat)
                     cat_freqs[seg_cat] += 1
                     cat_scores[seg_cat] += seg_score
+                    values[index]["windows"][seq_id].append([seg_cat])
                 max_cat = None
                 max_freq = 0
                 max_score = 0
@@ -216,7 +220,6 @@ def apply_taxrule(
                 values[index]["score"][seq_id] = cat_scores.get(top_cat)
                 values[index]["cindex"][seq_id] = len(cat_scores.keys()) - 1
     for index, rank in enumerate(taxdump.list_ranks()):
-        print(list(values[index]["category"].keys()))
         if not identifiers.validate_list(list(values[index]["category"].keys())):
             raise UserWarning(
                 "Contig names in the hits file do not match dataset identifiers."
@@ -243,6 +246,10 @@ def apply_taxrule(
                     results[index]["data"]["positions"][i] = []
                     if index == 0:
                         results[index]["data"]["hits"][i] = []
+                if values[index]["windows"]:
+                    results[index]["data"]["windows"][i] = values[index]["windows"][
+                        seq_id
+                    ]
     return results
 
 
@@ -348,6 +355,31 @@ def create_fields(results, taxrule, files, fields=None):
                 headers=headers,
             )
         )
+        if "dist" in taxrule:
+            subfield = "windows"
+            field_id = "%s_%s" % (result["field_id"], subfield)
+            if len(result["data"][subfield]) > 1:
+                headers = ["name"]
+            else:
+                headers = ["name"]
+            fields.append(
+                MultiArray(
+                    field_id,
+                    values=result["data"][subfield],
+                    fixed_keys=main.keys,
+                    meta={
+                        "field_id": field_id,
+                        "name": field_id,
+                        "type": "array",
+                        "datatype": "string",
+                        "preload": False,
+                        "active": False,
+                    },
+                    parents=parents,
+                    category_slot=0,
+                    headers=headers,
+                )
+            )
     return fields
 
 
