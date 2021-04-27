@@ -57,6 +57,42 @@ SETTINGS = {
         ],
         "plot_axis": "z",
     },
+    "position": {
+        "meta": {
+            "name": "Position",
+            "scale": "scaleLinear",
+            "datatype": "integer",
+            "type": "variable",
+            "range": [0, 1],
+        },
+        "parents": [
+            {
+                "id": "position_stats",
+                "scale": "scaleLinear",
+                "datatype": "integer",
+                "type": "variable",
+            },
+            "children",
+        ],
+    },
+    "proportion": {
+        "meta": {
+            "name": "Proportion",
+            "scale": "scaleLinear",
+            "datatype": "float",
+            "type": "variable",
+            "range": [0, 1],
+        },
+        "parents": [
+            {
+                "id": "proportion_stats",
+                "scale": "scaleLinear",
+                "datatype": "float",
+                "type": "variable",
+            },
+            "children",
+        ],
+    },
     "cov": {
         "meta": {
             "preload": 1,
@@ -230,7 +266,11 @@ def parse(files, **kwargs):
                                     parent["range"][1], value_range[1]
                                 )
                     if not parent_range:
-                        meta["range"] = value_range
+                        if "range" in meta:
+                            meta["range"][0] = min(meta["range"][0], value_range[0])
+                            meta["range"][1] = max(meta["range"][1], value_range[1])
+                        else:
+                            meta["range"] = value_range
                     if "preload" in meta and meta["preload"] == 1:
                         if value_range[1] > ranges[suffix]["range"][1]:
                             meta["preload"] = True
