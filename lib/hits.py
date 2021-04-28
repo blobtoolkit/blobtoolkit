@@ -194,13 +194,15 @@ def apply_taxrule(
                 segments = dict(dist_scores).keys()
                 cat_freqs = defaultdict(int)
                 cat_scores = defaultdict(float)
-                values[index]["windows"][seq_id] = []
+                values[index]["windows"][seq_id] = [
+                    [None] for i in range(length_dict[seq_id]["segments"])
+                ]
                 for segment in segments:
                     seg_cat = max(dist_scores[segment], key=dist_scores[segment].get)
                     seg_score = dist_scores[segment].get(seg_cat)
                     cat_freqs[seg_cat] += 1
                     cat_scores[seg_cat] += seg_score
-                    values[index]["windows"][seq_id].append([seg_cat])
+                    values[index]["windows"][seq_id][segment] = [seg_cat]
                 max_cat = None
                 max_freq = 0
                 max_score = 0

@@ -56,45 +56,64 @@ import file_io
 import hits
 import taxid
 import text
+
 # from dataset import Metadata
 from fetch import fetch_field, fetch_metadata
+
 # from taxdump import Taxdump
 from field import Category, Identifier, MultiArray, Variable
 
-FIELDS = [{'flag': '--fasta', 'module': fasta, 'depends': ['identifiers']},
-          {'flag': '--fastq', 'module': cov, 'depends': ['identifiers'], 'requires': ['--cov']},
-          {'flag': '--text',
-           'module': text,
-           'depends': ['identifiers'],
-           'requires': ['--text-delimiter', '--text-header', '--text-id-column']}]
+FIELDS = [
+    {"flag": "--fasta", "module": fasta, "depends": ["identifiers"]},
+    {
+        "flag": "--fastq",
+        "module": cov,
+        "depends": ["identifiers"],
+        "requires": ["--cov"],
+    },
+    {
+        "flag": "--text",
+        "module": text,
+        "depends": ["identifiers"],
+        "requires": ["--text-delimiter", "--text-header", "--text-id-column"],
+    },
+]
 
-SUMMARY = [{'title': 'taxonomy', 'module': taxid, 'depends': []},
-           {'title': 'baseComposition', 'module': fasta, 'depends': ['gc', 'ncount', 'length']},
-           {'title': 'hits', 'module': hits, 'depends': ['length', 'gc']},
-           {'title': 'busco', 'module': busco, 'depends': []},
-           {'title': 'readMapping', 'module': cov, 'depends': ['length']}]
+SUMMARY = [
+    {"title": "taxonomy", "module": taxid, "depends": []},
+    {
+        "title": "baseComposition",
+        "module": fasta,
+        "depends": ["gc", "ncount", "length"],
+    },
+    {"title": "hits", "module": hits, "depends": ["length", "gc"]},
+    {"title": "busco", "module": busco, "depends": []},
+    {"title": "readMapping", "module": cov, "depends": ["length"]},
+]
 
 
 def parse_params(args, meta):
     """Parse and perform sanity checks on filer parameters."""
-    strings = args.get('--param', [])
-    valid = {'variable': ['Min', 'Max', 'Inv'],
-             'category': ['Keys', 'Inv'],
-             'multiarray': ['Keys', 'MinLength', 'MaxLength', 'Inv']}
-    if args.get('--query-string'):
-        qstr = args['--query-string']
-        qstr = re.sub(r'^.*\?', '', qstr)
-        qstr = re.sub(r'#.*$', '', qstr)
-        strings += urllib.parse.unquote(qstr).split('&')
+    strings = args.get("--param", [])
+    valid = {
+        "variable": ["Min", "Max", "Inv"],
+        "category": ["Keys", "Inv"],
+        "multiarray": ["Keys", "MinLength", "MaxLength", "Inv"],
+    }
+    if args.get("--query-string"):
+        qstr = args["--query-string"]
+        qstr = re.sub(r"^.*\?", "", qstr)
+        qstr = re.sub(r"#.*$", "", qstr)
+        strings += urllib.parse.unquote(qstr).split("&")
     params = defaultdict(dict)
     for string in strings:
         try:
-            key, value = string.split('=')
+            key, value = string.split("=")
         except ValueError:
             print("WARN: Skipping string '%s', not a valid parameter" % string)
             continue
         try:
-            field_id, param = key.split('--')
+            field_id, param = key.split("--")
         except ValueError:
             print("WARN: Skipping string '%s', not a valid parameter" % string)
             continue
@@ -104,10 +123,13 @@ def parse_params(args, meta):
             #     field_type = 'variable'
             # else:
             #     field_type = 'category'
-            if param in valid[field_meta['type']]:
+            if param in valid[field_meta["type"]]:
                 params[field_id].update({param: value})
             else:
-                print("WARN: '%s' is not a valid parameter for field '%s'" % (param, field_id))
+                print(
+                    "WARN: '%s' is not a valid parameter for field '%s'"
+                    % (param, field_id)
+                )
         else:
             print("WARN: Skipping field '%s', not present in dataset" % field_id)
     return dict(params)
@@ -119,14 +141,15 @@ def filter_by_params(meta, directory, indices, params, invert_all):
     for field_id, filters in params.items():
         field = fetch_field(directory, field_id, meta)
         invert = False
-        if filters.get('Inv'):
+        if filters.get("Inv"):
             invert = True
         if isinstance(field, Category):
             keys = field.keys
-            if filters.get('Keys'):
-                keys = [int(x)
-                        if x.isdigit() else field.keys.index(x)
-                        for x in filters['Keys'].split(',')]
+            if filters.get("Keys"):
+                keys = [
+                    int(x) if x.isdigit() else field.keys.index(x)
+                    for x in filters["Keys"].split(",")
+                ]
                 if not invert:
                     keys = [i for i, x in enumerate(field.keys) if i not in keys]
                 keys = set(keys)
@@ -134,33 +157,44 @@ def filter_by_params(meta, directory, indices, params, invert_all):
         elif isinstance(field, Variable):
             low = -math.inf
             high = math.inf
-            if filters.get('Min'):
-                low = float(filters['Min'])
-            if filters.get('Max'):
-                high = float(filters['Max'])
+            if filters.get("Min"):
+                low = float(filters["Min"])
+            if filters.get("Max"):
+                high = float(filters["Max"])
             if invert:
-                indices = [i for i in indices if field.values[i] < low or field.values[i] > high]
+                indices = [
+                    i
+                    for i in indices
+                    if field.values[i] < low or field.values[i] > high
+                ]
             else:
                 indices = [i for i in indices if low <= field.values[i] <= high]
         elif isinstance(field, MultiArray):
             low = -math.inf
             high = math.inf
             length = False
-            if filters.get('MinLength'):
-                low = int(filters['MinLength'])
+            if filters.get("MinLength"):
+                low = int(filters["MinLength"])
                 length = True
-            if filters.get('MaxLength'):
-                high = int(filters['MaxLength'])
+            if filters.get("MaxLength"):
+                high = int(filters["MaxLength"])
                 length = True
             if length:
                 if invert:
-                    indices = [i for i in indices if len(field.values[i]) < low or len(field.values[i]) > high]
+                    indices = [
+                        i
+                        for i in indices
+                        if len(field.values[i]) < low or len(field.values[i]) > high
+                    ]
                 else:
-                    indices = [i for i in indices if low <= len(field.values[i]) <= high]
-            if filters.get('Keys'):
-                keys = [int(x)
-                        if x.isdigit() else field.keys.index(x)
-                        for x in filters['Keys'].split(',')]
+                    indices = [
+                        i for i in indices if low <= len(field.values[i]) <= high
+                    ]
+            if filters.get("Keys"):
+                keys = [
+                    int(x) if x.isdigit() else field.keys.index(x)
+                    for x in filters["Keys"].split(",")
+                ]
                 cat_i = int(field.category_slot)
                 if not invert:
                     keys = [i for i, x in enumerate(field.keys) if i not in keys]
@@ -181,7 +215,7 @@ def filter_by_params(meta, directory, indices, params, invert_all):
 def filter_by_json(identifiers, indices, json_file, invert):
     """Filter included set using json file."""
     data = file_io.load_yaml(json_file)
-    id_set = set(data['identifiers'])
+    id_set = set(data["identifiers"])
     if not invert:
         indices = [i for i in indices if identifiers[i] in id_set]
     else:
@@ -192,16 +226,16 @@ def filter_by_json(identifiers, indices, json_file, invert):
 def create_filtered_dataset(dataset_meta, indir, outdir, indices):
     """Write filtered records to new dataset."""
     meta = dataset_meta.to_dict()
-    meta.update({'fields': [],
-                 'origin': dataset_meta.dataset_id,
-                 'records': len(indices)})
-    meta.pop('id')
+    meta.update(
+        {"fields": [], "origin": dataset_meta.dataset_id, "records": len(indices)}
+    )
+    meta.pop("id")
     meta = fetch_metadata(outdir, meta=meta)
     # meta = fetch_metadata(outdir, **args)
     for field_id in dataset_meta.list_fields():
         field_meta = dataset_meta.field_meta(field_id)
-        if not field_meta.get('children'):
-            field_meta.pop('data', False)
+        if not field_meta.get("children"):
+            field_meta.pop("data", False)
             keys = None
             slot = None
             headers = None
@@ -209,10 +243,10 @@ def create_filtered_dataset(dataset_meta, indir, outdir, indices):
             if isinstance(full_field, (Variable, Identifier)):
                 values = [full_field.values[i] for i in indices]
                 if isinstance(full_field, Variable):
-                    field_meta.update({'range': [min(values), max(values)]})
-                    if field_id == 'length':
-                        meta.assembly.update({'span': sum(values)})
-                        meta.assembly.update({'scaffold-count': len(values)})
+                    field_meta.update({"range": [min(values), max(values)]})
+                    if field_id == "length":
+                        meta.assembly.update({"span": sum(values)})
+                        meta.assembly.update({"scaffold-count": len(values)})
             elif isinstance(full_field, Category):
                 full_values = full_field.expand_values()
                 values = [full_values[i] for i in indices]
@@ -224,16 +258,20 @@ def create_filtered_dataset(dataset_meta, indir, outdir, indices):
                     headers = full_field.headers
                 except AttributeError:
                     pass
-                if field_meta.get('parent'):
-                    parent_field = fetch_field(outdir, field_meta['parent'], dataset_meta)
+                if field_meta.get("parent"):
+                    parent_field = fetch_field(
+                        outdir, field_meta["parent"], dataset_meta
+                    )
                     if parent_field:
                         keys = parent_field.keys
-            field = type(full_field)(field_id,
-                                     meta=field_meta,
-                                     values=values,
-                                     fixed_keys=keys,
-                                     category_slot=slot,
-                                     headers=headers)
+            field = type(full_field)(
+                field_id,
+                meta=field_meta,
+                values=values,
+                fixed_keys=keys,
+                category_slot=slot,
+                headers=headers,
+            )
             parents = dataset_meta.field_parent_list(field_id)
             meta.add_field(parents, **field_meta, field_id=field_id)
             json_file = "%s/%s.json" % (outdir, field.field_id)
@@ -244,60 +282,64 @@ def create_filtered_dataset(dataset_meta, indir, outdir, indices):
 def main():
     """Entrypoint for blobtools filter."""
     args = docopt(__doc__)
-    meta = fetch_metadata(args['DATASET'], **args)
+    meta = fetch_metadata(args["DATASET"], **args)
     params = parse_params(args, meta)
-    identifiers = fetch_field(args['DATASET'], 'identifiers', meta)
+    identifiers = fetch_field(args["DATASET"], "identifiers", meta)
     indices = [index for index, value in enumerate(identifiers.values)]
-    invert = args['--invert']
+    invert = args["--invert"]
     if params:
-        indices = filter_by_params(meta, args['DATASET'], indices, params, invert)
-    if args['--json']:
-        indices = filter_by_json(identifiers.values, indices, args['--json'], invert)
-    if args['--output']:
-        create_filtered_dataset(meta, args['DATASET'], args['--output'], indices)
+        indices = filter_by_params(meta, args["DATASET"], indices, params, invert)
+    if args["--json"]:
+        indices = filter_by_json(identifiers.values, indices, args["--json"], invert)
+    if args["--output"]:
+        create_filtered_dataset(meta, args["DATASET"], args["--output"], indices)
     ids = [identifiers.values[i] for i in indices]
     for field in FIELDS:
-        if args[field['flag']]:
+        if args[field["flag"]]:
             requirements = True
-            if field.get('requires'):
-                for flag in field['requires']:
+            if field.get("requires"):
+                for flag in field["requires"]:
                     if flag not in args:
-                        print("WARN: '%s' must be set to use option '%s'"
-                              % (flag, field['flag']))
+                        print(
+                            "WARN: '%s' must be set to use option '%s'"
+                            % (flag, field["flag"])
+                        )
                         requirements = False
             if not requirements:
                 continue
-            field['module'].apply_filter(ids, args[field['flag']], **args)
-    if args['--table']:
-        full_field_ids = args['--table-fields'].split(',')
-        expanded_ids = ['index', 'identifiers']
+            field["module"].apply_filter(ids, args[field["flag"]], **args)
+    if args["--table"]:
+        full_field_ids = args["--table-fields"].split(",")
+        expanded_ids = ["index", "identifiers"]
         field_ids = []
         alt_ids = {field_id: field_id for field_id in expanded_ids}
         for full_id in full_field_ids:
             try:
-                field_id, alt_id = full_id.split('=')
+                field_id, alt_id = full_id.split("=")
                 field_ids.append(field_id)
                 alt_ids[field_id] = alt_id
             except ValueError:
                 field_ids.append(full_id)
                 alt_ids[full_id] = full_id
-        fields = {'identifiers': fetch_field(args['DATASET'], 'identifiers', meta)}
+        fields = {"identifiers": fetch_field(args["DATASET"], "identifiers", meta)}
         for field_id in field_ids:
-            if field_id == 'plot':
-                for axis in ['x', 'z', 'y', 'cat']:
+            if field_id == "plot":
+                for axis in ["x", "z", "y", "cat"]:
                     if axis in meta.plot:
                         expanded_ids.append(meta.plot[axis])
-                        alt_ids.update({meta.plot[axis]:meta.plot[axis]})
-                        fields[meta.plot[axis]] = fetch_field(args['DATASET'], meta.plot[axis], meta)
+                        alt_ids.update({meta.plot[axis]: meta.plot[axis]})
+                        fields[meta.plot[axis]] = fetch_field(
+                            args["DATASET"], meta.plot[axis], meta
+                        )
             else:
                 expanded_ids.append(field_id)
                 alt_ids.update({field_id: field_id})
-                fields[field_id] = fetch_field(args['DATASET'], field_id, meta)
+                fields[field_id] = fetch_field(args["DATASET"], field_id, meta)
         table = [[alt_ids[field_id] for field_id in expanded_ids]]
         for i in indices:
             record = []
             for field_id in expanded_ids:
-                if field_id == 'index':
+                if field_id == "index":
                     record.append(i)
                 else:
                     value = fields[field_id].values[i]
@@ -305,77 +347,95 @@ def main():
                         value = fields[field_id].keys[value]
                     record.append(value)
             table.append(record)
-        file_io.write_file(args['--table'], table)
-    if args['--summary']:
+        file_io.write_file(args["--table"], table)
+    if args["--summary"]:
         summary_stats = {}
         for section in SUMMARY:
             requirements = True
-            if section.get('requires'):
-                for flag in section['requires']:
+            if section.get("requires"):
+                for flag in section["requires"]:
                     if not args[flag]:
-                        print("WARN: '%s' must be set to generate '%s' summary"
-                              % (flag, section['title']))
+                        print(
+                            "WARN: '%s' must be set to generate '%s' summary"
+                            % (flag, section["title"])
+                        )
                         requirements = False
             if not requirements:
                 continue
             fields = {}
-            if section.get('depends'):
-                for field in section['depends']:
-                    fields.update({field: fetch_field(args['DATASET'], field, meta)})
-            if section['title'] == 'hits':
-                field = "%s_%s" % (args['--taxrule'], args['--summary-rank'])
-                fields.update({'hits': fetch_field(args['DATASET'], field, meta)})
-                if 'y' in meta.plot:
-                    fields.update({'cov': fetch_field(args['DATASET'], meta.plot['y'], meta)})
-            if section['title'] == 'busco':
+            if section.get("depends"):
+                for field in section["depends"]:
+                    fields.update({field: fetch_field(args["DATASET"], field, meta)})
+            if section["title"] == "hits":
+                field = "%s_%s" % (args["--taxrule"], args["--summary-rank"])
+                fields.update({"hits": fetch_field(args["DATASET"], field, meta)})
+                if "y" in meta.plot:
+                    fields.update(
+                        {"cov": fetch_field(args["DATASET"], meta.plot["y"], meta)}
+                    )
+            if section["title"] == "busco":
                 lineages = []
                 for field in meta.list_fields():
-                    if field.endswith('_busco'):
+                    if field.endswith("_busco"):
                         lineages.append(field)
-                        fields.update({field: fetch_field(args['DATASET'], field, meta)})
-                fields.update({'lineages': lineages})
-            if section['title'] == 'readMapping':
+                        fields.update(
+                            {field: fetch_field(args["DATASET"], field, meta)}
+                        )
+                fields.update({"lineages": lineages})
+            if section["title"] == "readMapping":
                 libraries = []
                 for field in meta.list_fields():
-                    if field.endswith('_read_cov'):
-                        library = field.replace('_read_cov', '')
+                    if field.endswith("_cov") and not field.endswith("_read_cov"):
+                        library = field.replace("_cov", "")
                         libraries.append(library)
-                        fields.update({"%s_cov" % library: fetch_field(args['DATASET'], "%s_cov" % library, meta)})
-                        fields.update({field: fetch_field(args['DATASET'], field, meta)})
-                fields.update({'libraries': libraries})
-            summary_stats.update({section['title']: section['module'].summarise(indices,
-                                                                                fields,
-                                                                                **args,
-                                                                                meta=meta,
-                                                                                stats=summary_stats)})
+                        fields.update(
+                            {field: fetch_field(args["DATASET"], field, meta)}
+                        )
+                fields.update({"libraries": libraries})
+            summary_stats.update(
+                {
+                    section["title"]: section["module"].summarise(
+                        indices, fields, **args, meta=meta, stats=summary_stats
+                    )
+                }
+            )
         stats = {}
-        if 'hits' in summary_stats:
+        if "hits" in summary_stats:
             nohit_span = 0
-            span = summary_stats['hits']['total']['span']
-            if 'no-hit' in summary_stats['hits']:
-                nohit_span = summary_stats['hits']['no-hit']['span']
-                stats.update({'noHit': float("%.3f" % (nohit_span / span))})
+            span = summary_stats["hits"]["total"]["span"]
+            if "no-hit" in summary_stats["hits"]:
+                nohit_span = summary_stats["hits"]["no-hit"]["span"]
+                stats.update({"noHit": float("%.3f" % (nohit_span / span))})
             else:
-                stats.update({'noHit': 0})
-            if 'taxonomy' in summary_stats and 'target' in summary_stats['taxonomy']:
-                if summary_stats['taxonomy']['target'] in summary_stats['hits']:
-                    target_span = summary_stats['hits'][summary_stats['taxonomy']['target']]['span']
-                    stats.update({'target': float("%.3f" % (target_span / (span - nohit_span)))})
-                elif 'target' in summary_stats['hits']:
-                    target_span = summary_stats['hits']['target']['span']
-                    stats.update({'target': float("%.3f" % (target_span / (span - nohit_span)))})
-                    del summary_stats['hits']['target']
+                stats.update({"noHit": 0})
+            if "taxonomy" in summary_stats and "target" in summary_stats["taxonomy"]:
+                if summary_stats["taxonomy"]["target"] in summary_stats["hits"]:
+                    target_span = summary_stats["hits"][
+                        summary_stats["taxonomy"]["target"]
+                    ]["span"]
+                    stats.update(
+                        {"target": float("%.3f" % (target_span / (span - nohit_span)))}
+                    )
+                elif "target" in summary_stats["hits"]:
+                    target_span = summary_stats["hits"]["target"]["span"]
+                    stats.update(
+                        {"target": float("%.3f" % (target_span / (span - nohit_span)))}
+                    )
+                    del summary_stats["hits"]["target"]
                 else:
-                    stats.update({'target': 0})
-            ratio = summary_stats['hits']['total']['span'] / summary_stats['hits']['total']['n50']
+                    stats.update({"target": 0})
+            ratio = (
+                summary_stats["hits"]["total"]["span"]
+                / summary_stats["hits"]["total"]["n50"]
+            )
             if ratio >= 100:
-                ratio = int(float('%.3g' % ratio))
+                ratio = int(float("%.3g" % ratio))
             else:
-                ratio = float('%.3g' % ratio)
-            stats.update({'spanOverN50': ratio})
-        summary_stats.update({'stats': stats})
-        file_io.write_file(args['--summary'], {'summaryStats': summary_stats})
+                ratio = float("%.3g" % ratio)
+            stats.update({"spanOverN50": ratio})
+        summary_stats.update({"stats": stats})
+        file_io.write_file(args["--summary"], {"summaryStats": summary_stats})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -11,37 +11,38 @@ from functools import reduce
 from operator import add
 
 
-class Field():
+class Field:
     """Parent class for specific field types."""
 
-    __slots__ = ['field_id',
-                 'values',
-                 'keys',
-                 'meta',
-                 'type',
-                 'headers',
-                 'category_slot',
-                 '_subset'
-                 ]
+    __slots__ = [
+        "field_id",
+        "values",
+        "keys",
+        "meta",
+        "type",
+        "headers",
+        "category_slot",
+        "_subset",
+    ]
 
     def __init__(self, field_id, **kwargs):
         """Init Field class."""
         self.field_id = field_id
-        self.type = 'field'
+        self.type = "field"
         self.values = []
         self.keys = []
         self.meta = {}
         self._subset = False
-        if 'meta' not in kwargs:
-            kwargs['meta'] = {}
-        if 'type' not in kwargs['meta']:
-            kwargs['meta'].update({'type': self.type})
+        if "meta" not in kwargs:
+            kwargs["meta"] = {}
+        if "type" not in kwargs["meta"]:
+            kwargs["meta"].update({"type": self.type})
         self.update_data(**kwargs)
 
     def update_data(self, **kwargs):
         """Update values and keys for an existing field."""
         for key, value in kwargs.items():
-            if key != 'sparent':
+            if key != "parent":
                 setattr(self, key, value)
 
     def update_values(self, values):
@@ -87,8 +88,8 @@ class Field():
 
     def values_to_dict(self):
         """Create a dict of values (with keys if applicable)."""
-        data = {'values': self.values}
-        for key in ('keys', 'category_slot', 'headers'):
+        data = {"values": self.values}
+        for key in ("keys", "category_slot", "headers"):
             if key in self.__slots__:
                 if hasattr(self, key):
                     data[key] = getattr(self, key)
@@ -123,12 +124,14 @@ class Field():
         if keys is None:
             keys = []
         counter = len(keys)
-        keys = OrderedDict([(key, index) for index, key in enumerate(keys)])
+        keys = OrderedDict(
+            [(key, index) for index, key in enumerate(keys) if key is not None]
+        )
         indexed_values = []
         for value in values:
             if value in keys:
                 index = keys[value]
-            else:
+            elif value is not None:
                 index = counter
                 keys[value] = counter
                 counter += 1
@@ -152,10 +155,10 @@ class Identifier(Field):
 
     def __init__(self, field_id, **kwargs):
         """Init Identifier class."""
-        kwargs['type'] = 'identifier'
-        if 'meta' not in kwargs:
-            kwargs['meta'] = {}
-        kwargs['meta']['type'] = kwargs['type']
+        kwargs["type"] = "identifier"
+        if "meta" not in kwargs:
+            kwargs["meta"] = {}
+        kwargs["meta"]["type"] = kwargs["type"]
         super().__init__(field_id, **kwargs)
 
     def to_set(self):
@@ -189,10 +192,10 @@ class Variable(Field):
 
     def __init__(self, field_id, **kwargs):
         """Init Variable class."""
-        kwargs['type'] = 'variable'
-        if 'meta' not in kwargs:
-            kwargs['meta'] = {}
-        kwargs['meta']['type'] = kwargs['type']
+        kwargs["type"] = "variable"
+        if "meta" not in kwargs:
+            kwargs["meta"] = {}
+        kwargs["meta"]["type"] = kwargs["type"]
         super().__init__(field_id, **kwargs)
 
     def get_indices_in_range(self, min_max, invert=False):
@@ -228,21 +231,21 @@ class Array(Field):
     def __init__(self, field_id, **kwargs):
         """Init Array class."""
         self.category_slot = None
-        if 'meta' not in kwargs:
-            kwargs['meta'] = {}
-        if 'category_slot' in kwargs:
-            self.category_slot = kwargs['category_slot']
-        if self.category_slot is not None and not kwargs.get('keys'):
-            slot = kwargs['category_slot']
-            cat_values = [value[slot] for value in kwargs['values']]
-            keys = kwargs.get('fixed_keys', [])
-            kwargs['keys'], values = self._collapse_values(cat_values, keys)
-            for index, value in enumerate(kwargs['values']):
+        if "meta" not in kwargs:
+            kwargs["meta"] = {}
+        if "category_slot" in kwargs:
+            self.category_slot = kwargs["category_slot"]
+        if self.category_slot is not None and not kwargs.get("keys"):
+            slot = kwargs["category_slot"]
+            cat_values = [value[slot] for value in kwargs["values"]]
+            keys = kwargs.get("fixed_keys", [])
+            kwargs["keys"], values = self._collapse_values(cat_values, keys)
+            for index, value in enumerate(kwargs["values"]):
                 value[slot] = values[index]
-            kwargs['meta'].update({'category_slot': kwargs['category_slot']})
-        kwargs['meta'].update({'headers': kwargs['headers']})
-        kwargs['type'] = 'array'
-        kwargs['meta']['type'] = kwargs['type']
+            kwargs["meta"].update({"category_slot": kwargs["category_slot"]})
+        kwargs["meta"].update({"headers": kwargs["headers"]})
+        kwargs["type"] = "array"
+        kwargs["meta"]["type"] = kwargs["type"]
         super().__init__(field_id, **kwargs)
 
     def get_values_by_indices_for_slots(self, indices, slots):
@@ -284,29 +287,31 @@ class MultiArray(Field):
     def __init__(self, field_id, **kwargs):
         """Init MultiArray class."""
         self.category_slot = None
-        kwargs['type'] = 'multiarray'
-        if 'meta' not in kwargs:
-            kwargs['meta'] = {}
-        kwargs['meta']['type'] = kwargs['type']
-        if 'category_slot' in kwargs:
-            self.category_slot = kwargs['category_slot']
-        if self.category_slot is not None and not kwargs.get('keys'):
-            slot = kwargs['category_slot']
+        kwargs["type"] = "multiarray"
+        if "meta" not in kwargs:
+            kwargs["meta"] = {}
+        kwargs["meta"]["type"] = kwargs["type"]
+        if "category_slot" in kwargs:
+            self.category_slot = kwargs["category_slot"]
+        if self.category_slot is not None and not kwargs.get("keys"):
+            slot = kwargs["category_slot"]
             cat_values = []
-            for record in kwargs['values']:
+            for record in kwargs["values"]:
                 if record:
                     for arr in record:
-                        cat_values.append(arr[slot])
-            keys = kwargs.get('fixed_keys', [])
-            kwargs['keys'], values = self._collapse_values(cat_values, keys)
+                        if arr:
+                            cat_values.append(arr[slot])
+            keys = kwargs.get("fixed_keys", [])
+            kwargs["keys"], values = self._collapse_values(cat_values, keys)
             index = 0
-            for record in kwargs['values']:
+            for record in kwargs["values"]:
                 if record:
                     for arr in record:
-                        arr[slot] = values[index]
-                        index += 1
-            kwargs['meta'].update({'category_slot': kwargs['category_slot']})
-        kwargs['meta'].update({'headers': kwargs['headers']})
+                        if arr[slot] is not None:
+                            arr[slot] = values[index]
+                            index += 1
+            kwargs["meta"].update({"category_slot": kwargs["category_slot"]})
+        kwargs["meta"].update({"headers": kwargs["headers"]})
         super().__init__(field_id, **kwargs)
 
     def expand_values(self):
@@ -332,13 +337,15 @@ class Category(Field):
 
     def __init__(self, field_id, **kwargs):
         """Init Category class."""
-        kwargs['type'] = 'category'
-        if 'meta' not in kwargs:
-            kwargs['meta'] = {}
-        kwargs['meta']['type'] = kwargs['type']
-        if 'keys' not in kwargs or kwargs['keys'] is None:
-            keys = kwargs.get('fixed_keys', [])
-            kwargs['keys'], kwargs['values'] = self._collapse_values(kwargs['values'], keys)
+        kwargs["type"] = "category"
+        if "meta" not in kwargs:
+            kwargs["meta"] = {}
+        kwargs["meta"]["type"] = kwargs["type"]
+        if "keys" not in kwargs or kwargs["keys"] is None:
+            keys = kwargs.get("fixed_keys", [])
+            kwargs["keys"], kwargs["values"] = self._collapse_values(
+                kwargs["values"], keys
+            )
         super().__init__(field_id, **kwargs)
 
     def expand_values(self):
@@ -350,9 +357,10 @@ class Category(Field):
         return self.type
 
 
-__all__ = ['Array', 'Category', 'Field', 'Identifier', 'MultiArray', 'Variable']
+__all__ = ["Array", "Category", "Field", "Identifier", "MultiArray", "Variable"]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
