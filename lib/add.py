@@ -6,7 +6,7 @@
 Add data to a BlobDir.
 
 Usage:
-    blobtools add [--bed BED...] [--beddir DIRECTORY]
+    blobtools add [--bed BED...] [--beddir DIRECTORY] [--bedtsv TSV...] [--bedtsvdir DIRECTORY]
                   [--busco TSV...] [--cov BAM...] [--hits TSV...] [--fasta FASTA] [--hits-cols LIST]
                   [--key path=value...] [--link path=url...] [--taxid INT] [--skip-link-test]
                   [--blobdb JSON] [--meta YAML] [--synonyms TSV...] [--trnascan TSV...]
@@ -21,6 +21,8 @@ Arguments:
 Options:
     --bed BED             BED format file.
     --beddir DIRECTORY    Directory containing one or more BED format files.
+    --bedtsv TSV          TSV file with header row and bed-format columns 1-3.
+    --bedtsvdir DIRECTORY Directory containing one or more BED-like tsv files.
     --busco TSV           BUSCO full_table.tsv output file.
     --cov BAM             BAM/SAM/CRAM read alignment file.
     --fasta FASTA         FASTA sequence file.
@@ -84,6 +86,8 @@ from field import Identifier
 FIELDS = [
     {"flag": "--bed", "module": bed, "optional": ["identifiers"]},
     {"flag": "--beddir", "module": bed, "optional": ["identifiers"]},
+    {"flag": "--bedtsv", "module": bed, "optional": ["identifiers"]},
+    {"flag": "--bedtsvdir", "module": bed, "optional": ["identifiers"]},
     {"flag": "--fasta", "module": fasta, "optional": ["identifiers"]},
     {"flag": "--blobdb", "module": blob_db, "depends": ["identifiers"]},
     {"flag": "--busco", "module": busco, "depends": ["identifiers"]},
