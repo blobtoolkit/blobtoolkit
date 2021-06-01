@@ -3,10 +3,12 @@
 
 """Parse BED files into Fields."""
 
+
 import math
 import sys
 from collections import Counter, OrderedDict, defaultdict
 from glob import glob
+from itertools import zip_longest
 from os import path
 from pathlib import Path
 
@@ -17,154 +19,157 @@ import file_io
 from field import Identifier, MultiArray, Variable
 from run_external import seqtk_subseq
 
-SETTINGS = {
-    "gc": {
-        "meta": {
-            "preload": True,
-            "name": "GC",
-            "scale": "scaleLinear",
-            "type": "variable",
-            "datatype": "float",
-        },
-        "parents": [
-            {
-                "id": "gc_stats",
+
+def field_settings():
+    """Field settings for bed file imports."""
+    return {
+        "gc": {
+            "meta": {
+                "preload": True,
+                "name": "GC",
                 "scale": "scaleLinear",
                 "type": "variable",
                 "datatype": "float",
             },
-            "children",
-        ],
-        "plot_axis": "x",
-    },
-    "length": {
-        "meta": {
-            "preload": True,
-            "name": "Length",
-            "clamp": 1,
-            "scale": "scaleLog",
-            "datatype": "integer",
-            "type": "variable",
+            "parents": [
+                {
+                    "id": "gc_stats",
+                    "scale": "scaleLinear",
+                    "type": "variable",
+                    "datatype": "float",
+                },
+                "children",
+            ],
+            "plot_axis": "x",
         },
-        "parents": [
-            {
-                "id": "length_stats",
+        "length": {
+            "meta": {
+                "preload": True,
+                "name": "Length",
+                "clamp": 1,
                 "scale": "scaleLog",
                 "datatype": "integer",
                 "type": "variable",
             },
-            "children",
-        ],
-        "plot_axis": "z",
-    },
-    "position": {
-        "meta": {
-            "name": "Position",
-            "scale": "scaleLinear",
-            "datatype": "integer",
-            "type": "variable",
-            "range": [0, 1],
+            "parents": [
+                {
+                    "id": "length_stats",
+                    "scale": "scaleLog",
+                    "datatype": "integer",
+                    "type": "variable",
+                },
+                "children",
+            ],
+            "plot_axis": "z",
         },
-        "parents": [
-            {
-                "id": "position_stats",
+        "position": {
+            "meta": {
+                "name": "Position",
+                "scale": "scaleLinear",
+                "datatype": "integer",
+                "type": "variable",
+                "range": [0, 1],
+            },
+            "parents": [
+                {
+                    "id": "position_stats",
+                    "scale": "scaleLinear",
+                    "datatype": "integer",
+                    "type": "variable",
+                },
+                "children",
+            ],
+        },
+        "proportion": {
+            "meta": {
+                "name": "Proportion",
+                "scale": "scaleLinear",
+                "datatype": "float",
+                "type": "variable",
+                "range": [0, 1],
+            },
+            "parents": [
+                {
+                    "id": "proportion_stats",
+                    "scale": "scaleLinear",
+                    "datatype": "float",
+                    "type": "variable",
+                },
+                "children",
+            ],
+        },
+        "cov": {
+            "meta": {
+                "preload": 1,
+                "scale": "scaleLog",
+                "name": "Coverage",
+                "clamp": 0.01,
+                "datatype": "float",
+                "type": "variable",
+            },
+            "parents": [
+                {
+                    "id": "coverage",
+                    "type": "variable",
+                    "datatype": "float",
+                    "range": [math.inf, -math.inf],
+                },
+                "children",
+            ],
+            "plot_axis": "y",
+        },
+        "n": {
+            "meta": {
+                "name": "N",
+                "scale": "scaleLinear",
+                "datatype": "float",
+                "type": "variable",
+            },
+            "parents": [
+                {
+                    "id": "n_stats",
+                    "scale": "scaleLinear",
+                    "datatype": "float",
+                    "type": "variable",
+                },
+                "children",
+            ],
+        },
+        "masked": {
+            "meta": {
+                "name": "Masked",
+                "scale": "scaleLinear",
+                "datatype": "float",
+                "type": "variable",
+            },
+            "parents": [
+                {
+                    "id": "masked_stats",
+                    "scale": "scaleLinear",
+                    "datatype": "float",
+                    "type": "variable",
+                },
+                "children",
+            ],
+        },
+        "ncount": {
+            "meta": {
+                "name": "N count",
                 "scale": "scaleLinear",
                 "datatype": "integer",
                 "type": "variable",
             },
-            "children",
-        ],
-    },
-    "proportion": {
-        "meta": {
-            "name": "Proportion",
-            "scale": "scaleLinear",
-            "datatype": "float",
-            "type": "variable",
-            "range": [0, 1],
+            "parents": [
+                {
+                    "id": "ncount_stats",
+                    "scale": "scaleLinear",
+                    "datatype": "integer",
+                    "type": "variable",
+                },
+                "children",
+            ],
         },
-        "parents": [
-            {
-                "id": "proportion_stats",
-                "scale": "scaleLinear",
-                "datatype": "float",
-                "type": "variable",
-            },
-            "children",
-        ],
-    },
-    "cov": {
-        "meta": {
-            "preload": 1,
-            "scale": "scaleLog",
-            "name": "Coverage",
-            "clamp": 0.01,
-            "datatype": "float",
-            "type": "variable",
-        },
-        "parents": [
-            {
-                "id": "coverage",
-                "type": "variable",
-                "datatype": "float",
-                "range": [math.inf, -math.inf],
-            },
-            "children",
-        ],
-        "plot_axis": "y",
-    },
-    "n": {
-        "meta": {
-            "name": "N",
-            "scale": "scaleLinear",
-            "datatype": "float",
-            "type": "variable",
-        },
-        "parents": [
-            {
-                "id": "n_stats",
-                "scale": "scaleLinear",
-                "datatype": "float",
-                "type": "variable",
-            },
-            "children",
-        ],
-    },
-    "masked": {
-        "meta": {
-            "name": "Masked",
-            "scale": "scaleLinear",
-            "datatype": "float",
-            "type": "variable",
-        },
-        "parents": [
-            {
-                "id": "masked_stats",
-                "scale": "scaleLinear",
-                "datatype": "float",
-                "type": "variable",
-            },
-            "children",
-        ],
-    },
-    "ncount": {
-        "meta": {
-            "name": "N count",
-            "scale": "scaleLinear",
-            "datatype": "integer",
-            "type": "variable",
-        },
-        "parents": [
-            {
-                "id": "ncount_stats",
-                "scale": "scaleLinear",
-                "datatype": "integer",
-                "type": "variable",
-            },
-            "children",
-        ],
-    },
-}
+    }
 
 
 def parse_full_bed(filename):
@@ -192,22 +197,90 @@ def parse_window_bed(filename):
     return windowed
 
 
-def parse(files, **kwargs):
-    if isinstance(files, str) and path.isdir(files):
-        print("Reading all BED files in %s" % files)
-        files = glob("%s/*.bed" % files)
-    parsed = []
-    full = {}
+def parse_full_tsv(filename):
+    """Parse a TSV file containing one value per sequence."""
+    values = defaultdict(dict)
+    sd = defaultdict(dict)
+    header = None
+    with tofile.open_file_handle(filename) as fh:
+        for line in fh:
+            row = line.strip().split("\t")
+            if header is None:
+                header = {key: idx + 3 for idx, key in enumerate(row[3:])}
+                continue
+            values["length"][row[0]] = int(row[2])
+            for key, idx in header.items():
+                if key.endswith("_sd"):
+                    sd[key.replace("_sd", "")][row[0]] = float(row[idx])
+                else:
+                    values[key][row[0]] = float(row[idx])
+    return values, sd
+
+
+def parse_windowed_tsv(filename):
+    """Parse a TSV file containing one value per sequence."""
+    values = defaultdict(lambda: defaultdict(list))
+    sd = defaultdict(lambda: defaultdict(list))
+    header = None
+    with tofile.open_file_handle(filename) as fh:
+        for line in fh:
+            row = line.strip().split("\t")
+            if header is None:
+                header = {key: idx + 3 for idx, key in enumerate(row[3:])}
+                continue
+            values["length"][row[0]].append(int(row[2]))
+            for key, idx in header.items():
+                if key.endswith("_sd"):
+                    sd[key.replace("_sd", "")][row[0]].append(float(row[idx]))
+                else:
+                    values[key][row[0]].append(float(row[idx]))
+    return values, sd
+
+
+def parse_tsvfiles(files):
+    """Parse all tsvfiles."""
     windows = {}
+    windows_sd = {}
+    [fullfile, *files] = sorted(files, key=len)
+    full, full_sd = parse_full_tsv(fullfile)
+    for file in files:
+        window = "".join(y for x, y in zip_longest(fullfile, file) if x != y).replace(
+            ".tsv", ""
+        )
+        windows[window], windows_sd[window] = parse_windowed_tsv(file)
+    return fullfile, windows, full
+
+
+def parse_bedfiles(files):
+    """Parse all bedfiles."""
+    full = {}
+    windows = {"0.1": {}}
     filenames = {}
     for filename in files:
         filepath = Path(filename)
         field = filepath.name.split(".")[-2]
         filenames[field] = filepath.name
         if field.endswith("_windows"):
-            windows[field.replace("_windows", "")] = parse_window_bed(filename)
+            windows["0.1"][field.replace("_windows", "")] = parse_window_bed(filename)
         else:
             full[field] = parse_full_bed(filename)
+    return filenames, windows, full
+
+
+def parse(files, **kwargs):
+    if "--bedtsvdir" in kwargs or "--bedtsvdir" in kwargs:
+        if isinstance(files, str) and path.isdir(files):
+            print("Reading all TSV files in %s" % files)
+            files = glob("%s/*.tsv" % files)
+        filename, all_windows, full = parse_tsvfiles(files)
+        filenames = {"all": filename}
+    else:
+        if isinstance(files, str) and path.isdir(files):
+            print("Reading all BED files in %s" % files)
+            files = glob("%s/*.bed" % files)
+        filenames, all_windows, full = parse_bedfiles(files)
+    parsed = []
+    settings = field_settings()
     identifiers = kwargs["dependencies"]["identifiers"]
     keys = []
     if "length" in full:
@@ -231,9 +304,10 @@ def parse(files, **kwargs):
         kwargs["meta"].assembly.update({"scaffold-count": len(identifiers.values)})
         parsed.append(identifiers)
     ranges = {
-        key: {"range": [math.inf, -math.inf], "meta": {}} for key in SETTINGS.keys()
+        key: {"range": [math.inf, -math.inf], "meta": {}} for key in settings.keys()
     }
     for field, data in full.items():
+        filename = filenames.get(field, filenames.get("all", ""))
         if data:
             values = []
             for seq_id in identifiers.values:
@@ -242,11 +316,11 @@ def parse(files, **kwargs):
                 meta = {}
                 parents = []
                 suffix = field.split("_")[-1]
-                if suffix in SETTINGS:
+                if suffix in settings:
                     meta = {
-                        **SETTINGS[suffix]["meta"],
+                        **settings[suffix]["meta"],
                         "field_id": field,
-                        "file": filenames[field],
+                        "file": filename,
                     }
                     if meta["datatype"] == "integer":
                         values = [int(value) for value in values]
@@ -254,8 +328,8 @@ def parse(files, **kwargs):
                     if "clamp" in meta and value_range[0] >= meta["clamp"]:
                         meta["clamp"] = False
                     parent_range = False
-                    if "parents" in SETTINGS[suffix]:
-                        parents = SETTINGS[suffix]["parents"]
+                    if "parents" in settings[suffix]:
+                        parents = settings[suffix]["parents"]
                         for parent in parents:
                             if "range" in parent:
                                 parent_range = True
@@ -274,9 +348,9 @@ def parse(files, **kwargs):
                     if "preload" in meta and meta["preload"] == 1:
                         if value_range[1] > ranges[suffix]["range"][1]:
                             meta["preload"] = True
-                            if "plot_axis" in SETTINGS[suffix]:
+                            if "plot_axis" in settings[suffix]:
                                 kwargs["meta"].plot.update(
-                                    {SETTINGS[suffix]["plot_axis"]: field}
+                                    {settings[suffix]["plot_axis"]: field}
                                 )
                             if "preload" in ranges[suffix]["meta"]:
                                 ranges[suffix]["meta"]["preload"] = False
@@ -291,29 +365,30 @@ def parse(files, **kwargs):
                         parents=parents,
                     )
                 )
-                if field in windows:
-                    window_values = []
-                    for seq_id in identifiers.values:
-                        values = windows[field][seq_id] if seq_id in data else []
-                        if meta["datatype"] == "integer":
-                            values = [[int(value)] for value in values]
-                        else:
-                            values = [[value] for value in values]
-                        window_values.append(values)
-                    parsed.append(
-                        MultiArray(
-                            "%s_windows" % field,
-                            meta={
-                                "field_id": "%s_windows" % field,
-                                "name": "%s windows" % meta["name"],
-                                "type": "multiarray",
-                                "datatype": meta["datatype"],
-                            },
-                            values=window_values,
-                            parents=parents,
-                            headers=[field],
+                for window, windows in all_windows.items():
+                    if field in windows:
+                        window_values = []
+                        for seq_id in identifiers.values:
+                            values = windows[field][seq_id] if seq_id in data else []
+                            if meta["datatype"] == "integer":
+                                values = [[int(value)] for value in values]
+                            else:
+                                values = [[value] for value in values]
+                            window_values.append(values)
+                        parsed.append(
+                            MultiArray(
+                                "%s_windows_%s" % (field, window),
+                                meta={
+                                    "field_id": "%s_windows_%s" % (field, window),
+                                    "name": "%s windows %s" % (meta["name"], window),
+                                    "type": "multiarray",
+                                    "datatype": meta["datatype"],
+                                },
+                                values=window_values,
+                                parents=parents,
+                                headers=[field],
+                            )
                         )
-                    )
     return parsed
 
 
