@@ -16,7 +16,7 @@ from tolkein import tofile
 from tqdm import tqdm
 
 import file_io
-from field import Identifier, MultiArray, Variable
+from field import Array, Identifier, MultiArray, Variable
 from run_external import seqtk_subseq
 
 
@@ -33,7 +33,7 @@ def field_settings():
             },
             "parents": [
                 {
-                    "id": "gc_stats",
+                    "id": "gc_data",
                     "scale": "scaleLinear",
                     "type": "variable",
                     "datatype": "float",
@@ -53,7 +53,7 @@ def field_settings():
             },
             "parents": [
                 {
-                    "id": "length_stats",
+                    "id": "length_data",
                     "scale": "scaleLog",
                     "datatype": "integer",
                     "type": "variable",
@@ -72,7 +72,7 @@ def field_settings():
             },
             "parents": [
                 {
-                    "id": "position_stats",
+                    "id": "position_data",
                     "scale": "scaleLinear",
                     "datatype": "integer",
                     "type": "variable",
@@ -90,7 +90,7 @@ def field_settings():
             },
             "parents": [
                 {
-                    "id": "proportion_stats",
+                    "id": "proportion_data",
                     "scale": "scaleLinear",
                     "datatype": "float",
                     "type": "variable",
@@ -127,7 +127,7 @@ def field_settings():
             },
             "parents": [
                 {
-                    "id": "n_stats",
+                    "id": "n_data",
                     "scale": "scaleLinear",
                     "datatype": "float",
                     "type": "variable",
@@ -144,7 +144,7 @@ def field_settings():
             },
             "parents": [
                 {
-                    "id": "masked_stats",
+                    "id": "masked_data",
                     "scale": "scaleLinear",
                     "datatype": "float",
                     "type": "variable",
@@ -161,7 +161,7 @@ def field_settings():
             },
             "parents": [
                 {
-                    "id": "ncount_stats",
+                    "id": "ncount_data",
                     "scale": "scaleLinear",
                     "datatype": "integer",
                     "type": "variable",
@@ -201,6 +201,7 @@ def parse_full_tsv(filename):
     """Parse a TSV file containing one value per sequence."""
     values = defaultdict(dict)
     sd = defaultdict(dict)
+    n = defaultdict(dict)
     header = None
     with tofile.open_file_handle(filename) as fh:
         for line in fh:
@@ -208,19 +209,23 @@ def parse_full_tsv(filename):
             if header is None:
                 header = {key: idx + 3 for idx, key in enumerate(row[3:])}
                 continue
-            values["length"][row[0]] = int(row[2])
+            values["length"][row[0]] = int(row[2]) - int(row[1])
+            values["position"][row[0]] = int(row[2])
             for key, idx in header.items():
                 if key.endswith("_sd"):
                     sd[key.replace("_sd", "")][row[0]] = float(row[idx])
+                elif key.endswith("_n"):
+                    n[key.replace("_n", "")][row[0]] = float(row[idx])
                 else:
                     values[key][row[0]] = float(row[idx])
-    return values, sd
+    return values, sd, n
 
 
 def parse_windowed_tsv(filename):
     """Parse a TSV file containing one value per sequence."""
     values = defaultdict(lambda: defaultdict(list))
     sd = defaultdict(lambda: defaultdict(list))
+    n = defaultdict(lambda: defaultdict(list))
     header = None
     with tofile.open_file_handle(filename) as fh:
         for line in fh:
@@ -228,27 +233,37 @@ def parse_windowed_tsv(filename):
             if header is None:
                 header = {key: idx + 3 for idx, key in enumerate(row[3:])}
                 continue
-            values["length"][row[0]].append(int(row[2]))
+            values["length"][row[0]].append(int(row[2]) - int(row[1]))
+            values["position"][row[0]].append(int(row[2]))
             for key, idx in header.items():
                 if key.endswith("_sd"):
                     sd[key.replace("_sd", "")][row[0]].append(float(row[idx]))
+                elif key.endswith("_n"):
+                    n[key.replace("_n", "")][row[0]].append(float(row[idx]))
                 else:
                     values[key][row[0]].append(float(row[idx]))
-    return values, sd
+    return values, sd, n
 
 
 def parse_tsvfiles(files):
     """Parse all tsvfiles."""
     windows = {}
     windows_sd = {}
+    windows_n = {}
     [fullfile, *files] = sorted(files, key=len)
-    full, full_sd = parse_full_tsv(fullfile)
+    full, sd, n = parse_full_tsv(fullfile)
     for file in files:
         window = "".join(y for x, y in zip_longest(fullfile, file) if x != y).replace(
             ".tsv", ""
         )
-        windows[window], windows_sd[window] = parse_windowed_tsv(file)
-    return fullfile, windows, full
+        windows[window], windows_sd[window], windows_n[window] = parse_windowed_tsv(
+            file
+        )
+    return (
+        fullfile,
+        {"values": windows, "sd": windows_sd, "n": windows_n},
+        {"values": full, "sd": sd, "n": n},
+    )
 
 
 def parse_bedfiles(files):
@@ -279,6 +294,18 @@ def parse(files, **kwargs):
             print("Reading all BED files in %s" % files)
             files = glob("%s/*.bed" % files)
         filenames, all_windows, full = parse_bedfiles(files)
+    full_n = {}
+    full_sd = {}
+    if isinstance(full, dict):
+        full_sd = full["sd"]
+        full_n = full["n"]
+        full = full["values"]
+    all_windows_n = {}
+    all_windows_sd = {}
+    if isinstance(all_windows, dict):
+        all_windows_n = all_windows["n"]
+        all_windows_sd = all_windows["sd"]
+        all_windows = all_windows["values"]
     parsed = []
     settings = field_settings()
     identifiers = kwargs["dependencies"]["identifiers"]
@@ -365,28 +392,68 @@ def parse(files, **kwargs):
                         parents=parents,
                     )
                 )
+                if field in full_sd:
+                    stats_values = []
+                    for seq_id in identifiers.values:
+                        values = (
+                            [full_sd[field][seq_id], full_n[field][seq_id]]
+                            if seq_id in data
+                            else []
+                        )
+                        stats_values.append(values)
+                    parsed.append(
+                        Array(
+                            "%s_stats" % field,
+                            meta={
+                                "field_id": "%s_stats" % field,
+                                "name": "%s stats" % meta["name"],
+                                "type": "array",
+                                "datatype": "mixed",
+                            },
+                            values=stats_values,
+                            parents=parents,
+                            headers=["sd", "n"],
+                        )
+                    )
                 for window, windows in all_windows.items():
+                    windows_sd = all_windows_sd.get(window, {})
+                    windows_n = all_windows_n.get(window, {})
                     if field in windows:
                         window_values = []
+                        headers = [field]
+                        if field in windows_sd:
+                            headers += ["sd", "n"]
                         for seq_id in identifiers.values:
-                            values = windows[field][seq_id] if seq_id in data else []
-                            if meta["datatype"] == "integer":
-                                values = [[int(value)] for value in values]
-                            else:
-                                values = [[value] for value in values]
-                            window_values.append(values)
+                            seq_values = []
+                            if seq_id in data:
+                                for idx, value in enumerate(windows[field][seq_id]):
+                                    if meta["datatype"] == "integer":
+                                        value = int(value)
+                                    if field in windows_sd:
+                                        value = [
+                                            value,
+                                            windows_sd[field][seq_id][idx],
+                                            windows_n[field][seq_id][idx],
+                                        ]
+                                    else:
+                                        value = [value]
+                                    seq_values.append(value)
+                            window_values.append(seq_values)
+                        windows_field = "%s_windows" % field
+                        if str(window) != "0.1":
+                            windows_field += "_%s" % str(window)
                         parsed.append(
                             MultiArray(
-                                "%s_windows_%s" % (field, window),
+                                windows_field,
                                 meta={
-                                    "field_id": "%s_windows_%s" % (field, window),
+                                    "field_id": windows_field,
                                     "name": "%s windows %s" % (meta["name"], window),
                                     "type": "multiarray",
-                                    "datatype": meta["datatype"],
+                                    "datatype": "mixed",
                                 },
                                 values=window_values,
                                 parents=parents,
-                                headers=[field],
+                                headers=headers,
                             )
                         )
     return parsed
