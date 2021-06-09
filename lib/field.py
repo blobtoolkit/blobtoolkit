@@ -127,15 +127,17 @@ class Field:
         keys = OrderedDict(
             [(key, index) for index, key in enumerate(keys) if key is not None]
         )
+        print(keys)
         indexed_values = []
         for value in values:
             if value in keys:
-                index = keys[value]
+                indexed_values.append(keys[value])
             elif value is not None:
-                index = counter
+                indexed_values.append(counter)
                 keys[value] = counter
                 counter += 1
-            indexed_values.append(index)
+            else:
+                indexed_values.append("")
         return list(keys.keys()), indexed_values
 
     @staticmethod
@@ -304,11 +306,12 @@ class MultiArray(Field):
             keys = kwargs.get("fixed_keys", [])
             kwargs["keys"], values = self._collapse_values(cat_values, keys)
             index = 0
+            keys = {k: i for i, k in enumerate(kwargs["keys"])}
             for record in kwargs["values"]:
                 if record:
                     for arr in record:
                         if arr[slot] is not None:
-                            arr[slot] = values[index]
+                            arr[slot] = keys[arr[slot]]
                             index += 1
             kwargs["meta"].update({"category_slot": kwargs["category_slot"]})
         kwargs["meta"].update({"headers": kwargs["headers"]})

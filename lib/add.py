@@ -28,7 +28,7 @@ Options:
     --fasta FASTA         FASTA sequence file.
     --hits TSV            Tabular BLAST/Diamond output file.
     --hits-cols LIST      Comma separated list of <column number>=<field name>.
-                          [Default: 1=qseqid,2=staxids,3=bitscore,5=sseqid,10=sstart,11=send,14=evalue]
+                          [Default: 1=qseqid,2=staxids,3=bitscore,5=sseqid,10=qstart,11=qend,14=evalue]
     --taxid INT           Add ranks to metadata for a taxid.
     --key path=value      Set a metadata key to value.
     --link path=URL       Link to an external resource.

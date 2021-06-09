@@ -8,6 +8,8 @@
 import math
 import re
 from collections import Counter, defaultdict
+from itertools import groupby
+from operator import itemgetter
 
 import file_io
 from field import Category, MultiArray, Variable
@@ -19,6 +21,7 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
         results = defaultdict(list)
     bitscores = {}
     blastp = {}
+
     for line in file_io.stream_file(blast_file):
         row = line.rstrip().split("\t")
         score = float(row[cols["bitscore"]])
@@ -29,10 +32,16 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
         else:
             if evalue < float(row[cols["evalue"]]):
                 continue
+        # allow for mis-specified columns following documentation bug
+        if "sstart" in cols and "qstart" not in cols:
+            cols["qstart"] = cols["sstart"]
+        if "send" in cols and "qend" not in cols:
+            cols["qend"] = cols["send"]
         seq_id, *offset = row[cols["qseqid"]].split("_-_")
         offset = int(offset[0]) if offset else 0
         query = row[cols["qseqid"]]
         if ":" in query and "=" in query:
+            # parse blastp
             parts = query.split("=")
             if query in bitscores and score <= bitscores[query]:
                 continue
@@ -49,15 +58,17 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
                 "title": parts[1],
             }
         else:
+            # parse blastx/blastn
             try:
                 hit = {
                     "subject": row[cols["sseqid"]],
                     "score": score,
-                    "start": int(row[cols["sstart"]]) + offset,
-                    "end": int(row[cols["send"]]) + offset,
+                    "start": int(row[cols["qstart"]]) + offset,
+                    "end": int(row[cols["qend"]]) + offset,
                     "file": index,
                 }
             except IndexError:
+                # parse file without positions
                 hit = {
                     "subject": row[cols["sseqid"]],
                     "score": score,
@@ -70,9 +81,11 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
             try:
                 taxid, *rest = taxid.split(";")
             except ValueError:
+                # no taxid for this row
                 pass
             hit.update({"taxid": int(taxid)})
         except ValueError:
+            # no taxid in file
             hit.update({"taxid": 0})
         if bitscores:
             blastp[query] = hit
@@ -80,7 +93,7 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
             results[seq_id].append(hit)
     if bitscores:
         for query, hit in blastp.items():
-            seq_id, start, end = re.split(r"[:-]", query)
+            seq_id, rest = query.split(":")
             results[seq_id].append(hit)
     return results
 
@@ -93,18 +106,99 @@ def chunk_size(value):
     return size
 
 
-def apply_taxrule(
-    blast, taxdump, taxrule, prefix, hit_count, identifiers, lengths, results=None
+def set_windows(meta, taxrule):
+    """Set window sizes from dataset metadata."""
+    windows = []
+    chunk = 0.1
+    if "bestsum" in taxrule:
+        chunk = 1
+    elif "blast_max_chunks" in meta.settings:
+        chunk = 1 / int(meta.settings["blast_max_chunks"])
+    if "stats_windows" in meta.settings:
+        for x in meta.settings["stats_windows"]:
+            window = {
+                "key": ("%f" % x).rstrip("0").rstrip("."),
+                "window": True,
+                "value": float(x),
+                "chunk": False,
+            }
+            if window["key"] == "0.1":
+                window["title"] = "windows"
+            else:
+                window["title"] = "windows_%s" % window["key"]
+            if chunk is not None and float(x) == chunk:
+                window.update({"chunk": True})
+                chunk = None
+            windows.append(window)
+    if chunk is not None:
+        window = {
+            "key": ("%f" % chunk).rstrip("0").rstrip("."),
+            "window": False,
+            "value": chunk,
+            "chunk": True,
+        }
+    return windows
+
+
+def bin_hits(
+    blast,
+    meta,
+    identifiers,
+    lengths,
+    taxrule,
+    hit_count,
 ):
-    """Apply taxrule to parsed BLAST results."""
-    chunk = 100000
-    max_chunks = 10
-    overlap = 500
-    segment = chunk + overlap
+    """Place hits into bins for each window size."""
+    windows = set_windows(meta, taxrule)
+    bins = defaultdict(dict)
+    get_item = itemgetter("start")
+    get_score = itemgetter("score")
+    for idx, identifier in enumerate(identifiers.values):
+        length = lengths[idx]
+        hits = sorted(blast[identifier], key=get_item)
+        for window in windows:
+            if window["value"] > 1:
+                chunk = window["value"]
+            elif window["value"] == 1:
+                chunk = length
+            else:
+                chunk = round(length * window["value"] / 1000 + 0.5) * 1000
+            if length < 1000000:
+                if not window["chunk"]:
+                    continue
+                print(identifier)
+                chunk = 100000
+            bin = {**window}
+            groups = {
+                k: list(g)
+                for k, g in groupby(hits, lambda x: get_item(x) // chunk * chunk)
+            }
+            current = 0
+            bin["bins"] = []
+            while current < length:
+                if current in groups:
+                    bin["bins"].append(
+                        sorted(groups[current], key=get_score, reverse=True)[:hit_count]
+                    )
+                else:
+                    bin["bins"].append([])
+                current += chunk
+            bins[identifier][window["key"]] = bin
+    return bins
+
+
+def initialise_values(bins, prefix, results, ranks):
+    """Initialise results and values ready to apply taxrule."""
+    windows = [
+        obj["title"]
+        for obj in bins[list(bins.keys())[0]].values()
+        if "title" in obj and obj["window"]
+    ]
     if results is None:
-        blank = [None] * len(identifiers.values)
-        results = [
-            {
+        blank = [None] * len(bins.keys())
+        results = []
+        for rank in ranks:
+            result = {
                 "field_id": "%s_%s" % (prefix, rank),
                 "values": blank[:],
                 "data": {
@@ -112,116 +206,109 @@ def apply_taxrule(
                     "score": blank[:],
                     "positions": blank[:],
                     "hits": blank[:],
-                    "windows": blank[:],
                 },
             }
-            for rank in taxdump.list_ranks()
-        ]
-    values = [
-        {
+            for window in windows:
+                result["data"].update({window: blank[:]})
+            results.append(result)
+    values = []
+    for rank in ranks:
+        value = {
             "category": defaultdict(str),
             "cindex": defaultdict(int),
             "score": defaultdict(float),
             "positions": defaultdict(list),
+            "categories": defaultdict(list),
+            "scores": defaultdict(list),
             "hits": defaultdict(list),
-            "windows": defaultdict(list),
         }
-        for rank in taxdump.list_ranks()
-    ]
-    length_dict = {}
-    if "dist" in taxrule:
-        for i, seq_id in enumerate(identifiers.values):
-            my_chunk = chunk
-            if lengths[i] > segment:
-                segments = (lengths[i] + chunk) // chunk
-                if segments > max_chunks:
-                    my_chunk = chunk_size(lengths[i] / max_chunks)
-                    segments = max_chunks
+        for window in windows:
+            value.update({window: defaultdict(list)})
+        values.append(value)
+    return results, values
+
+
+def apply_taxrule_to_bin(seqid, values, bin, window, taxdump, ranks):
+    """Apply taxrule to a single bin."""
+    for index, rank in enumerate(ranks):
+        cat_scores = defaultdict(float)
+        for hit in bin:
+            try:
+                category = taxdump.ancestors[hit["taxid"]][rank]
+            except KeyError:
+                category = 0
+            if category > 0:
+                category = taxdump.names[category]
+            elif category < 0:
+                category = "%s-undef" % taxdump.names[-category]
             else:
-                segments = 1
-            length_dict.update(
-                {
-                    seq_id: {
-                        "length": lengths[i],
-                        "segments": segments,
-                        "chunk": my_chunk,
-                    }
-                }
-            )
-    for seq_id, hits in blast.items():
-        sorted_hits = sorted(hits, key=lambda k: k["score"], reverse=True)
-        for index, rank in enumerate(taxdump.list_ranks()):
-            cat_scores = defaultdict(float)
-            if "dist" in taxrule:
-                dist_scores = defaultdict(lambda: defaultdict(float))
-            for hit in sorted_hits:
+                category = "undef"
+            # category = "no-hit"
+            if category != "undef":
+                cat_scores[category] += hit["score"]
+            if index == 0 and window["chunk"]:
                 try:
-                    category = taxdump.ancestors[hit["taxid"]][rank]
+                    values[index]["hits"][seqid].append(
+                        [
+                            hit["taxid"],
+                            hit["start"],
+                            hit["end"],
+                            hit["score"],
+                            hit["subject"],
+                            hit["file"],
+                            hit.get("title", None),
+                        ]
+                    )
                 except KeyError:
-                    category = 0
-                if category > 0:
-                    category = taxdump.names[category]
-                elif category < 0:
-                    category = "%s-undef" % taxdump.names[-category]
-                else:
-                    category = "undef"
-                values[index]["positions"][seq_id].append([category])
-                if index == 0:
-                    try:
-                        values[index]["hits"][seq_id].append(
-                            [
-                                hit["taxid"],
-                                hit["start"],
-                                hit["end"],
-                                hit["score"],
-                                hit["subject"],
-                                hit["file"],
-                                hit.get("title", None),
-                            ]
-                        )
-                    except KeyError:
-                        values[index]["hits"][seq_id].append([category, hit["file"]])
-                # diverge here for dist taxrules
-                if "dist" in taxrule:
-                    segment = 0
-                    if length_dict[seq_id]["segments"] > 0:
-                        segment = hit["start"] // length_dict[seq_id]["chunk"]
-                    dist_scores[segment][category] += hit["score"]
-                else:
-                    if len(values[index]["positions"][seq_id]) <= hit_count:
-                        cat_scores[category] += hit["score"]
-            if "dist" in taxrule:
-                segments = dict(dist_scores).keys()
-                cat_freqs = defaultdict(int)
-                cat_scores = defaultdict(float)
-                values[index]["windows"][seq_id] = [
-                    [None] for i in range(length_dict[seq_id]["segments"])
-                ]
-                for segment in segments:
-                    seg_cat = max(dist_scores[segment], key=dist_scores[segment].get)
-                    seg_score = dist_scores[segment].get(seg_cat)
-                    cat_freqs[seg_cat] += 1
-                    cat_scores[seg_cat] += seg_score
-                    values[index]["windows"][seq_id][segment] = [seg_cat]
-                max_cat = None
-                max_freq = 0
-                max_score = 0
-                for cat, freq in cat_freqs.items():
-                    if freq > max_freq or (
-                        freq == max_freq and cat_scores[cat] > max_score
-                    ):
-                        max_cat = cat
-                        max_freq = freq
-                        max_score = cat_scores[cat]
-                values[index]["category"][seq_id] = max_cat
-                values[index]["score"][seq_id] = max_score
-                values[index]["cindex"][seq_id] = len(cat_freqs.keys()) - 1
-            else:
-                top_cat = max(cat_scores, key=cat_scores.get)
-                values[index]["category"][seq_id] = top_cat
-                values[index]["score"][seq_id] = cat_scores.get(top_cat)
-                values[index]["cindex"][seq_id] = len(cat_scores.keys()) - 1
-    for index, rank in enumerate(taxdump.list_ranks()):
+                    pass
+            if window["chunk"]:
+                values[index]["positions"][seqid].append([category])
+        if cat_scores:
+            category = max(cat_scores, key=cat_scores.get)
+            score = cat_scores[category]
+        else:
+            category = None
+            score = 0
+        if "title" in window:
+            values[index][window["title"]][seqid].append([category])
+        if window["chunk"]:
+            values[index]["categories"][seqid].append([category])
+            values[index]["scores"][seqid].append(score)
+
+
+def apply_taxrule_across_bins(seqid, values, window, ranks):
+    """Find most common bin category."""
+    if window["chunk"]:
+        for index, rank in enumerate(ranks):
+            scores = defaultdict(float)
+            counts = defaultdict(int)
+            for idx, category in enumerate(values[index]["categories"][seqid]):
+                if category and category[0] is not None:
+                    counts[category[0]] += 1
+                    scores[category[0]] += values[index]["scores"][seqid][idx]
+            max_score = 0
+            max_count = 0
+            top_cat = False
+            for category, count in counts.items():
+                if count > max_count:
+                    max_count = count
+                    max_score = scores[category]
+                    top_cat = category
+                elif count == max_count:
+                    score = scores[category]
+                    if score > max_score:
+                        max_count = count
+                        max_score = score
+                        top_cat = category
+            if top_cat is not False:
+                values[index]["category"][seqid] = top_cat
+                values[index]["cindex"][seqid] = len(counts.keys()) - 1
+                values[index]["score"][seqid] = max_score
+
+
+def add_values_to_results(results, values, ranks, identifiers):
+    """Add new values to result set."""
+    for index, rank in enumerate(ranks):
         if not identifiers.validate_list(list(values[index]["category"].keys())):
             raise UserWarning(
                 "Contig names in the hits file do not match dataset identifiers."
@@ -248,10 +335,22 @@ def apply_taxrule(
                     results[index]["data"]["positions"][i] = []
                     if index == 0:
                         results[index]["data"]["hits"][i] = []
-                if values[index]["windows"]:
-                    results[index]["data"]["windows"][i] = values[index]["windows"][
-                        seq_id
-                    ]
+                for key in values[index].keys():
+                    if key.startswith("windows"):
+                        results[index]["data"][key][i] = values[index][key][seq_id]
+
+
+def apply_taxrule(bins, taxdump, taxrule, prefix, results, identifiers):
+    """Apply taxrule to binned BLAST results."""
+    ranks = taxdump.list_ranks()
+    # ranks = ["superkingdom"]
+    results, values = initialise_values(bins, prefix, results, ranks)
+    for seqid, windows in bins.items():
+        for key, window in windows.items():
+            for bin in window["bins"]:
+                apply_taxrule_to_bin(seqid, values, bin, window, taxdump, ranks)
+            apply_taxrule_across_bins(seqid, values, window, ranks)
+    add_values_to_results(results, values, ranks, identifiers)
     return results
 
 
@@ -357,31 +456,37 @@ def create_fields(results, taxrule, files, fields=None):
                 headers=headers,
             )
         )
-        if "dist" in taxrule:
-            subfield = "windows"
-            field_id = "%s_%s" % (result["field_id"], subfield)
-            if len(result["data"][subfield]) > 1:
-                headers = ["name"]
-            else:
-                headers = ["name"]
-            fields.append(
-                MultiArray(
-                    field_id,
-                    values=result["data"][subfield],
-                    fixed_keys=main.keys,
-                    meta={
-                        "field_id": field_id,
-                        "name": field_id,
-                        "type": "array",
-                        "datatype": "string",
-                        "preload": False,
-                        "active": False,
-                    },
-                    parents=parents,
-                    category_slot=0,
-                    headers=headers,
+        for subfield in result["data"].keys():
+            if subfield == "windows":
+                print(result["data"][subfield][1])
+
+            if subfield.startswith("windows"):
+                field_id = "%s_%s" % (result["field_id"], subfield)
+                if len(result["data"][subfield]) > 1:
+                    headers = ["name"]
+                else:
+                    headers = ["name"]
+                fields.append(
+                    MultiArray(
+                        field_id,
+                        values=result["data"][subfield],
+                        fixed_keys=main.keys,
+                        meta={
+                            "field_id": field_id,
+                            "name": field_id,
+                            "type": "array",
+                            "datatype": "string",
+                            "preload": False,
+                            "active": False,
+                        },
+                        parents=parents,
+                        category_slot=0,
+                        headers=headers,
+                    )
                 )
-            )
+            if subfield == "windows":
+                print(fields[len(fields) - 1].values[1])
+
     return fields
 
 
@@ -415,35 +520,39 @@ def parse(files, **kwargs):
                 float(kwargs["--evalue"]),
                 float(kwargs["--bitscore"]),
             )
-            results = apply_taxrule(
+            bins = bin_hits(
                 blast,
-                kwargs["taxdump"],
-                taxrule,
-                prefix,
-                int(kwargs["--hit-count"]),
+                kwargs["meta"],
                 identifiers,
                 lengths,
-                results,
+                taxrule,
+                int(kwargs["--hit-count"]),
+            )
+            results = apply_taxrule(
+                bins, kwargs["taxdump"], taxrule, prefix, results, identifiers
             )
         fields = create_fields(results, prefix, files)
     else:
+        results = None
         for index, file in enumerate(files):
             blast = parse_blast(
                 file,
                 cols,
-                blast,
+                None,
                 index,
                 float(kwargs["--evalue"]),
                 float(kwargs["--bitscore"]),
             )
-        results = apply_taxrule(
+        bins = bin_hits(
             blast,
-            kwargs["taxdump"],
-            taxrule,
-            prefix,
-            int(kwargs["--hit-count"]),
+            kwargs["meta"],
             identifiers,
             lengths,
+            taxrule,
+            int(kwargs["--hit-count"]),
+        )
+        results = apply_taxrule(
+            bins, kwargs["taxdump"], taxrule, prefix, results, identifiers
         )
         fields = create_fields(results, prefix, files)
     if "cat" not in kwargs["meta"].plot:
