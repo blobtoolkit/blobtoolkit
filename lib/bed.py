@@ -210,7 +210,9 @@ def parse_full_tsv(filename):
                 header = {key: idx + 3 for idx, key in enumerate(row[3:])}
                 continue
             values["length"][row[0]] = int(row[2]) - int(row[1])
-            values["position"][row[0]] = int(row[2])
+            values["position"][row[0]] = round(
+                int(row[1]) + (values["length"][row[0]]) / 2
+            )
             for key, idx in header.items():
                 if key.endswith("_sd"):
                     sd[key.replace("_sd", "")][row[0]] = float(row[idx])
@@ -233,8 +235,9 @@ def parse_windowed_tsv(filename):
             if header is None:
                 header = {key: idx + 3 for idx, key in enumerate(row[3:])}
                 continue
-            values["length"][row[0]].append(int(row[2]) - int(row[1]))
-            values["position"][row[0]].append(int(row[2]))
+            length = int(row[2]) - int(row[1])
+            values["length"][row[0]].append(length)
+            values["position"][row[0]].append(round(int(row[1]) + length / 2))
             for key, idx in header.items():
                 if key.endswith("_sd"):
                     sd[key.replace("_sd", "")][row[0]].append(float(row[idx]))
