@@ -7,6 +7,7 @@
 import math
 import sys
 from collections import Counter, OrderedDict, defaultdict
+from copy import deepcopy
 from glob import glob
 from itertools import zip_longest
 from os import path
@@ -106,13 +107,13 @@ def field_settings():
                 "clamp": 0.01,
                 "datatype": "float",
                 "type": "variable",
+                "range": [math.inf, -math.inf],
             },
             "parents": [
                 {
                     "id": "coverage",
                     "type": "variable",
                     "datatype": "float",
-                    "range": [math.inf, -math.inf],
                 },
                 "children",
             ],
@@ -169,6 +170,38 @@ def field_settings():
                 "children",
             ],
         },
+        "count": {
+            "meta": {
+                "scale": "scaleLinear",
+                "name": "Count",
+                "datatype": "integer",
+                "type": "variable",
+            },
+            "parents": [
+                {
+                    "id": "count_data",
+                    "type": "variable",
+                    "datatype": "integer",
+                },
+                "children",
+            ],
+        },
+        "cpm": {
+            "meta": {
+                "scale": "scaleLinear",
+                "name": "Count per Mb",
+                "datatype": "float",
+                "type": "variable",
+            },
+            "parents": [
+                {
+                    "id": "cpm_data",
+                    "type": "variable",
+                    "datatype": "float",
+                },
+                "children",
+            ],
+        },
     }
 
 
@@ -209,25 +242,29 @@ def parse_full_tsv(filename):
             if header is None:
                 header = {key: idx + 3 for idx, key in enumerate(row[3:])}
                 continue
-            values["length"][row[0]] = int(row[2]) - int(row[1])
-            values["position"][row[0]] = round(
-                int(row[1]) + (values["length"][row[0]]) / 2
-            )
+            length = int(row[2]) - int(row[1])
+            values["length"][row[0]] = length
+            values["position"][row[0]] = int(row[2])
             for key, idx in header.items():
                 if key.endswith("_sd"):
                     sd[key.replace("_sd", "")][row[0]] = float(row[idx])
                 elif key.endswith("_n"):
                     n[key.replace("_n", "")][row[0]] = float(row[idx])
+                elif key.endswith("_count"):
+                    values[key.replace("_count", "_cpm")][row[0]] = float(
+                        "%.3g" % (float(row[idx]) / length * 1000000)
+                    )
                 else:
                     values[key][row[0]] = float(row[idx])
     return values, sd, n
 
 
-def parse_windowed_tsv(filename):
+def parse_windowed_tsv(filename, window):
     """Parse a TSV file containing one value per sequence."""
     values = defaultdict(lambda: defaultdict(list))
     sd = defaultdict(lambda: defaultdict(list))
     n = defaultdict(lambda: defaultdict(list))
+    lengths = {}
     header = None
     with tofile.open_file_handle(filename) as fh:
         for line in fh:
@@ -236,6 +273,11 @@ def parse_windowed_tsv(filename):
                 header = {key: idx + 3 for idx, key in enumerate(row[3:])}
                 continue
             length = int(row[2]) - int(row[1])
+            if float(window) > 1:
+                prev_len = lengths.get(row[0], 0)
+                if length < prev_len:
+                    continue
+                lengths[row[0]] = length
             values["length"][row[0]].append(length)
             values["position"][row[0]].append(round(int(row[1]) + length / 2))
             for key, idx in header.items():
@@ -243,6 +285,10 @@ def parse_windowed_tsv(filename):
                     sd[key.replace("_sd", "")][row[0]].append(float(row[idx]))
                 elif key.endswith("_n"):
                     n[key.replace("_n", "")][row[0]].append(float(row[idx]))
+                elif key.endswith("_count"):
+                    values[key.replace("_count", "_cpm")][row[0]].append(
+                        float("%.3g" % (float(row[idx]) / length * 1000000))
+                    )
                 else:
                     values[key][row[0]].append(float(row[idx]))
     return values, sd, n
@@ -260,7 +306,7 @@ def parse_tsvfiles(files):
             ".tsv", ""
         )
         windows[window], windows_sd[window], windows_n[window] = parse_windowed_tsv(
-            file
+            file, window
         )
     return (
         fullfile,
@@ -347,11 +393,13 @@ def parse(files, **kwargs):
                 parents = []
                 suffix = field.split("_")[-1]
                 if suffix in settings:
-                    meta = {
-                        **settings[suffix]["meta"],
-                        "field_id": field,
-                        "file": filename,
-                    }
+                    meta = deepcopy(settings[suffix]["meta"])
+                    meta.update(
+                        {
+                            "field_id": field,
+                            "file": filename,
+                        }
+                    )
                     if meta["datatype"] == "integer":
                         values = [int(value) for value in values]
                     value_range = [min(values), max(values)]
@@ -375,6 +423,8 @@ def parse(files, **kwargs):
                             meta["range"][1] = max(meta["range"][1], value_range[1])
                         else:
                             meta["range"] = value_range
+                    if meta["range"][1] <= meta["range"][0]:
+                        continue
                     if "preload" in meta and meta["preload"] == 1:
                         if value_range[1] > ranges[suffix]["range"][1]:
                             meta["preload"] = True
@@ -387,6 +437,11 @@ def parse(files, **kwargs):
                             ranges[suffix].update({"range": value_range, "meta": meta})
                         else:
                             meta["preload"] = False
+                    if field.endswith("_%s" % suffix):
+                        meta["name"] = "%s %s" % (
+                            field.replace("_%s" % suffix, ""),
+                            meta["name"],
+                        )
                 parsed.append(
                     Variable(
                         field,

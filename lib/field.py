@@ -127,7 +127,6 @@ class Field:
         keys = OrderedDict(
             [(key, index) for index, key in enumerate(keys) if key is not None]
         )
-        print(keys)
         indexed_values = []
         for value in values:
             if value in keys:
