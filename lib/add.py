@@ -13,7 +13,7 @@ Usage:
                   [--text TXT...] [--text-delimiter STRING] [--text-cols LIST] [--text-header]
                   [--text-no-array] [--taxdump DIRECTORY] [--taxrule bestsum|bestsumorder[=prefix]]
                   [--threads INT] [--evalue NUMBER] [--bitscore NUMBER] [--hit-count INT]
-                  [--pileup-args key=value...] [--create] [--replace] DIRECTORY
+                  [--update-plot] [--pileup-args key=value...] [--create] [--replace] DIRECTORY
 
 Arguments:
     DIRECTORY             Existing Blob directory.
@@ -45,6 +45,7 @@ Options:
     --evalue FLOAT        Set evalue cutoff when parsing hits file. [Default: 1]
     --bitscore FLOAT      Set bitscore cutoff when parsing hits file. [Default: 1]
     --hit-count INT       Number of hits to parse when inferring taxonomy. [Default: 10]
+    --update-plot         Flag to use new taxrule as default category.
     --text TXT            Generic text file.
     --text-delimiter STRING
                           Text file delimiter. [Default: whitespace]
