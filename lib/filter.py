@@ -39,7 +39,7 @@ Options:
                               table output. Use 'plot' to include all plot axes.
                               [Default: plot]
     --taxdump DIRECTORY       Location of NCBI new_taxdump directory.
-    --taxrule STRING          Taxrule used when processing hits. [Default: bestsumorder]
+    --taxrule STRING          Taxrule used when processing hits.
 """
 
 import math
@@ -367,7 +367,15 @@ def main():
                 for field in section["depends"]:
                     fields.update({field: fetch_field(args["DATASET"], field, meta)})
             if section["title"] == "hits":
-                field = "%s_%s" % (args["--taxrule"], args["--summary-rank"])
+                taxrule = args.get("--taxrule", None)
+                if taxrule is None:
+                    taxrule = meta.plot.get("cat", None)
+                    if taxrule is not None:
+                        taxrule = re.sub(r"_[^_]+$", "", taxrule)
+                        args["--taxrule"] = taxrule
+                    else:
+                        continue
+                field = "%s_%s" % (taxrule, args["--summary-rank"])
                 fields.update({"hits": fetch_field(args["DATASET"], field, meta)})
                 if "y" in meta.plot:
                     fields.update(
