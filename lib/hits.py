@@ -555,7 +555,8 @@ def parse(files, **kwargs):
             bins, kwargs["taxdump"], taxrule, prefix, results, identifiers
         )
         fields = create_fields(results, prefix, files)
-    if "cat" not in kwargs["meta"].plot:
+    update_plot = kwargs.get("--update-plot", False)
+    if update_plot or "cat" not in kwargs["meta"].plot:
         kwargs["meta"].plot.update({"cat": "%s_phylum" % prefix})
     return fields
 
