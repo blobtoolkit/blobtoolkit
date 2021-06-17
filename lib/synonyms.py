@@ -1,31 +1,63 @@
 #!/usr/bin/env python3
 """Parse BUSCO results into MultiArray Field."""
 
+import re
 from pathlib import Path
 
 import file_io
 from field import Array
+from text import parse_header_row
 
 
-def parse_synonyms(synonym_file, identifiers):
+def parse_synonyms(synonym_file, delimiter, columns, header, identifiers):
     """Parse synonyms into Array."""
     meta = {}
-    file_stem = Path(synonym_file).stem
-    meta['field_id'] = "%s_synonyms" % file_stem
+    synonym_file, *prefix = synonym_file.split("=")
+    if prefix:
+        prefix = prefix[0]
+    else:
+        prefix = Path(synonym_file).stem
+    meta["field_id"] = "%s_synonyms" % prefix
     by_id = {}
     ids = identifiers.to_set()
-    for line in file_io.stream_file(synonym_file):
-        row = line.rstrip().replace('"', '').split('\t')
+    lines = file_io.stream_file(synonym_file)
+    if columns:
+        columns = columns.split(",")
+    else:
+        columns = []
+    if delimiter == "whitespace":
+        delimit = re.compile(r"\s+")
+    else:
+        delimit = re.compile(r"%s" % delimiter)
+    if header:
+        header_row = next(lines).rstrip().replace('"', "")
+        columns = parse_header_row(delimit, header_row, columns)
+    try:
+        id_col = columns.index("identifier")
+    except ValueError:
+        id_col = None
+    for line in lines:
+        row = re.split(delimit, line.rstrip().replace('"', ""))
         key = None
         names = []
-        for value in row:
-            if value in ids:
+        for i, value in enumerate(row):
+            if id_col is None and value in ids:
+                key = value
+                id_col = i
+            elif i == id_col:
                 key = value
             else:
                 names.append(value)
         by_id.update({key: names})
     values = [by_id[id] if id in by_id else [] for id in identifiers.values]
-    synonyms_field = Array(meta['field_id'], meta=meta, values=values, parents=['children'])
+    del columns[id_col]
+    synonyms_field = Array(
+        meta["field_id"],
+        meta=meta,
+        values=values,
+        headers=columns,
+        parents=["children"],
+    )
     return synonyms_field
 
 
@@ -33,18 +65,24 @@ def parse(files, **kwargs):
     """Parse all synonym files."""
     parsed = []
     for file in files:
-        parsed.append(parse_synonyms(file, identifiers=kwargs['dependencies']['identifiers']))
+        parsed.append(
+            parse_synonyms(
+                file,
+                delimiter=kwargs["--text-delimiter"],
+                columns=kwargs["--text-cols"],
+                header=kwargs["--text-header"],
+                identifiers=kwargs["dependencies"]["identifiers"],
+            )
+        )
     return parsed
 
 
 def parent():
     """Set standard metadata for synonyms."""
     synonyms = {
-        'datatype': 'string',
-        'type': 'array',
-        'id': 'synonyms',
-        'name': 'Synonyms'
+        "datatype": "string",
+        "type": "array",
+        "id": "synonyms",
+        "name": "Synonyms",
     }
-    return [
-        synonyms
-    ]
+    return [synonyms]

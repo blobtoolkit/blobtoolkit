@@ -17,25 +17,27 @@ def parse_header_row(delimiter, header_row, columns):
     head = re.split(delimiter, header_row)
     for i, col in enumerate(columns):
         try:
-            index, name = col.split('=')
+            index, name = col.split("=")
             if not index.isdigit():
                 try:
                     index = head.index(index)
-                    columns[i] = "%d=%s" % (index+1, name)
+                    columns[i] = "%d=%s" % (index + 1, name)
                 except ValueError:
                     pass
         except ValueError:
             if col.isdigit():
                 try:
-                    columns[i] = "%s=%s" % (col, head[int(col)-1])
+                    columns[i] = "%s=%s" % (col, head[int(col) - 1])
                 except IndexError:
                     exit("ERROR: column index out of range '%s'" % col)
             else:
                 try:
                     index = head.index(col)
-                    columns[i] = "%s=%s" % (str(index+1), col)
+                    columns[i] = "%s=%s" % (str(index + 1), col)
                 except ValueError:
                     pass
+    if not columns:
+        return head
     return columns
 
 
@@ -49,10 +51,10 @@ def map_fields(delimiter, first_row, columns):
     for i, col in enumerate(columns):
         if col:
             try:
-                index, name = col.split('=')
+                index, name = col.split("=")
                 if index.isdigit() and width >= int(index):
-                    cols.append(int(index)-1)
-                    headers[int(index)-1] = name
+                    cols.append(int(index) - 1)
+                    headers[int(index) - 1] = name
                 else:
                     exit("ERROR: column index out of range '%s'" % col)
             except ValueError:
@@ -62,15 +64,15 @@ def map_fields(delimiter, first_row, columns):
                     cols.append(i)
                     headers[i] = col
     for col in cols:
-        if re.search('identifier', headers[col], re.IGNORECASE):
-            types[headers[col]] = 'Identifier'
+        if re.search("identifier", headers[col], re.IGNORECASE):
+            types[headers[col]] = "Identifier"
         else:
             datum = sample_data[col]
             try:
                 float(datum)
-                types[headers[col]] = 'Variable'
+                types[headers[col]] = "Variable"
             except ValueError:
-                types[headers[col]] = 'Category'
+                types[headers[col]] = "Category"
     return cols, headers, types, width
 
 
@@ -82,16 +84,19 @@ def parse_rows(delimiter, lines, width, no_array, cols, types, headers):
     index = 0
     array = False
     for line in lines:
-        line = line.replace('"', '')
+        line = line.replace('"', "")
         data = re.split(delimiter, line)
         if len(data) < width:
             continue
         row = {}
         for col in cols:
-            if types[headers[col]] == 'Identifier':
+            if types[headers[col]] == "Identifier":
                 if data[col] in ids:
                     if no_array:
-                        exit("ERROR: found multiple instances of Identifier '%s'" % data[col])
+                        exit(
+                            "ERROR: found multiple instances of Identifier '%s'"
+                            % data[col]
+                        )
                     array = True
                 ids.add(data[col])
                 id_rows[data[col]].append(index)
@@ -104,7 +109,7 @@ def parse_rows(delimiter, lines, width, no_array, cols, types, headers):
 
 def rows_to_results(rows, id_rows, types, array, field_name):
     """Make fields from rows."""
-    field_names = [type for type in types.keys() if types[type] != 'Identifier']
+    field_names = [type for type in types.keys() if types[type] != "Identifier"]
     if field_name:
         results = {field_name: {}}
     else:
@@ -138,36 +143,38 @@ def rows_to_results(rows, id_rows, types, array, field_name):
 def results_to_fields(results, types, cols, headers, text_file, delimiter, identifiers):
     """Convert results to fields."""
     fields = []
-    field_types = {'Variable': Variable,
-                   'Category': Category,
-                   'Array': Array,
-                   'MultiArray': MultiArray}
-    array_type = 'array'
+    field_types = {
+        "Variable": Variable,
+        "Category": Category,
+        "Array": Array,
+        "MultiArray": MultiArray,
+    }
+    array_type = "array"
     for col in cols:
-        if types[headers[col]] == 'Identifier':
+        if types[headers[col]] == "Identifier":
             id_column = col
         else:
             if array_type and types[headers[col]] != array_type:
-                array_type = 'mixed'
+                array_type = "mixed"
                 break
-            array_type = 'string' if types[headers[col]] == 'Category' else 'float'
+            array_type = "string" if types[headers[col]] == "Category" else "float"
     for key, values in results.items():
         ident, sample = next(iter(values.items()))
         blank = 0
         if not identifiers.validate_list(list(results[key].keys())):
-            exit('Contig names in the text file did not match dataset identifiers.')
+            exit("Contig names in the text file did not match dataset identifiers.")
         kwargs = {
-            'meta': {
-                'field_id': key,
-                'name': key,
-                'preload': False,
-                'active': False,
-                'file': text_file,
-                'id_column': id_column,
-                'delimiter': delimiter,
-                'datatype': array_type
-                },
-            'parents': []
+            "meta": {
+                "field_id": key,
+                "name": key,
+                "preload": False,
+                "active": False,
+                "file": text_file,
+                "id_column": id_column,
+                "delimiter": delimiter,
+                "datatype": array_type,
+            },
+            "parents": [],
         }
         if isinstance(sample, list):
             blank = []
@@ -175,35 +182,36 @@ def results_to_fields(results, types, cols, headers, text_file, delimiter, ident
             index = -1
             if key in types:
                 array_headers.append(key)
-                if types[key] == 'Category' and 'category_slot' not in kwargs:
-                    kwargs.update({'category_slot': 0})
+                if types[key] == "Category" and "category_slot" not in kwargs:
+                    kwargs.update({"category_slot": 0})
             else:
                 for col in cols:
-                    if types[headers[col]] != 'Identifier':
+                    if types[headers[col]] != "Identifier":
                         index += 1
-                        print(types[headers[col]])
                         array_headers.append(headers[col])
-                        if types[headers[col]] == 'Category' and 'category_slot' not in kwargs:
-                            kwargs.update({'category_slot': index})
-                            print(kwargs)
-            kwargs.update({'headers': array_headers})
+                        if (
+                            types[headers[col]] == "Category"
+                            and "category_slot" not in kwargs
+                        ):
+                            kwargs.update({"category_slot": index})
+            kwargs.update({"headers": array_headers})
             if isinstance(sample[0], list):
-                field_type = field_types['MultiArray']
-                kwargs.update({'type': 'multiarray'})
+                field_type = field_types["MultiArray"]
+                kwargs.update({"type": "multiarray"})
             else:
-                field_type = field_types['Array']
-                kwargs.update({'type': 'array'})
+                field_type = field_types["Array"]
+                kwargs.update({"type": "array"})
         else:
             field_type = field_types[types[key]]
-            kwargs.update({'type': types[key].lower()})
+            kwargs.update({"type": types[key].lower()})
 
-        if kwargs['type'] == 'variable':
+        if kwargs["type"] == "variable":
             vals = []
             is_float = False
             for ident in identifiers.values:
                 value = results[key][ident] if ident in results[key] else blank
                 vals.append(value)
-                if kwargs['type'] == 'variable' and not is_float:
+                if kwargs["type"] == "variable" and not is_float:
                     try:
                         int(value)
                     except ValueError:
@@ -214,24 +222,25 @@ def results_to_fields(results, types, cols, headers, text_file, delimiter, ident
                 value = float(value) if is_float else int(value)
                 values.append(value)
                 min_max = [min(min_max[0], value), max(min_max[1], value)]
-            kwargs['meta'].update({'range': min_max})
+            kwargs["meta"].update({"range": min_max})
             if is_float:
-                kwargs['meta'].update({'datatype': 'float'})
+                kwargs["meta"].update({"datatype": "float"})
             else:
-                kwargs['meta'].update({'datatype': 'integer'})
-            if min_max[0] < 0 or min_max[0] > min_max[1]/1000:
-                kwargs['meta'].update({'scale': 'scaleLinear'})
+                kwargs["meta"].update({"datatype": "integer"})
+            if min_max[0] < 0 or min_max[0] > min_max[1] / 1000:
+                kwargs["meta"].update({"scale": "scaleLinear"})
             else:
-                kwargs['meta'].update({'scale': 'scaleLog'})
+                kwargs["meta"].update({"scale": "scaleLog"})
                 if min_max[0] == 0:
-                    kwargs['meta'].update({'clamp': 0.01})
+                    kwargs["meta"].update({"clamp": 0.01})
         else:
-            values = [results[key][ident] if ident in results[key] else blank for ident in identifiers.values]
-            if kwargs['type'] == 'category':
-                kwargs['meta'].update({'datatype': 'string'})
-        field = field_type(key,
-                           values=values,
-                           **kwargs)
+            values = [
+                results[key][ident] if ident in results[key] else blank
+                for ident in identifiers.values
+            ]
+            if kwargs["type"] == "category":
+                kwargs["meta"].update({"datatype": "string"})
+        field = field_type(key, values=values, **kwargs)
         fields.append(field)
     return fields
 
@@ -239,25 +248,34 @@ def results_to_fields(results, types, cols, headers, text_file, delimiter, ident
 def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
     """Parse text file into Category and/or Variable fields."""
     try:
-        text_file, field_name = text_file.split('=')
+        text_file, field_name = text_file.split("=")
     except ValueError:
         field_name = False
     data = file_io.read_file(text_file)
-    lines = data.split('\n')
-    if delimiter == 'whitespace':
-        delimit = re.compile(r'\s+')
+    lines = data.split("\n")
+    if delimiter == "whitespace":
+        delimit = re.compile(r"\s+")
     else:
         delimit = re.compile(r"%s" % delimiter)
-    columns = columns.split(',')
+    if columns:
+        columns = columns.split(",")
+    else:
+        columns = []
     if header:
-        header_row = lines.pop(0).replace('"', '')
-        columns = parse_header_row(delimiter, header_row, columns)
-    cols, headers, types, width = map_fields(delimit, lines[0].replace('"', ''), columns)
-    rows, id_rows, array = parse_rows(delimit, lines, width, no_array, cols, types, headers)[:3]
+        header_row = lines.pop(0).replace('"', "")
+        columns = parse_header_row(delimit, header_row, columns)
+    cols, headers, types, width = map_fields(
+        delimit, lines[0].replace('"', ""), columns
+    )
+    rows, id_rows, array = parse_rows(
+        delimit, lines, width, no_array, cols, types, headers
+    )[:3]
     # if not identifiers.validate_list(list(ids)):
     #     exit('ERROR: contig names in the text file did not match dataset identifiers.')
     results = rows_to_results(rows, id_rows, types, array, field_name)
-    fields = results_to_fields(results, types, cols, headers, text_file, delimiter, identifiers)
+    fields = results_to_fields(
+        results, types, cols, headers, text_file, delimiter, identifiers
+    )
     # meta = {'file': text_file}
     return fields
     # results = defaultdict(list)
@@ -290,25 +308,25 @@ def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
 
 def apply_filter(ids, text_file, **kwargs):
     """Filter Text file."""
-    suffix = kwargs['--suffix']
+    suffix = kwargs["--suffix"]
     path = pathlib.Path(text_file)
-    outfile = str(path.parent / (path.stem + '.' + suffix + path.suffix))
+    outfile = str(path.parent / (path.stem + "." + suffix + path.suffix))
     data = file_io.read_file(text_file)
-    lines = data.split('\n')
-    delimiter = kwargs['--text-delimiter']
-    if delimiter == 'whitespace':
-        delimit = re.compile(r'\s+')
+    lines = data.split("\n")
+    delimiter = kwargs["--text-delimiter"]
+    if delimiter == "whitespace":
+        delimit = re.compile(r"\s+")
     else:
         delimit = re.compile(r"%s" % delimiter)
-    id_col = int(kwargs['--text-id-column'])-1
+    id_col = int(kwargs["--text-id-column"]) - 1
     output = []
-    if kwargs['--text-header']:
+    if kwargs["--text-header"]:
         header_row = lines.pop(0)
         header_row.rstrip()
         output.append(header_row)
     for line in lines:
         line = line
-        row = re.split(delimit, line.replace('"', ''))
+        row = re.split(delimit, line.replace('"', ""))
         try:
             if row[id_col] in ids:
                 output.append(line)
@@ -321,12 +339,14 @@ def parse(files, **kwargs):
     """Parse all text files."""
     parsed = []
     for file in files:
-        parsed = parsed + parse_text(file,
-                                     delimiter=kwargs['--text-delimiter'],
-                                     columns=kwargs['--text-cols'],
-                                     header=kwargs['--text-header'],
-                                     no_array=kwargs['--text-no-array'],
-                                     identifiers=kwargs['dependencies']['identifiers'])
+        parsed = parsed + parse_text(
+            file,
+            delimiter=kwargs["--text-delimiter"],
+            columns=kwargs["--text-cols"],
+            header=kwargs["--text-header"],
+            no_array=kwargs["--text-no-array"],
+            identifiers=kwargs["dependencies"]["identifiers"],
+        )
     return parsed
 
 
