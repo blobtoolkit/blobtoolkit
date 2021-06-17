@@ -250,10 +250,12 @@ def parse_full_tsv(filename):
                     sd[key.replace("_sd", "")][row[0]] = float(row[idx])
                 elif key.endswith("_n"):
                     n[key.replace("_n", "")][row[0]] = float(row[idx])
-                elif key.endswith("_count"):
-                    values[key.replace("_count", "_cpm")][row[0]] = float(
+                elif key.endswith("_cpm"):
+                    values[key][row[0]] = float(
                         "%.3g" % (float(row[idx]) / length * 1000000)
                     )
+                elif key.endswith("_count"):
+                    values[key][row[0]] = int(row[idx])
                 else:
                     values[key][row[0]] = float(row[idx])
     return values, sd, n
@@ -285,10 +287,12 @@ def parse_windowed_tsv(filename, window):
                     sd[key.replace("_sd", "")][row[0]].append(float(row[idx]))
                 elif key.endswith("_n"):
                     n[key.replace("_n", "")][row[0]].append(float(row[idx]))
-                elif key.endswith("_count"):
-                    values[key.replace("_count", "_cpm")][row[0]].append(
+                elif key.endswith("_cpm"):
+                    values[key][row[0]].append(
                         float("%.3g" % (float(row[idx]) / length * 1000000))
                     )
+                elif key.endswith("_count"):
+                    values[key][row[0]].append(int(row[idx]))
                 else:
                     values[key][row[0]].append(float(row[idx]))
     return values, sd, n

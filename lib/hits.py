@@ -131,12 +131,14 @@ def set_windows(meta, taxrule):
                 chunk = None
             windows.append(window)
     if chunk is not None:
-        window = {
-            "key": ("%f" % chunk).rstrip("0").rstrip("."),
-            "window": False,
-            "value": chunk,
-            "chunk": True,
-        }
+        windows.append(
+            {
+                "key": ("%f" % chunk).rstrip("0").rstrip("."),
+                "window": False,
+                "value": chunk,
+                "chunk": True,
+            }
+        )
     return windows
 
 
@@ -166,7 +168,6 @@ def bin_hits(
             if length < 1000000:
                 if not window["chunk"]:
                     continue
-                print(identifier)
                 chunk = 100000
             bin = {**window}
             groups = {
@@ -509,9 +510,11 @@ def parse(files, **kwargs):
             cols[name] = int(index) - 1
         except ValueError:
             exit("ERROR: --hits-cols contains an invalid value.")
+    print(taxrule)
     if taxrule.endswith("order"):
         results = None
         for index, file in enumerate(files):
+            print(file)
             blast = parse_blast(
                 file,
                 cols,
@@ -528,6 +531,7 @@ def parse(files, **kwargs):
                 taxrule,
                 int(kwargs["--hit-count"]),
             )
+            print(bins.keys())
             results = apply_taxrule(
                 bins, kwargs["taxdump"], taxrule, prefix, results, identifiers
             )
@@ -535,6 +539,7 @@ def parse(files, **kwargs):
     else:
         results = None
         for index, file in enumerate(files):
+            print(file)
             blast = parse_blast(
                 file,
                 cols,
@@ -551,6 +556,7 @@ def parse(files, **kwargs):
             taxrule,
             int(kwargs["--hit-count"]),
         )
+        print(bins.keys())
         results = apply_taxrule(
             bins, kwargs["taxdump"], taxrule, prefix, results, identifiers
         )
