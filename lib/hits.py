@@ -458,9 +458,6 @@ def create_fields(results, taxrule, files, fields=None):
             )
         )
         for subfield in result["data"].keys():
-            if subfield == "windows":
-                print(result["data"][subfield][1])
-
             if subfield.startswith("windows"):
                 field_id = "%s_%s" % (result["field_id"], subfield)
                 if len(result["data"][subfield]) > 1:
@@ -485,8 +482,6 @@ def create_fields(results, taxrule, files, fields=None):
                         headers=headers,
                     )
                 )
-            if subfield == "windows":
-                print(fields[len(fields) - 1].values[1])
 
     return fields
 
@@ -510,11 +505,9 @@ def parse(files, **kwargs):
             cols[name] = int(index) - 1
         except ValueError:
             exit("ERROR: --hits-cols contains an invalid value.")
-    print(taxrule)
     if taxrule.endswith("order"):
         results = None
         for index, file in enumerate(files):
-            print(file)
             blast = parse_blast(
                 file,
                 cols,
@@ -531,7 +524,6 @@ def parse(files, **kwargs):
                 taxrule,
                 int(kwargs["--hit-count"]),
             )
-            print(bins.keys())
             results = apply_taxrule(
                 bins, kwargs["taxdump"], taxrule, prefix, results, identifiers
             )
@@ -539,7 +531,6 @@ def parse(files, **kwargs):
     else:
         results = None
         for index, file in enumerate(files):
-            print(file)
             blast = parse_blast(
                 file,
                 cols,
@@ -556,7 +547,6 @@ def parse(files, **kwargs):
             taxrule,
             int(kwargs["--hit-count"]),
         )
-        print(bins.keys())
         results = apply_taxrule(
             bins, kwargs["taxdump"], taxrule, prefix, results, identifiers
         )
