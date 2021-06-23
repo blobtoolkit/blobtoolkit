@@ -245,6 +245,17 @@ def results_to_fields(results, types, cols, headers, text_file, delimiter, ident
     return fields
 
 
+def set_delimiter(delimiter, *, sample=None):
+    """Set text delimiter."""
+    if delimiter == "whitespace":
+        if sample is not None:
+            if "\t" in sample:
+                return re.compile(r"\t")
+        return re.compile(r"\s+")
+    else:
+        return re.compile(r"%s" % delimiter)
+
+
 def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
     """Parse text file into Category and/or Variable fields."""
     try:
@@ -253,10 +264,7 @@ def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
         field_name = False
     data = file_io.read_file(text_file)
     lines = data.split("\n")
-    if delimiter == "whitespace":
-        delimit = re.compile(r"\s+")
-    else:
-        delimit = re.compile(r"%s" % delimiter)
+    delimit = set_delimiter(delimiter, sample=lines[0])
     if columns:
         columns = columns.split(",")
     else:
@@ -267,6 +275,7 @@ def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
     cols, headers, types, width = map_fields(
         delimit, lines[0].replace('"', ""), columns
     )
+    print(lines)
     rows, id_rows, array = parse_rows(
         delimit, lines, width, no_array, cols, types, headers
     )[:3]
@@ -314,10 +323,7 @@ def apply_filter(ids, text_file, **kwargs):
     data = file_io.read_file(text_file)
     lines = data.split("\n")
     delimiter = kwargs["--text-delimiter"]
-    if delimiter == "whitespace":
-        delimit = re.compile(r"\s+")
-    else:
-        delimit = re.compile(r"%s" % delimiter)
+    delimit = set_delimiter(delimiter, sample=lines[0])
     id_col = int(kwargs["--text-id-column"]) - 1
     output = []
     if kwargs["--text-header"]:
