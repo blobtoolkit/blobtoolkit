@@ -6,7 +6,7 @@ from pathlib import Path
 
 import file_io
 from field import Array
-from text import parse_header_row
+from text import parse_header_row, set_delimiter
 
 
 def parse_synonyms(synonym_file, delimiter, columns, header, identifiers):
@@ -25,10 +25,7 @@ def parse_synonyms(synonym_file, delimiter, columns, header, identifiers):
         columns = columns.split(",")
     else:
         columns = []
-    if delimiter == "whitespace":
-        delimit = re.compile(r"\s+")
-    else:
-        delimit = re.compile(r"%s" % delimiter)
+    delimit = set_delimiter(delimiter, sample=lines[0])
     if header:
         header_row = next(lines).rstrip().replace('"', "")
         columns = parse_header_row(delimit, header_row, columns)
