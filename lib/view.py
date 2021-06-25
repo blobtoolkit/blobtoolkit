@@ -94,7 +94,10 @@ def test_loc(args):
         print("ERROR: DATASET '%s' must be a valid path to begin hosting.")
         sys.exit(1)
     dataset = Path(args["DATASET"]).name
-    if Path("%s/meta.json" % args["DATASET"]).is_file():
+    if (
+        Path("%s/meta.json" % args["DATASET"]).is_file()
+        or Path("%s/meta.json.gz" % args["DATASET"]).is_file()
+    ):
         parent = Path(args["DATASET"]).resolve().absolute().parent
     else:
         level = "blobdir"
