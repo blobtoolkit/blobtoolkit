@@ -20,15 +20,17 @@ def parse_synonyms(synonym_file, delimiter, columns, header, identifiers):
     meta["field_id"] = "%s_synonyms" % prefix
     by_id = {}
     ids = identifiers.to_set()
-    lines = file_io.stream_file(synonym_file)
+    data = file_io.stream_file(synonym_file)
+    lines = [line for line in data]
     if columns:
         columns = columns.split(",")
     else:
         columns = []
     delimit = set_delimiter(delimiter, sample=lines[0])
     if header:
-        header_row = next(lines).rstrip().replace('"', "")
+        header_row = lines[0].rstrip().replace('"', "")
         columns = parse_header_row(delimit, header_row, columns)
+        lines = lines[1:]
     try:
         id_col = columns.index("identifier")
     except ValueError:

@@ -275,7 +275,6 @@ def parse_text(text_file, delimiter, columns, header, no_array, identifiers):
     cols, headers, types, width = map_fields(
         delimit, lines[0].replace('"', ""), columns
     )
-    print(lines)
     rows, id_rows, array = parse_rows(
         delimit, lines, width, no_array, cols, types, headers
     )[:3]
