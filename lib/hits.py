@@ -270,7 +270,7 @@ def apply_taxrule_to_bin(seqid, values, bin, window, taxdump, ranks):
         else:
             category = None
             score = 0
-        if "title" in window:
+        if "title" in window and window["title"] in values[index]:
             values[index][window["title"]][seqid].append([category])
         if window["chunk"]:
             values[index]["categories"][seqid].append([category])

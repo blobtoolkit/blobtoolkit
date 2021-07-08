@@ -162,7 +162,7 @@ def results_to_fields(results, types, cols, headers, text_file, delimiter, ident
         ident, sample = next(iter(values.items()))
         blank = 0
         if not identifiers.validate_list(list(results[key].keys())):
-            exit("Contig names in the text file did not match dataset identifiers.")
+            print("WARN: Contig names in the text file did not match dataset identifiers.")
         kwargs = {
             "meta": {
                 "field_id": key,
