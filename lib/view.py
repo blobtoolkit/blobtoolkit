@@ -47,6 +47,9 @@ from host import test_port
 def file_ready(file_path):
     """Check if file is ready."""
     while not os.path.exists(file_path):
+        # flush nfs cache by chowning parent to current owner 
+        parent = os.path.dirname(os.path.abspath(file_path))
+        os.chown(parent, os.stat(parent).st_uid, os.stat(parent).st_gid)
         time.sleep(1)
         if os.path.isfile(file_path):
             return True
