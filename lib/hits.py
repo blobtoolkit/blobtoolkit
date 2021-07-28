@@ -110,26 +110,29 @@ def set_windows(meta, taxrule):
     """Set window sizes from dataset metadata."""
     windows = []
     chunk = 0.1
-    if "bestsum" in taxrule:
-        chunk = 1
-    elif "blast_max_chunks" in meta.settings:
-        chunk = 1 / int(meta.settings["blast_max_chunks"])
-    if "stats_windows" in meta.settings:
-        for x in meta.settings["stats_windows"]:
-            window = {
-                "key": ("%f" % x).rstrip("0").rstrip("."),
-                "window": True,
-                "value": float(x),
-                "chunk": False,
-            }
-            if window["key"] == "0.1":
-                window["title"] = "windows"
-            else:
-                window["title"] = "windows_%s" % window["key"]
-            if chunk is not None and float(x) == chunk:
-                window.update({"chunk": True})
-                chunk = None
-            windows.append(window)
+    try:
+        if "bestsum" in taxrule:
+            chunk = 1
+        elif "blast_max_chunks" in meta.settings:
+            chunk = 1 / int(meta.settings["blast_max_chunks"])
+        if "stats_windows" in meta.settings:
+            for x in meta.settings["stats_windows"]:
+                window = {
+                    "key": ("%f" % x).rstrip("0").rstrip("."),
+                    "window": True,
+                    "value": float(x),
+                    "chunk": False,
+                }
+                if window["key"] == "0.1":
+                    window["title"] = "windows"
+                else:
+                    window["title"] = "windows_%s" % window["key"]
+                if chunk is not None and float(x) == chunk:
+                    window.update({"chunk": True})
+                    chunk = None
+                windows.append(window)
+    except AttributeError:
+        pass
     if chunk is not None:
         windows.append(
             {
