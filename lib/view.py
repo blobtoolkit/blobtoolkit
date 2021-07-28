@@ -193,6 +193,16 @@ def static_view(args, loc, viewer):
     timeout = int(args["--timeout"])
     outdir = os.path.abspath(args["--out"])
     driver, display = firefox_driver(args)
+
+    def handle_error(err):
+        """Release resources before quitting."""
+        if viewer is not None:
+            viewer.send_signal(signal.SIGINT)
+        driver.quit()
+        display.stop()
+        print(err)
+        sys.exit(1)
+
     try:
         view = args["--view"][0]
         if args["--preview"]:
@@ -202,7 +212,7 @@ def static_view(args, loc, viewer):
         try:
             driver.get(url)
         except Exception as err:
-            print(err)
+            handle_error(err)
 
         for next_view in args["--view"]:
             if next_view != view:
@@ -212,7 +222,7 @@ def static_view(args, loc, viewer):
                 try:
                     driver.get(url)
                 except Exception as err:
-                    print(err)
+                    handle_error(err)
             for fmt in args["--format"]:
                 file = "%s.%s" % (args["DATASET"], view)
                 if view == "blob":
@@ -226,7 +236,11 @@ def static_view(args, loc, viewer):
                 el_id = "%s_save_%s" % (view, fmt)
                 print("waiting for element %s" % el_id)
                 unstable = True
+                start_time = time.time()
                 while unstable:
+                    elapsed_time = time.time() - start_time
+                    if timeout and elapsed_time > timeout:
+                        handle_error("Timeout waiting for file")
                     try:
                         element = WebDriverWait(driver, timeout).until(
                             EC.visibility_of_element_located((By.ID, el_id))
@@ -253,17 +267,18 @@ def static_view(args, loc, viewer):
                     print("waiting for file '%s'" % file_name)
                     file_ready(file_name)
                 except Exception as err:
-                    print(err)
+                    handle_error(err)
         if viewer is not None:
             viewer.send_signal(signal.SIGINT)
         driver.quit()
         display.stop()
     except Exception as err:
-        print(err)
-        if viewer is not None:
-            viewer.send_signal(signal.SIGINT)
-        driver.quit()
-        display.stop()
+        handle_error(err)
+        # print(err)
+        # if viewer is not None:
+        #     viewer.send_signal(signal.SIGINT)
+        # driver.quit()
+        # display.stop()
     return True
 
 
