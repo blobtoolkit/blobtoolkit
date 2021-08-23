@@ -10,7 +10,7 @@ from collections import Counter, OrderedDict, defaultdict
 from copy import deepcopy
 from glob import glob
 from itertools import zip_longest
-from os import path
+from os import path, stat
 from pathlib import Path
 
 from tolkein import tofile
@@ -306,6 +306,8 @@ def parse_tsvfiles(files):
     [fullfile, *files] = sorted(files, key=len)
     full, sd, n = parse_full_tsv(fullfile)
     for file in files:
+        if stat(file).st_size == 0:
+            continue
         window = "".join(y for x, y in zip_longest(fullfile, file) if x != y).replace(
             ".tsv", ""
         )
