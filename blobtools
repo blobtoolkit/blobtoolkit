@@ -47,7 +47,7 @@ from subprocess import Popen
 
 from docopt import docopt
 
-__version__ = "blobtools v2.6.1"
+__version__ = "blobtools v2.6.3"
 
 MAINDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ""))
 LIBDIR = os.path.abspath(os.path.join(MAINDIR, "lib/"))
