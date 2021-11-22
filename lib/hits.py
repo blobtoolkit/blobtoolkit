@@ -533,15 +533,17 @@ def parse(files, **kwargs):
         fields = create_fields(results, prefix, files)
     else:
         results = None
+        previous = None
         for index, file in enumerate(files):
             blast = parse_blast(
                 file,
                 cols,
-                None,
+                previous,
                 index,
                 float(kwargs["--evalue"]),
                 float(kwargs["--bitscore"]),
             )
+            previous = blast
         bins = bin_hits(
             blast,
             kwargs["meta"],
