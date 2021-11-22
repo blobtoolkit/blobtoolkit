@@ -247,9 +247,9 @@ def parse_full_tsv(filename):
             values["position"][row[0]] = int(row[2])
             for key, idx in header.items():
                 if key.endswith("_sd"):
-                    sd[key.replace("_sd", "")][row[0]] = float(row[idx])
+                    sd[key[:key.rfind("_sd")]][row[0]] = float(row[idx])
                 elif key.endswith("_n"):
-                    n[key.replace("_n", "")][row[0]] = float(row[idx])
+                    n[key[:key.rfind("_n")]][row[0]] = float(row[idx])
                 elif key.endswith("_cpm"):
                     values[key][row[0]] = float(
                         "%.3g" % (float(row[idx]) / length * 1000000)
@@ -284,9 +284,9 @@ def parse_windowed_tsv(filename, window):
             values["position"][row[0]].append(round(int(row[1]) + length / 2))
             for key, idx in header.items():
                 if key.endswith("_sd"):
-                    sd[key.replace("_sd", "")][row[0]].append(float(row[idx]))
+                    sd[key[:key.rfind("_sd")]][row[0]].append(float(row[idx]))
                 elif key.endswith("_n"):
-                    n[key.replace("_n", "")][row[0]].append(float(row[idx]))
+                    n[key[:key.rfind("_n")]][row[0]].append(float(row[idx]))
                 elif key.endswith("_cpm"):
                     values[key][row[0]].append(
                         float("%.3g" % (float(row[idx]) / length * 1000000))
@@ -331,7 +331,7 @@ def parse_bedfiles(files):
         field = filepath.name.split(".")[-2]
         filenames[field] = filepath.name
         if field.endswith("_windows"):
-            windows["0.1"][field.replace("_windows", "")] = parse_window_bed(filename)
+            windows["0.1"][key[:key.rfind("_windows")]] = parse_window_bed(filename)
         else:
             full[field] = parse_full_bed(filename)
     return filenames, windows, full
@@ -445,7 +445,7 @@ def parse(files, **kwargs):
                             meta["preload"] = False
                     if field.endswith("_%s" % suffix):
                         meta["name"] = "%s %s" % (
-                            field.replace("_%s" % suffix, ""),
+                            field[:field.rfind("_%s" % suffix)],
                             meta["name"],
                         )
                 parsed.append(

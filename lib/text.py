@@ -160,7 +160,7 @@ def results_to_fields(results, types, cols, headers, text_file, delimiter, ident
             array_type = "string" if types[headers[col]] == "Category" else "float"
     for key, values in results.items():
         ident, sample = next(iter(values.items()))
-        blank = 0
+        blank = "NA" if types[headers[col]] == "Category" else 0
         if not identifiers.validate_list(list(results[key].keys())):
             print("WARN: Contig names in the text file did not match dataset identifiers.")
         kwargs = {
