@@ -429,7 +429,7 @@ def parse(files, **kwargs):
                             meta["range"][1] = max(meta["range"][1], value_range[1])
                         else:
                             meta["range"] = value_range
-                    if meta["range"][1] <= meta["range"][0]:
+                    if meta["range"][1] < meta["range"][0]:
                         continue
                     if "preload" in meta and meta["preload"] == 1:
                         if value_range[1] > ranges[suffix]["range"][1]:
