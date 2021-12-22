@@ -337,6 +337,21 @@ def parse_bedfiles(files):
     return filenames, windows, full
 
 
+def validate_range(meta):
+    """Ensure range is greater than zero."""
+    if meta["range"][1] < meta["range"][0]:
+        return False
+    if meta["range"][1] == meta["range"][0]:
+        if meta["datatype"] == "integer":
+            meta["range"][1] += 1
+        elif meta["range"][1] == 0:
+            meta["range"][1] += 0.1
+        else:
+            mag = math.floor(math.log10(meta["range"][1]))
+            meta["range"][1] += 10 ** (mag - 1)
+    return True
+
+
 def parse(files, **kwargs):
     if "--bedtsvdir" in kwargs or "--bedtsvdir" in kwargs:
         if isinstance(files, str) and path.isdir(files):
@@ -429,7 +444,7 @@ def parse(files, **kwargs):
                             meta["range"][1] = max(meta["range"][1], value_range[1])
                         else:
                             meta["range"] = value_range
-                    if meta["range"][1] < meta["range"][0]:
+                    if not validate_range(meta):
                         continue
                     if "preload" in meta and meta["preload"] == 1:
                         if value_range[1] > ranges[suffix]["range"][1]:
