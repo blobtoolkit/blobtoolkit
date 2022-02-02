@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "subschema/fields.schema.json",
+  "title": "Fields",
+  "description": "BlobDir field-specific metadata",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "description": "Field unique ID",
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_.-]+$"
+      },
+      "name": {
+        "description": "Field name",
+        "type": "string"
+      },
+      "type": {
+        "description": "Field type",
+        "type": "string",
+        "enum": [
+          "identifier",
+          "variable",
+          "category",
+          "array",
+          "multiarray"
+        ]
+      },
+      "datatype": {
+        "description": "Field datatype",
+        "type": "string",
+        "enum": [
+          "integer",
+          "float",
+          "mixed",
+          "string"
+        ]
+      },
+      "children": {
+        "description": "Array of child fields (top-level field is a container and does not have associated data)",
+        "type": "array"
+      },
+      "data": {
+        "description": "Array of child fields (top-level field also has associated data)",
+        "type": "array"
+      },
+      "preload": {
+        "description": "Flag to indicate if field should be loaded before dataset is displayed",
+        "type": "boolean"
+      },
+      "active": {
+        "description": "Flag to indicate if field should be part of preview set",
+        "type": "boolean"
+      },
+      "scale": {
+        "description": "Scale to use when binning/presenting data",
+        "type": "string",
+        "enum": ["scaleLinear", "scaleSqrt", "scaleLog"]
+      },
+      "range" : {
+        "description": "Upper and lower bounds for variable values",
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 2,
+        "items": {
+          "type": "number"
+        }
+      },
+      "clamp" : {
+        "description": "Clamp low values to number (used to allow use of log scale when range contains zero)",
+        "type": ["number", "boolean"]
+      },
+      "linked_field": {
+        "description": "Field ID to which the current field is linked",
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_.-]+$"
+      },
+      "category_slot": {
+        "description": "Index of array slot containing category information in an array or multiarray field",
+        "type": "integer",
+        "minimum": 0
+      },
+      "headers": {
+        "description": "List of headers for array or multiarray field",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": ["id", "type"]
+  }
+}

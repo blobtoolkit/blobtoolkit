@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "/schema/subschema/assembly.schema.json",
+  "title": "Assembly",
+  "description": "BlobDir assembly-level metadata format",
+  "type": "object",
+  "properties": {
+    "accession": {
+      "description": "Public assembly accession",
+      "type": "string"
+    },
+    "alias": {
+      "description": "Assembly alias",
+      "type": "string"
+    },
+    "bioproject": {
+      "description": "Record type (e.g. 'scaffold' or 'contig')",
+      "type": "string"
+    },
+    "biosample": {
+      "description": "Number of records",
+      "type": "string"
+    },
+    "level": {
+      "description": "Number of records",
+      "type": "string"
+    },
+    "prefix": {
+      "description": "Number of records",
+      "type": "string"
+    },
+    "scaffold-count": {
+      "description": "Number of records",
+      "type": "integer"
+    },
+    "span": {
+      "description": "Number of records",
+      "type": "integer"
+    },
+    "file": {
+      "description": "Number of records",
+      "type": "string"
+    }
+  }
+}

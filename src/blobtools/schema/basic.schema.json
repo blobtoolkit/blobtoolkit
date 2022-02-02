@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "meta.schema.json",
+  "title": "Meta",
+  "description": "BlobDir metadata format",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Dataset unique identifier",
+      "type": "string"
+    },
+    "name": {
+      "description": "Dataset name",
+      "type": "string"
+    },
+    "record_type": {
+      "description": "Record type (e.g. 'scaffold' or 'contig')",
+      "type": "string"
+    },
+    "records": {
+      "description": "Number of records",
+      "type": "integer"
+    },
+    "assembly": {
+      "description": "Assembly-specific metadata.",
+      "$ref": "subschemas/assembly.basic.schema.json"
+    },
+    "taxon": {
+      "description": "Taxon-specific metadata.",
+      "$ref": "subschemas/taxon.basic.schema.json"
+    },
+    "fields": {
+      "description": "Dataset fields",
+      "$ref": "subschemas/fields.schema.json"
+    },
+    "links": {
+      "description": "Links to external resources",
+      "type": "object"
+    },
+    "plot": {
+      "description": "Plot-specific metadata.",
+      "$ref": "subschemas/plot.schema.json"
+    },
+    "reads": {
+      "description": "Read mapping metadata.",
+      "$ref": "subschemas/reads.schema.json"
+    }
+
+  },
+  "required": [ "id", "name", "record_type", "records", "assembly", "taxon" ]
+}

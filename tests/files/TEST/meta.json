@@ -1,0 +1,65 @@
+{
+ "id": "TEST",
+ "assembly": {
+  "file": "UELW01.fasta",
+  "scaffold-count": 996,
+  "span": 665208374
+ },
+ "fields": [
+  {
+   "id": "identifiers",
+   "type": "identifier"
+  },
+  {
+   "id": "gc",
+   "preload": true,
+   "scale": "scaleLinear",
+   "name": "GC",
+   "datatype": "float",
+   "range": [
+    0.3289,
+    0.5832
+   ],
+   "type": "variable"
+  },
+  {
+   "preload": true,
+   "scale": "scaleLog",
+   "id": "length",
+   "name": "Length",
+   "clamp": false,
+   "datatype": "integer",
+   "range": [
+    6993,
+    39982851
+   ],
+   "type": "variable"
+  },
+  {
+   "scale": "scaleLinear",
+   "id": "ncount",
+   "name": "N count",
+   "datatype": "integer",
+   "range": [
+    0,
+    950
+   ],
+   "type": "variable"
+  }
+ ],
+ "links": {
+
+ },
+ "name": "TEST",
+ "plot": {
+  "x": "gc",
+  "z": "length"
+ },
+ "record_type": "record",
+ "records": 996,
+ "taxon": {
+
+ },
+ "version": 1,
+ "revision": 0
+}

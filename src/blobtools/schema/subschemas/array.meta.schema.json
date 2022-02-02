@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "array.meta.schema.json",
+  "title": "Array metadata",
+  "description": "Array metadata",
+  "type": "object",
+  "properties": {
+    "type": {
+      "description": "Field type",
+      "type": "string",
+      "enum": ["array"]
+    },
+    "headers": {
+      "description": "List of headers for array or multiarray field",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["type", "headers"]
+}

@@ -8,3 +8,10 @@ AHIO*
 notes.md
 .gitignore
 .vscode
+build
+dist
+htmlcov
+*.egg-info
+.tox
+.git
+bin
