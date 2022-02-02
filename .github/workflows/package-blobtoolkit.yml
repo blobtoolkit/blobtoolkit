@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: curl $(curl -L https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2) > blobtoolkit-api-linux
+      - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2)
+      - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2)
       # - name: curl
       #   uses: wei/curl@master
       #   with:
