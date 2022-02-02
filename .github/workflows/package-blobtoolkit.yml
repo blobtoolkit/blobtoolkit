@@ -1,0 +1,29 @@
+name: package-blobtoolkit
+on:
+  [push]
+  # push:
+  #   tags:
+  #     - "*"
+jobs:
+  package-blobtoolkit-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: curl
+        uses: wei/curl@master
+        with:
+          args: -L https://github.com/blobtoolkit/viewer/releases/blobtoolkit-api-linux
+      - name: curl
+        uses: wei/curl@master
+        with:
+          args: -L https://github.com/blobtoolkit/viewer/releases/blobtoolkit-viewer-linux
+      - run: pwd
+      - run: ls
+      # - uses: "marvinpinto/action-automatic-releases@v1.2.1"
+      #   with:
+      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #     draft: false
+      #     prerelease: false
+      #     title: "v${{github.ref_name}}"
+      #     files: |
+      #       dist/*
