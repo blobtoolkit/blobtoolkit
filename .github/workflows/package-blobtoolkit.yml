@@ -9,14 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: curl
-        uses: wei/curl@master
-        with:
-          args: -L https://github.com/blobtoolkit/viewer/releases/latest/blobtoolkit-api-linux
-      - name: curl
-        uses: wei/curl@master
-        with:
-          args: -L https://github.com/blobtoolkit/viewer/releases/latest/blobtoolkit-viewer-linux
+      - run: curl $(curl -L https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2) > blobtoolkit-api-linux
+      # - name: curl
+      #   uses: wei/curl@master
+      #   with:
+      #     args: -L https://github.com/blobtoolkit/viewer/releases/download/3.0.0/blobtoolkit-api-linux
+      # - name: curl
+      #   uses: wei/curl@master
+      #   with:
+      #     args: -L https://github.com/blobtoolkit/viewer/releases/latest/blobtoolkit-viewer-linux
       - run: pwd
       - run: ls
       # - uses: "marvinpinto/action-automatic-releases@v1.2.1"
