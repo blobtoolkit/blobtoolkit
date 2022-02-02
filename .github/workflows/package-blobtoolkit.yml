@@ -14,6 +14,10 @@ jobs:
       - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
       - run: pwd
       - run: ls src/blobtools/bin
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
       - run: ./pip_install_latest.sh
       # - uses: "marvinpinto/action-automatic-releases@v1.2.1"
       #   with:

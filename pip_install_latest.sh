@@ -7,6 +7,8 @@ BTK_VERSION=$(
     | head -n 1 \
     | awk '{print $3}')
 
-python3 setup.py sdist bdist_wheel \
-&& echo y | pip uninstall blobtools2 \
-&& pip install dist/blobtools2-${BTK_VERSION}-py3-none-any.whl
+python3 setup.py sdist bdist_wheel &&
+ls dist &&
+echo y | pip uninstall blobtools2 &&
+pip install dist/blobtools2-${BTK_VERSION}-py3-none-any.whl ||
+echo failed
