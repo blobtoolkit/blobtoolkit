@@ -12,11 +12,11 @@ jobs:
       - name: curl
         uses: wei/curl@master
         with:
-          args: -L https://github.com/blobtoolkit/viewer/releases/blobtoolkit-api-linux
+          args: -L https://github.com/blobtoolkit/viewer/releases/latest/blobtoolkit-api-linux
       - name: curl
         uses: wei/curl@master
         with:
-          args: -L https://github.com/blobtoolkit/viewer/releases/blobtoolkit-viewer-linux
+          args: -L https://github.com/blobtoolkit/viewer/releases/latest/blobtoolkit-viewer-linux
       - run: pwd
       - run: ls
       # - uses: "marvinpinto/action-automatic-releases@v1.2.1"
