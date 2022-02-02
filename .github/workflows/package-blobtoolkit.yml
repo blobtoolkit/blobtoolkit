@@ -9,18 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2)
-      - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2)
-      # - name: curl
-      #   uses: wei/curl@master
-      #   with:
-      #     args: -L https://github.com/blobtoolkit/viewer/releases/download/3.0.0/blobtoolkit-api-linux
-      # - name: curl
-      #   uses: wei/curl@master
-      #   with:
-      #     args: -L https://github.com/blobtoolkit/viewer/releases/latest/blobtoolkit-viewer-linux
+      - run: mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
+      - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-linux
+      - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
       - run: pwd
-      - run: ls
+      - run: ls src/blobtools/bin
+      - run: ./pip_install_latest.sh
       # - uses: "marvinpinto/action-automatic-releases@v1.2.1"
       #   with:
       #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
