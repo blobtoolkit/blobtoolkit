@@ -266,8 +266,6 @@ def main(args):
     if not os.path.isfile(file):
         if args["--example"]:
             print("Validating example file.")
-            print(script_dir)
-
             file = os.path.join(script_dir, "example", "FXWY01", "meta.json")
         else:
             show_error("%s not found" % file, 1)

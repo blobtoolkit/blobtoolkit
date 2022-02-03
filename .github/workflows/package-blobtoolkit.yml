@@ -112,3 +112,14 @@ jobs:
           user: __token__
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
+  blobtoolkit-release:
+    runs-on: ubuntu-latest
+    needs: upload-to-pypi
+    steps:
+      - name: create release
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          draft: true
+          prerelease: true
+          title: "v${{github.ref_name}}"

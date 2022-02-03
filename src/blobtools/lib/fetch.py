@@ -34,6 +34,8 @@ def fetch_field(path_to_dataset, field_id, meta=None):
     field_meta = meta.field_meta(field_id)
     try:
         data = file_io.load_yaml("%s/%s.json" % (path_to_dataset, field_id))
+        if data is None:
+            data = file_io.load_yaml("%s/%s.json.gz" % (path_to_dataset, field_id))
         if data is not None:
             data.update({"meta": field_meta})
         field = TYPES[field_meta["type"]](field_id, **data)
@@ -66,6 +68,8 @@ def fetch_metadata(path_to_dataset, **kwargs):
     except KeyError:
         try:
             meta = file_io.load_yaml("%s/meta.json" % path_to_dataset)
+            if meta is None:
+                meta = file_io.load_yaml("%s/meta.json.gz" % path_to_dataset)
         except ValueError:
             pass
     if meta is None:
