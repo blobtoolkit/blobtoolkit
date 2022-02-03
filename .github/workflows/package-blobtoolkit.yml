@@ -27,6 +27,9 @@ jobs:
           ./pip_install_latest.sh manylinux2014_x86_64
           ls dist
         # twine upload dist/*linux_x86_64.whl
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./dist/*.whl
   package-blobtoolkit-macos-11:
     runs-on: macos-11
     steps:
@@ -49,6 +52,33 @@ jobs:
           ./pip_install_latest.sh macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --plat-name macosx_10_9_x86_64
           ls dist
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./dist/*.whl
+  package-blobtoolkit-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fetch viewer
+        run: |
+          mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
+          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-win.exe | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-win.exe
+          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-win.exe | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-win.exe
+      - name: Install dependencies
+        run: |
+          ls src/blobtools/bin
+          python3 -m pip install --upgrade pip
+          pip install requests setuptools wheel twine
+      - name: Build and publish
+        # env:
+        #   TWINE_USERNAME: __token__
+        #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          python3 setup.py sdist bdist_wheel --plat-name win_amd64
+          ls dist
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./dist/*.whl
         # twine upload dist/*
 
       # - uses: "marvinpinto/action-automatic-releases@v1.2.1"
