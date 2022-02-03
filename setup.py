@@ -97,7 +97,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit",  # Required
-    version="2.7.1",
+    version="3.0.0",
     description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
