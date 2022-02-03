@@ -89,14 +89,14 @@ jobs:
           mv dist/artifact/* dist/
           rm -r dist/artifact
           ls -lh dist
-      - name: Publish package to PyPI
+      - name: Publish package to TestPyPI
         uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          repository_url: https://upload.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
 
-  create-github-release:
+  create-release:
     runs-on: ubuntu-latest
     needs: upload-to-pypi
     steps:
@@ -104,6 +104,6 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          draft: false
-          prerelease: false
+          draft: true
+          prerelease: true
           title: "v${{github.ref_name}}"
