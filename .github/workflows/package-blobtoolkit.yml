@@ -16,7 +16,7 @@ jobs:
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
       - name: Install dependencies
         run: |
-          ls bin
+          ls src/blobtools/bin
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
       - name: Build and publish
@@ -38,7 +38,7 @@ jobs:
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-macos
       - name: Install dependencies
         run: |
-          ls bin
+          ls src/blobtools/bin
           python -m pip install --upgrade pip
           pip install requests setuptools wheel twine
       - name: Build and publish
