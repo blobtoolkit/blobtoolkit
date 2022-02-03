@@ -24,11 +24,11 @@ jobs:
         #   TWINE_USERNAME: __token__
         #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          ./pip_install_latest.sh linux_x86_64
+          ./pip_install_latest.sh manylinux_x86_64
           ls dist
         # twine upload dist/*linux_x86_64.whl
-  package-blobtoolkit-macos:
-    runs-on: macos-latest
+  package-blobtoolkit-macos-11:
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
       - name: Fetch viewer
@@ -46,7 +46,8 @@ jobs:
         #   TWINE_USERNAME: __token__
         #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          ./pip_install_latest.sh macosx_10_9_x86_64
+          ./pip_install_latest.sh macosx_11_0_x86_64
+          python3 setup.py sdist bdist_wheel macosx_10_9_x86_64
           ls dist
         # twine upload dist/*
 
