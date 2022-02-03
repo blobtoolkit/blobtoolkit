@@ -9,16 +9,43 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
-      - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-linux
-      - run: curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
-      - run: pwd
-      - run: ls src/blobtools/bin
+      - name: Fetch viewer
+      - run: |
+          mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
+          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-linux
+          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
-      - run: ./pip_install_latest.sh linux_x86_64
+      - name: Build and publish
+        # env:
+        #   TWINE_USERNAME: __token__
+        #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          ./pip_install_latest.sh linux_x86_64
+        # twine upload dist/*linux_x86_64.whl
+  package-blobtoolkit-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fetch viewer
+      - run: |
+          mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
+          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-macos
+          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-macos
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
+      - name: Build and publish
+        # env:
+        #   TWINE_USERNAME: __token__
+        #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          ./pip_install_latest.sh macosx_10_15_x86_64
+        # twine upload dist/*
+
       # - uses: "marvinpinto/action-automatic-releases@v1.2.1"
       #   with:
       #     repo_token: "${{ secrets.GITHUB_TOKEN }}"

@@ -17,4 +17,4 @@ BTK_VERSION=$(
 python3 setup.py sdist bdist_wheel --plat-name=$PLATFORM &&
 echo y | pip uninstall blobtools2 &&
 pip install dist/blobtools2-${BTK_VERSION}-py3-none-$PLATFORM.whl &&
-blobtools -h
+blobtools -v
