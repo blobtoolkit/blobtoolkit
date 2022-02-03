@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Fetch viewer
-      - run: |
+        run: |
           mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-linux
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Fetch viewer
-      - run: |
+        run: |
           mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-macos
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-macos
