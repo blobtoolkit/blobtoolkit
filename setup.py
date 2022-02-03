@@ -99,6 +99,7 @@ setup(
     name="blobtools2",  # Required
     version="2.7.0",
     description="blobtools2",  # Optional
+    long_description="blobtoolkit",  # Optional
     # long_description="%s\n%s"
     # % (
     #     re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
