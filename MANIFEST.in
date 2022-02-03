@@ -14,3 +14,4 @@ recursive-exclude ci *
 recursive-exclude tests *
 recursive-include src/blobtools/example *
 recursive-include src/blobtools/schema *
+recursive-include src/blobtools/bin *

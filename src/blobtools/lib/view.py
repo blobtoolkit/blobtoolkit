@@ -98,18 +98,25 @@ def test_loc(args):
                 dataset,
             )
             return loc, None, None, None, level
-    if not Path(args["DIRECTORY"]).exists():
-        print("ERROR: DIRECTORY '%s' must be a valid path to begin hosting.")
-        sys.exit(1)
-    dataset = Path(args["DIRECTORY"]).name
-    if (
-        Path("%s/meta.json" % args["DIRECTORY"]).is_file()
-        or Path("%s/meta.json.gz" % args["DIRECTORY"]).is_file()
-    ):
-        parent = Path(args["DIRECTORY"]).resolve().absolute().parent
-    else:
+    if args["DIRECTORY"] == "_":
+        parent = "_"
         level = "blobdir"
-        parent = Path(args["DIRECTORY"]).resolve().absolute()
+    else:
+        if not Path(args["DIRECTORY"]).exists():
+            print(
+                "ERROR: DIRECTORY '%s' must be a valid path to begin hosting."
+                % args["DIRECTORY"]
+            )
+            sys.exit(1)
+        dataset = Path(args["DIRECTORY"]).name
+        if (
+            Path("%s/meta.json" % args["DIRECTORY"]).is_file()
+            or Path("%s/meta.json.gz" % args["DIRECTORY"]).is_file()
+        ):
+            parent = Path(args["DIRECTORY"]).resolve().absolute().parent
+        else:
+            level = "blobdir"
+            parent = Path(args["DIRECTORY"]).resolve().absolute()
     port_range = args["--ports"].split("-")
     api_port = False
     port = False
@@ -346,7 +353,7 @@ def interactive_view(args, loc, viewer, level):
             if qstr:
                 url += "?%s" % qstr
         else:
-            url = "%s/all" % loc
+            url = loc if loc.endswith("all") else "%s/all" % loc
         print("Loading %s" % url)
         try:
             driver.get(url)
