@@ -16,6 +16,7 @@ jobs:
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
       - name: Install dependencies
         run: |
+          ls bin
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
       - name: Build and publish
@@ -24,6 +25,7 @@ jobs:
         #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           ./pip_install_latest.sh linux_x86_64
+          ls dist
         # twine upload dist/*linux_x86_64.whl
   package-blobtoolkit-macos:
     runs-on: macos-latest
@@ -36,14 +38,16 @@ jobs:
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-macos
       - name: Install dependencies
         run: |
+          ls bin
           python -m pip install --upgrade pip
-          pip install setuptools wheel twine
+          pip install requests setuptools wheel twine
       - name: Build and publish
         # env:
         #   TWINE_USERNAME: __token__
         #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          ./pip_install_latest.sh macosx_10_15_x86_64
+          ./pip_install_latest.sh macosx_10_9_x86_64
+          ls dist
         # twine upload dist/*
 
       # - uses: "marvinpinto/action-automatic-releases@v1.2.1"
