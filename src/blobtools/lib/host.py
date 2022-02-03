@@ -116,7 +116,6 @@ def find_binary(tool):
 def start_api(port, api_port, hostname, directory):
     """Start BlobToolKit API."""
     cmd = find_binary("api")
-    print(cmd)
     # cmd = "blobtoolkit-api"
     origins = "http://localhost:%d http://localhost null" % int(port)
     if hostname != "localhost":
@@ -134,7 +133,6 @@ def start_api(port, api_port, hostname, directory):
             BTK_FILE_PATH=directory,
             BTK_ORIGINS=origins,
         )
-    print(env)
     process = Popen(
         shlex.split(cmd),
         stdout=PIPE,
@@ -148,7 +146,6 @@ def start_api(port, api_port, hostname, directory):
 def start_viewer(port, api_port, hostname):
     """Start BlobToolKit viewer."""
     cmd = find_binary("viewer")
-    print(cmd)
     # cmd = "blobtoolkit-viewer"
     api_url = "http://%s:%d/api/v1" % (hostname, int(api_port))
     process = Popen(

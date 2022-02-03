@@ -96,9 +96,9 @@ def read(*names, **kwargs):
 
 
 setup(
-    name="blobtools2",  # Required
+    name="blobtoolkit",  # Required
     version="2.7.0",
-    description="blobtools2",  # Optional
+    description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
     # long_description="%s\n%s"
@@ -224,8 +224,6 @@ setup(
         "Bug Reports": "https://github.com/blobtoolkit/blobtools2/issues",
         "Source": "https://github.com/blobtoolkit/blobtools2",
     },
-    # package_data={"blobtools2": ["blobtools/example/*", "blobtools/schema/*"]},
     include_package_data=True,
     zip_safe=False,
-    # scripts=[blobtoolkit_api, blobtoolkit_viewer],
 )

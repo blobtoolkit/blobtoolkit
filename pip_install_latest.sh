@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Build and install the latest blobtools2 version in the current environment
+# Build and install the latest blobtoolkit version in the current environment
 
 PLATFORM=$1
 
@@ -15,6 +15,6 @@ BTK_VERSION=$(
     | awk '{print $3}')
 
 python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name=$PLATFORM &&
-echo y | pip uninstall blobtools2 &&
-pip install dist/blobtools2-${BTK_VERSION}-py3-none-$PLATFORM.whl &&
+echo y | pip uninstall blobtoolkit &&
+pip install dist/blobtoolkit-${BTK_VERSION}-py3-none-$PLATFORM.whl &&
 blobtools -v

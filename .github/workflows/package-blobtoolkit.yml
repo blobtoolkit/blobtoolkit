@@ -14,7 +14,7 @@ jobs:
           mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-linux
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
-          chmod 755 bin/*
+          chmod 755 src/blobtools/bin/*
       - name: Install dependencies
         run: |
           ls src/blobtools/bin
@@ -40,7 +40,7 @@ jobs:
           mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-macos
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-macos
-          chmod 755 bin/*
+          chmod 755 src/blobtools/bin/*
       - name: Install dependencies
         run: |
           ls src/blobtools/bin
@@ -66,7 +66,7 @@ jobs:
           mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-win.exe | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-win.exe
           curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-win.exe | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-win.exe
-          chmod 755 bin/*
+          chmod 755 src/blobtools/bin/*
       - name: Install dependencies
         run: |
           ls src/blobtools/bin
