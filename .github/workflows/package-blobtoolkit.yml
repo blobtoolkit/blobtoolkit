@@ -29,7 +29,7 @@ jobs:
         # twine upload dist/*linux_x86_64.whl
       - uses: actions/upload-artifact@v2
         with:
-          path: ./dist/*.whl
+          path: ./dist/*
   package-blobtoolkit-macos:
     runs-on: macos-11
     steps:
@@ -101,6 +101,8 @@ jobs:
           path: ./dist
       - run: |
           ls -lh
+          ls -lh dist
+          mv dist/artifacts/**/* dist/
           ls -lh dist
       - name: Publish package to TestPyPI
         uses: pypa/gh-action-pypi-publish@v1.5.0
