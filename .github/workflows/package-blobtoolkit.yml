@@ -47,7 +47,7 @@ jobs:
         #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           ./pip_install_latest.sh macosx_11_0_x86_64
-          python3 setup.py sdist bdist_wheel macosx_10_9_x86_64
+          python3 setup.py sdist bdist_wheel --plat-name macosx_10_9_x86_64
           ls dist
         # twine upload dist/*
 
