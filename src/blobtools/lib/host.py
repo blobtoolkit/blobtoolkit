@@ -116,21 +116,31 @@ def find_binary(tool):
 def start_api(port, api_port, hostname, directory):
     """Start BlobToolKit API."""
     cmd = find_binary("api")
+    print(cmd)
     # cmd = "blobtoolkit-api"
     origins = "http://localhost:%d http://localhost null" % int(port)
     if hostname != "localhost":
         origins += " http://%s:%d http://%s" % (hostname, int(port), hostname)
+    if directory == "_":
+        env = dict(
+            os.environ,
+            BTK_API_PORT=api_port,
+            BTK_ORIGINS=origins,
+        )
+    else:
+        env = dict(
+            os.environ,
+            BTK_API_PORT=api_port,
+            BTK_FILE_PATH=directory,
+            BTK_ORIGINS=origins,
+        )
+    print(env)
     process = Popen(
         shlex.split(cmd),
         stdout=PIPE,
         stderr=PIPE,
         encoding="ascii",
-        env=dict(
-            os.environ,
-            BTK_API_PORT=api_port,
-            BTK_FILE_PATH=directory,
-            BTK_ORIGINS=origins,
-        ),
+        env=env,
     )
     return process
 
@@ -138,6 +148,7 @@ def start_api(port, api_port, hostname, directory):
 def start_viewer(port, api_port, hostname):
     """Start BlobToolKit viewer."""
     cmd = find_binary("viewer")
+    print(cmd)
     # cmd = "blobtoolkit-viewer"
     api_url = "http://%s:%d/api/v1" % (hostname, int(api_port))
     process = Popen(
@@ -159,21 +170,24 @@ def start_viewer(port, api_port, hostname):
 def main(args):
     """Entrypoint for blobtools host."""
     global PIDS
-    path = Path(args["DIRECTORY"])
-    if not path.exists():
-        print("ERROR: Directory '%s' does not exist" % args["DIRECTORY"])
-        sys.exit(1)
-    if (path / "meta.json").exists():
-        print("WARNING: Directory '%s' appears to be a BlobDir." % args["DIRECTORY"])
-        print("         Hosting the parent directory instead.")
-        path = path.resolve().parent
+    directory = args["DIRECTORY"]
+    if directory != "_":
+        path = Path(directory)
+        if not path.exists():
+            print("ERROR: Directory '%s' does not exist" % directory)
+            sys.exit(1)
+        if (path / "meta.json").exists():
+            print("WARNING: Directory '%s' appears to be a BlobDir." % directory)
+            print("         Hosting the parent directory instead.")
+            path = path.resolve().parent
+        directory = path.absolute()
     test_port(args["--api-port"], "BlobtoolKit API")
     test_port(args["--port"], "BlobtoolKit viewer")
     api = start_api(
         args["--port"],
         args["--api-port"],
         args["--hostname"],
-        path.absolute(),
+        directory,
     )
     PIDS.append(api.pid)
     print(

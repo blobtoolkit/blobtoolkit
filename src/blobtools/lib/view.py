@@ -98,8 +98,11 @@ def test_loc(args):
                 dataset,
             )
             return loc, None, None, None, level
-    if not Path(args["DIRECTORY"]).exists():
-        print("ERROR: DIRECTORY '%s' must be a valid path to begin hosting.")
+    if not args["DIRECTORY"] == "_" and not Path(args["DIRECTORY"]).exists():
+        print(
+            "ERROR: DIRECTORY '%s' must be a valid path to begin hosting."
+            % args["DIRECTORY"]
+        )
         sys.exit(1)
     dataset = Path(args["DIRECTORY"]).name
     if (
