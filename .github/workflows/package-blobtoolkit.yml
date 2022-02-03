@@ -17,14 +17,14 @@ jobs:
       - name: Install dependencies
         run: |
           ls src/blobtools/bin
-          python3 -m pip3 install --upgrade pip3
-          pip3 install setuptools wheel twine
+          python3 -m pip install --upgrade pip
+          pip install setuptools wheel twine
       - name: Build and publish
         # env:
         #   TWINE_USERNAME: __token__
         #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          ./pip_install_latest.sh manylinux2014
+          ./pip_install_latest.sh manylinux2014_x86_64
           ls dist
         # twine upload dist/*linux_x86_64.whl
   package-blobtoolkit-macos-11:
@@ -39,8 +39,8 @@ jobs:
       - name: Install dependencies
         run: |
           ls src/blobtools/bin
-          python3 -m pip3 install --upgrade pip3
-          pip3 install requests setuptools wheel twine
+          python3 -m pip install --upgrade pip
+          pip install requests setuptools wheel twine
       - name: Build and publish
         # env:
         #   TWINE_USERNAME: __token__
