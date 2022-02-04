@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "subschema/plot.schema.json",
+  "title": "Plot",
+  "description": "BlobDir default plot metadata",
+  "type": "object",
+  "patternProperties": {
+    "^[A-Za-z0-9_.]+$": {
+      "description": "Read file ID",
+      "type": "object",
+      "properties": {
+        "Mapped reads": {
+          "description": "Number of reads mapped to the assembly",
+          "type": ["integer", "string"],
+          "comment": "should be integer"
+        },
+        "Total reads": {
+          "description": "Total number of reads in the read file",
+          "type": ["integer", "string"],
+          "comment": "should be integer"
+        },
+        "coverage": {
+          "description": "Mean base coverage",
+          "type": "number"
+        },
+        "platform": {
+          "description": "Sequencing platform",
+          "type": "string"
+        },
+        "strategy": {
+          "description": "Sequencing startegy ('single' or 'paired')",
+          "type": "string",
+          "enum": ["single", "paired"]
+        },
+        "url": {
+          "description": "List of read file urls",
+          "type": "array"
+        }
+      }
+    }
+  }
+}

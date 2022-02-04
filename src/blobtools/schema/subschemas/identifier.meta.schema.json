@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "identifier.meta.schema.json",
+  "title": "Identifier metadata",
+  "description": "Identifier metadata",
+  "type": "object",
+  "properties": {
+    "type": {
+      "description": "Field type",
+      "type": "string",
+      "enum": ["identifier"]
+    }
+  },
+  "required": ["type"]
+}

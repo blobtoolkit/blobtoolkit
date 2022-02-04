@@ -1,0 +1,17 @@
+# MANIFEST.in
+exclude .gitignore
+exclude .coverage
+exclude .travis.yml
+include setup.py
+prune .cache
+prune .git
+prune build
+prune dist
+recursive-exclude *.egg-info *
+recursive-exclude tests *
+recursive-exclude conda-recipe *
+recursive-exclude ci *
+recursive-exclude tests *
+recursive-include src/blobtools/example *
+recursive-include src/blobtools/schema *
+recursive-include src/blobtools/bin *

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "category.meta.schema.json",
+  "title": "Category metadata",
+  "description": "Category metadata",
+  "type": "object",
+  "properties": {
+    "type": {
+      "description": "Field type",
+      "type": "string",
+      "enum": ["category"]
+    }
+  },
+  "required": ["type"]
+}

@@ -1,12 +1,7 @@
-# BlobTools2
+# BlobToolKit (v("3.0.0"))
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![DOI](https://zenodo.org/badge/150091036.svg)](https://zenodo.org/badge/latestdoi/150091036)
-
-A new implementation of [BlobTools](https://github.com/DRL/blobtools) with support for interactive data exploration via the [BlobToolKit viewer](https://github.com/blobtoolkit/viewer).
-
-More information and tutorials are available at [blobtoolkit.genomehubs.org/blobtools2/](https://blobtoolkit.genomehubs.org/blobtools2/)
 
 BlobToolKit is described in our [BlobToolKit paper](https://doi.org/10.1534/g3.119.400908):
 
@@ -25,52 +20,42 @@ Similar to [BlobTools v1](https://github.com/DRL/blobtools), **BlobTools2** is a
 
 To learn more about the development of the BlobTools approach, take a look at the papers by [Laetsch DR and Blaxter ML, 2017](https://f1000research.com/articles/6-1287/v1) and [Kumar et al., 2013](https://dx.doi.org/10.3389%2Ffgene.2013.00237).
 
-
 ## Installing
 
-The most up to date instructions can be found at [blobtoolkit.genomehubs.org/install/](https://blobtoolkit.genomehubs.org/install/).
+As of version 3.0.0, BlobTools2 and a local version of the BlobToolKit Viewer can be installed with:
 
-## Examples
+```
+pip install blobtoolkit
+```
 
-### Create a new dataset
-- [blobtools create](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/creating-a-dataset/)
+The only additional requirement is either firefox or a chromium-based web browser to run blobtools view to start the interactive viewer or to generate plots from the command line.
 
-### Adding more data
+## Example commands
 
-- [Coverage](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/adding-data-to-a-dataset/adding-coverage/)
-- [BLAST/Diamond hits](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/adding-data-to-a-dataset/adding-hits/)
-- [BUSCO results](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/adding-data-to-a-dataset/adding-busco/)
+Start the Viewer with an example dataset by using `_` as the dataset name (visit the URL shown in the command output)
 
-### Setting dataset metadata
+```
+blobtools view --local _
+```
 
-- [File-based metadata](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/creating-a-dataset/)
-- [Adding taxonomy information](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/updating-metadata/)
-- [Updating individual keys](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/updating-metadata/)
-- [Adding external links](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/updating-metadata/)
+Generate a table of contigs in a filtered BlobDir:
 
-### Filtering datasets
+```
+blobtools filter --param length--Min=1000000 --table table.tsv /path/to/BlobDir
+```
 
-- [Specifying filter parameters](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/filtering-a-dataset/)
-- [Filtering data files](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/filtering-a-dataset/)
+Generate a snail plot from a hosted BlobDir:
 
-### Visualising datasets
+```
+blobtools view --view snail --host https://blobtoolkit.genomehubs.org mSciVul1_1
+```
 
-- [Interactive visualisation](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/opening-a-dataset-in-the-viewer/)
-- [Command line visualisation](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/generating-plots-on-the-command-line/)
+To use a chromium-based browser (e.g. Google Chrome) in place of firefox, add `--driver chromium`
 
+```
+blobtools view --view snail --host https://blobtoolkit.genomehubs.org --driver chromium mSciVul1_1
+```
 
 ## Contributing
 
 If you find a problem or want to suggest a feature, please submit an issue.
-
-If you want to contribute code, pull requests are welcome but please make sure your code passes the linting, testing and style checks before submitting a pull request. Additional development dependencies are listed in `requirements.txt`
-
-Run linter/testing locally:
-```
-./run_tests.sh
-```
-
-Set up pre-commit hook to automate test running:
-```
-ln -s ../../pre-commit.sh .git/hooks/pre-commit
-```

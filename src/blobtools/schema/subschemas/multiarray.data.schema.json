@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "multiarray.data.schema.json",
+  "title": "MultiArray data",
+  "description": "MultiArray data",
+  "type": "object",
+  "properties": {
+    "values": {
+      "description": "MultiArray values",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "array"
+        }
+      }
+    },
+    "keys": {
+      "description": "Category keys",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["values"]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "/schema/subschema/taxon.schema.json",
+  "title": "Taxon",
+  "description": "BlobDir taxon-level metadata format",
+  "type": "object",
+  "properties": {
+    "taxid": {
+      "description": "NCBI taxonomy ID",
+      "type": ["integer", "string"]
+    },
+    "name": {
+      "description": "Primary name for the taxon",
+      "type": "string"
+    }
+  }
+}

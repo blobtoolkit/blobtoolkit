@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "identifier.data.schema.json",
+  "title": "Identifier data",
+  "description": "Identifier data",
+  "type": "object",
+  "properties": {
+    "values": {
+      "description": "Unique record identifiers",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_.-]+$"
+      }
+    }
+  },
+  "required": ["values"]
+}
