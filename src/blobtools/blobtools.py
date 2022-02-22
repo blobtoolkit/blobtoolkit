@@ -42,6 +42,7 @@ examples:
 """
 
 
+import os
 import sys
 
 from docopt import DocoptExit
@@ -56,18 +57,29 @@ LOGGER = tolog.logger(__name__)
 
 def cli():
     """Entry point."""
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
+        try:
+            args = docopt(__doc__, help=False, version=__version__)
+        except DocoptExit:
+            args = {
+                "<command>": " ".join(sys.argv[1:2]),
+            }
+    elif len(sys.argv) > 1:
         try:
             args = docopt(__doc__, help=False, version=__version__)
         except DocoptExit:
             args = {"<command>": sys.argv[1]}
-        if args["<command>"]:
-            # load <command> from entry_points
-            for entry_point in working_set.iter_entry_points("blobtools.subcmd"):
-                if entry_point.name == args["<command>"]:
-                    subcommand = entry_point.load()
-                    sys.exit(subcommand())
-            LOGGER.error("'blobtools %s' is not a valid command", args["<command>"])
-            sys.exit(1)
-    print(__doc__)
+    else:
+        print(__doc__)
+    if args["<command>"]:
+        args.update({"<tool>": os.path.basename(sys.argv[0])})
+        # load <command> from entry_points
+        for entry_point in working_set.iter_entry_points("%s.subcmd" % args["<tool>"]):
+            if entry_point.name == args["<command>"]:
+                subcommand = entry_point.load()
+                sys.exit(subcommand())
+        LOGGER.error(
+            "'%s %s' is not a valid command", args["<tool>"], args["<command>"]
+        )
+        sys.exit(1)
     raise DocoptExit
