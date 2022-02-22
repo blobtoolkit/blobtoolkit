@@ -1,0 +1,48 @@
+@import 'colors';
+
+.outer {
+  position:relative;
+  top:0;
+  height: 100%;
+  width: 100%;
+  overflow:auto;
+  margin:0 auto;
+}
+
+.FAQ {
+  margin: 0.5em;
+}
+
+.question {
+  font-family: 'Comfortaa', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.2em;
+  cursor: pointer;
+  color:$lightColor;
+  // background-color: $highlightColor;
+  padding: 0.25em;
+}
+
+.answer {
+  padding:0.5em 0.25em 0.5em 2em;
+  color: $lightColor;
+  background-color: $highlightColor;
+
+  a {
+    color: $lightColor;
+    text-decoration: underline !important;
+  }
+
+  a:visited {
+    color: $lightColor;
+    text-decoration: underline !important;
+  }
+}
+
+.result_count {
+  display:block;
+  margin: 1em;
+}
+
+.hidden {
+  display:none;
+}

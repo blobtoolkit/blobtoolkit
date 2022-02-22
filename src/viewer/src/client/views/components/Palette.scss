@@ -1,0 +1,56 @@
+@import 'web-fonts';
+@import 'colors';
+@import url(web-fonts-url('Open Sans', 'Comfortaa'));
+
+.block {
+  display: inline-block;
+  height: 2em;
+}
+
+.title {
+  color: $paleColor;
+  background-color: $deepColor;
+  text-align: center;
+  cursor:pointer;
+  display: none;
+}
+
+.active {
+  background-color:$highlightColor;
+  color: $lightColor;
+}
+
+.palette {
+  // margin-top:0.5em;
+}
+
+.color {
+  width:100%;
+  display: inline-block;
+  height: 2em;
+  /*
+  background: `rgba(${ this.state.color.r }, ${ this.state.color.g }, ${ this.state.color.b }, ${ this.state.color.a })`,
+*/
+}
+
+.swatch {
+  display: inline-block;
+  width:100%;
+  height: 2em;
+  cursor: pointer;
+}
+
+.popover {
+  position: fixed;
+  z-index: 50;
+  top: 5em;
+  left: 7em;
+}
+
+.cover {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}

@@ -1,0 +1,87 @@
+@import 'colors';
+
+div.icon {
+  height:1.5em;
+  width:1.5em;
+  margin:0.3em;
+  display: table-cell;
+  padding: 0.3em 0 0 0;
+
+  svg {
+    height:1.5em;
+    width:1.5em;
+    cursor:pointer;
+    background-color:inherit;
+    color:inherit;
+    height: 1.5em;
+    width: 1.5em;
+    border: 0.2em solid;
+    margin-top: -0.3em;
+    cursor: pointer;
+
+    border-color: #0000;
+    
+  }
+
+  svg.active {
+    background-color:$deepColor;
+    color:$lightColor;
+    border-color: #0000;
+
+  }
+
+  svg.invert {
+    border-color: $darkColor;
+  }
+
+  svg.invert.active {
+    background-color:$highlightColor;
+    color:$lightColor;
+  }
+
+  svg:hover {
+    background-color:$paleColor;
+    color:$lightColor;
+    border-color: $paleColor;
+  }
+
+  svg.active:hover {
+
+  }
+}
+
+.text_icon {
+  display:inline-block;
+  color: $lightColor;
+  padding: 0 0.3em 0.1em 0.3em;
+  cursor:pointer;
+  height:1.9em;
+}
+
+.text_icon.active {
+  background-color: $deepColor;
+  color: $lightColor;
+}
+
+.text_icon:hover {
+  background-color:$paleColor;
+  color:$deepColor;
+  border-color: $paleColor;
+}
+
+// .text_icon.invert {
+//   background-color: $deepColor;
+//   color: $lightColor;
+// }
+
+.text_icon.active.invert, .text_icon.invert.active {
+  background-color: $highlightColor;
+  border-color: #0000;
+  color: inherit !important;
+}
+
+.text_icon.invert:hover, .text_icon.active.invert:hover {
+  background-color:$paleColor;
+  color:inherit;
+  border-color: $paleColor;
+}

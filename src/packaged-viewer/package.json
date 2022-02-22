@@ -1,0 +1,30 @@
+{
+  "name": "blobtoolkit-viewer",
+  "version": "3.0.0",
+  "repository": "https://github.com/blobtoolkit/viewer",
+  "description": "",
+  "bin": "src/app.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/app.js",
+    "viewer": "rsync -r ../dist/public view && ws -s index.html -p 8080 -d ./view -z --spa.asset-test-fs"
+  },
+  "author": "Richard Challis",
+  "license": "MIT",
+  "pkg": {
+    "assets": [
+      "./src/public/**/*",
+      "./src/views/**/*"
+    ],
+    "targets": [
+      "node16-linux-x64",
+      "node16-macos-x64",
+      "node16-win-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.2"
+  }
+}
