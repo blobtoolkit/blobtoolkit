@@ -8,4 +8,4 @@ cd - &&
 
 mkdir -p dist &&
 
-mv ./src/api/dist/genomehubs-api* ./dist/
+mv ./src/api/dist/blobtoolkit-api* ./dist/
