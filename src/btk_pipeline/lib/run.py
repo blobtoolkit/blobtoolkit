@@ -95,7 +95,7 @@ def main():
         if args["--workdir"] is not None:
             workdir = args["--workdir"]
         else:
-            workdir = os.path.dirname(config)
+            workdir = os.path.abspath(os.path.dirname(config))
         if config != "%s/config.yaml" % workdir:
             shutil.copy2(config, "%s/config.yaml" % workdir)
         if args["--unlock"]:
