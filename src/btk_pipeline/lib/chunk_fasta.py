@@ -241,10 +241,10 @@ def parse_args():
     args = {}
     try:
         args["--in"] = snakemake.input.fasta
-        args["--chunk"] = int(snakemake.params.chunk)
-        args["--overlap"] = int(snakemake.params.overlap)
-        args["--max-chunks"] = int(snakemake.params.max_chunks)
-        args["--min-length"] = int(snakemake.params.min_length)
+        args["--chunk"] = str(snakemake.params.chunk)
+        args["--overlap"] = str(snakemake.params.overlap)
+        args["--max-chunks"] = str(snakemake.params.max_chunks)
+        args["--min-length"] = str(snakemake.params.min_length)
         try:
             args["--busco"] = snakemake.input.busco
         except AttributeError:

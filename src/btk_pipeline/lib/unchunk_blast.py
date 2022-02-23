@@ -38,7 +38,7 @@ def parse_args():
     args = {}
     try:
         args["--in"] = snakemake.input[0]
-        args["--count"] = snakemake.params.max_target_seqs
+        args["--count"] = str(snakemake.params.max_target_seqs)
         args["--out"] = snakemake.output[0]
         for key, value in args.items:
             sys.argv.append(key)

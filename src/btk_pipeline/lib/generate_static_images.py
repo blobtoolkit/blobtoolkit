@@ -46,13 +46,14 @@ def parse_args():
     args = {}
     try:
         args["--blobdir"] = snakemake.wildcards.blobdir
-        args["--coverage"] = snakemake.input.cov
         args["--host"] = str(snakemake.params.host)
         args["--ports"] = str(snakemake.params.ports)
-        args["--timeout"] = int(snakemake.params.timeout)
+        args["--timeout"] = str(snakemake.params.timeout)
         for key, value in args.items:
             sys.argv.append(key)
             sys.argv.append(value)
+        if snakemake.input.cov:
+            args["--coverage"] = True
     except NameError as err:
         pass
 
