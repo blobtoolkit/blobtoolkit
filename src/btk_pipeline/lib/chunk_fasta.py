@@ -248,15 +248,15 @@ def parse_args():
         try:
             args["--busco"] = snakemake.input.busco
         except AttributeError:
-            args["--busco"] = None
+            args["--busco"] = "None"
         try:
             args["--out"] = snakemake.output.fasta
         except AttributeError:
-            args["--out"] = None
+            args["--out"] = "None"
         try:
             args["--bed"] = snakemake.params.bed
         except AttributeError:
-            args["--bed"] = None
+            args["--bed"] = "None"
         for key, value in args.items():
             sys.argv.append(key)
             sys.argv.append(value)
@@ -273,7 +273,11 @@ def main():
         raise DocoptExit
     try:
         busco_windows = {}
-        if "--busco" in args and args["--busco"] is not None:
+        if (
+            "--busco" in args
+            and args["--busco"] is not None
+            and args["--busco"] != "None"
+        ):
             busco_windows = parse_busco_full_summary(args["--busco"])
         logger.info("Splitting %s into chunks" % args["--in"])
         bed_data = defaultdict(list)
@@ -291,7 +295,7 @@ def main():
             ):
                 chunk_by_busco(seq, seqs, busco_windows, args)
             else:
-                if "--bed" in args and args["--bed"]:
+                if "--bed" in args and args["--bed"] and args["--bed"] != "None":
                     stats = seq_stats(seq["seq"])
                     bed_data[seq["title"]].append(
                         {
@@ -304,7 +308,7 @@ def main():
                     seqs.append((seq))
         if bed_data:
             write_bedfiles(bed_data, args)
-        if args["--out"] is not None:
+        if args["--out"] is not None and args["--out"] != "None":
             chunked = ""
             for seq in seqs:
                 if seq["length"] >= int(args["--min-length"]):
