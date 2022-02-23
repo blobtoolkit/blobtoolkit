@@ -35,11 +35,15 @@ logger = logging.getLogger()
 
 def parse_args():
     """Parse snakemake args if available."""
+    args = {}
     try:
-        sys.argv["--busco"] = snakemake.input.busco
-        sys.argv["--out"] = snakemake.output.fasta
+        args["--busco"] = snakemake.input.busco
+        args["--out"] = snakemake.output.fasta
     except NameError as err:
         pass
+    for key, value in args:
+        sys.argv.append(key)
+        sys.argv.append(value)
 
 
 def main():

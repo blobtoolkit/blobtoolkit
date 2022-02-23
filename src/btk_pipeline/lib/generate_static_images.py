@@ -43,19 +43,27 @@ logger = logging.getLogger()
 
 def parse_args():
     """Parse snakemake args if available."""
+    args = {}
     try:
-        sys.argv["--blobdir"] = snakemake.wildcards.blobdir
-        sys.argv["--coverage"] = snakemake.input.cov
-        sys.argv["--host"] = str(snakemake.params.host)
-        sys.argv["--ports"] = str(snakemake.params.ports)
-        sys.argv["--timeout"] = int(snakemake.params.timeout)
+        args["--blobdir"] = snakemake.wildcards.blobdir
+        args["--coverage"] = snakemake.input.cov
+        args["--host"] = str(snakemake.params.host)
+        args["--ports"] = str(snakemake.params.ports)
+        args["--timeout"] = int(snakemake.params.timeout)
+        for key, value in args:
+            sys.argv.append(key)
+            sys.argv.append(value)
     except NameError as err:
         pass
 
 
 def main():
     """Entry point."""
-    args = docopt(__doc__)
+    try:
+        parse_args()
+        args = docopt(__doc__)
+    except DocoptExit:
+        raise DocoptExit
 
     blob_path = "%s/%s" % (args["--path"], args["--blobdir"])
 

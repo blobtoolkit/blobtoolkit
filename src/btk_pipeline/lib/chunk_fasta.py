@@ -238,24 +238,28 @@ def write_bedfiles(bed_data, args):
 
 def parse_args():
     """Parse snakemake args if available."""
+    args = {}
     try:
-        sys.argv["--in"] = snakemake.input.fasta
-        sys.argv["--chunk"] = int(snakemake.params.chunk)
-        sys.argv["--overlap"] = int(snakemake.params.overlap)
-        sys.argv["--max-chunks"] = int(snakemake.params.max_chunks)
-        sys.argv["--min-length"] = int(snakemake.params.min_length)
+        args["--in"] = snakemake.input.fasta
+        args["--chunk"] = int(snakemake.params.chunk)
+        args["--overlap"] = int(snakemake.params.overlap)
+        args["--max-chunks"] = int(snakemake.params.max_chunks)
+        args["--min-length"] = int(snakemake.params.min_length)
         try:
-            sys.argv["--busco"] = snakemake.input.busco
+            args["--busco"] = snakemake.input.busco
         except AttributeError:
-            sys.argv["--busco"] = None
+            args["--busco"] = None
         try:
-            sys.argv["--out"] = snakemake.output.fasta
+            args["--out"] = snakemake.output.fasta
         except AttributeError:
-            sys.argv["--out"] = None
+            args["--out"] = None
         try:
-            sys.argv["--bed"] = snakemake.params.bed
+            args["--bed"] = snakemake.params.bed
         except AttributeError:
-            sys.argv["--bed"] = None
+            args["--bed"] = None
+        for key, value in args:
+            sys.argv.append(key)
+            sys.argv.append(value)
     except NameError as err:
         pass
 

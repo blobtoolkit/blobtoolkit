@@ -128,16 +128,20 @@ def add_software_versions(meta, args):
 
 def parse_args():
     """Parse snakemake args if available."""
+    args = {}
     try:
-        sys.argv["--config"] = snakemake.config
-        sys.argv["--out"] = str(snakemake.output)
-        sys.argv["--gitdir"] = (
+        args["--config"] = snakemake.config
+        args["--out"] = str(snakemake.output)
+        args["--gitdir"] = (
             git.Repo(
                 os.path.dirname(os.path.abspath(__file__)),
                 search_parent_directories=True,
             ).working_tree_dir
             + "/.git"
         )
+        for key, value in args:
+            sys.argv.append(key)
+            sys.argv.append(value)
     except NameError as err:
         pass
 
