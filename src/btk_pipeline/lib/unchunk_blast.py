@@ -40,7 +40,7 @@ def parse_args():
         args["--in"] = snakemake.input[0]
         args["--count"] = snakemake.params.max_target_seqs
         args["--out"] = snakemake.output[0]
-        for key, value in args:
+        for key, value in args.items:
             sys.argv.append(key)
             sys.argv.append(value)
     except NameError as err:

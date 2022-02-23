@@ -139,7 +139,7 @@ def parse_args():
             ).working_tree_dir
             + "/.git"
         )
-        for key, value in args:
+        for key, value in args.items:
             sys.argv.append(key)
             sys.argv.append(value)
     except NameError as err:

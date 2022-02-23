@@ -45,7 +45,7 @@ def parse_args():
         args["--in"] = snakemake.input.tsv
         args["--window"] = snakemake.params.window
         args["--out"] = snakemake.output.tsv
-        for key, value in args:
+        for key, value in args.items:
             sys.argv.append(key)
             sys.argv.append(value)
     except NameError as err:

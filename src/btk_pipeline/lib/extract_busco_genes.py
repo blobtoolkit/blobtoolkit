@@ -41,7 +41,7 @@ def parse_args():
         args["--out"] = snakemake.output.fasta
     except NameError as err:
         pass
-    for key, value in args:
+    for key, value in args.items:
         sys.argv.append(key)
         sys.argv.append(value)
 

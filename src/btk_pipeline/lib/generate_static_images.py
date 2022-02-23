@@ -50,7 +50,7 @@ def parse_args():
         args["--host"] = str(snakemake.params.host)
         args["--ports"] = str(snakemake.params.ports)
         args["--timeout"] = int(snakemake.params.timeout)
-        for key, value in args:
+        for key, value in args.items:
             sys.argv.append(key)
             sys.argv.append(value)
     except NameError as err:
