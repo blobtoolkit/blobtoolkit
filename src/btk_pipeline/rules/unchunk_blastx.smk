@@ -13,5 +13,10 @@ rule unchunk_blastx:
         "logs/{assembly}/unchunk_blast.log"
     benchmark:
         "logs/{assembly}/unchunk_blast.benchmark.txt"
-    script:
-        "../lib/unchunk_blast.py"
+    # script:
+    #     "../lib/unchunk_blast.py"
+    shell:
+        """(btk pipeline unchunk-blast \
+            --in {input} \
+            --count {params.max_target_seqs} \
+            --out {output}) 2> {log}"""

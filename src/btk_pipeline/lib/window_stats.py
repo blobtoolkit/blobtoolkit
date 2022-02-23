@@ -38,18 +38,18 @@ logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
 
-def parse_args():
-    """Parse snakemake args if available."""
-    args = {}
-    try:
-        args["--in"] = snakemake.input.tsv
-        args["--window"] = str(snakemake.params.window)
-        args["--out"] = snakemake.output.tsv
-        for key, value in args.items:
-            sys.argv.append(key)
-            sys.argv.append(value)
-    except NameError as err:
-        pass
+# def parse_args():
+#     """Parse snakemake args if available."""
+#     args = {}
+#     try:
+#         args["--in"] = snakemake.input.tsv
+#         args["--window"] = str(snakemake.params.window)
+#         args["--out"] = snakemake.output.tsv
+#         for key, value in args.items:
+#             sys.argv.append(key)
+#             sys.argv.append(value)
+#     except NameError as err:
+#         pass
 
 
 def parse_chunked_values(filename):
@@ -161,7 +161,7 @@ def calculate_window_stats(lengths, chunks, window, interval, args):
 def main():
     """Entry point."""
     try:
-        parse_args()
+        # parse_args()
         args = docopt(__doc__)
     except DocoptExit:
         raise DocoptExit

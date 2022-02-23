@@ -33,24 +33,24 @@ logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
 
-def parse_args():
-    """Parse snakemake args if available."""
-    args = {}
-    try:
-        args["--in"] = snakemake.input[0]
-        args["--count"] = str(snakemake.params.max_target_seqs)
-        args["--out"] = snakemake.output[0]
-        for key, value in args.items:
-            sys.argv.append(key)
-            sys.argv.append(value)
-    except NameError as err:
-        pass
+# def parse_args():
+#     """Parse snakemake args if available."""
+#     args = {}
+#     try:
+#         args["--in"] = snakemake.input[0]
+#         args["--count"] = str(snakemake.params.max_target_seqs)
+#         args["--out"] = snakemake.output[0]
+#         for key, value in args.items:
+#             sys.argv.append(key)
+#             sys.argv.append(value)
+#     except NameError as err:
+#         pass
 
 
 def main():
     """Entry point."""
     try:
-        parse_args()
+        # parse_args()
         args = docopt(__doc__)
     except DocoptExit:
         raise DocoptExit

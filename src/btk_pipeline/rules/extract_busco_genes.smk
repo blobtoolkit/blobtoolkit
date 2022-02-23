@@ -11,16 +11,9 @@ rule extract_busco_genes:
         "logs/{assembly}/extract_busco_genes.log"
     benchmark:
         "logs/{assembly}/extract_busco_genes.benchmark.txt"
-    script:
-        "../lib/extract_busco_genes.py"
-    # shell:
-    #     """(> {output}; \
-    #     for TABLE in {input.busco}; do \
-    #         if [ -s $TABLE ]; then \
-    #             SEQS=${{TABLE/full_table.tsv.gz/busco_sequences.tar.gz}};
-    #             tar xf $SEQS \
-    #                 --to-command='FILE=$(basename $TAR_FILENAME); \
-    #                               TYPE=$(echo $TAR_FILENAME | awk -F '"'"'[/_]'"'"' '"'"'{{print $3}}'"'"');
-    #                               awk -v busco=${{FILE%.faa}} -v type=$TYPE '"'"'{{if($1 ~ /^>/){{print $1 "=" busco "=" type}} else {{print $1}}}}'"'"''; \
-    #         fi; \
-    #     done) >> {output} 2> {log}"""
+    # script:
+    #     "../lib/extract_busco_genes.py"
+    shell:
+        """(btk pipeline extract-busco-genes \
+            --in {input.busco} \
+            --out {output.fasta}) 2> {log}"""

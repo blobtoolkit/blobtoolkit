@@ -41,27 +41,27 @@ logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
 
-def parse_args():
-    """Parse snakemake args if available."""
-    args = {}
-    try:
-        args["--blobdir"] = snakemake.wildcards.blobdir
-        args["--host"] = str(snakemake.params.host)
-        args["--ports"] = str(snakemake.params.ports)
-        args["--timeout"] = str(snakemake.params.timeout)
-        for key, value in args.items:
-            sys.argv.append(key)
-            sys.argv.append(value)
-        if snakemake.input.cov:
-            args["--coverage"] = True
-    except NameError as err:
-        pass
+# def parse_args():
+#     """Parse snakemake args if available."""
+#     args = {}
+#     try:
+#         args["--blobdir"] = snakemake.wildcards.blobdir
+#         args["--host"] = str(snakemake.params.host)
+#         args["--ports"] = str(snakemake.params.ports)
+#         args["--timeout"] = str(snakemake.params.timeout)
+#         for key, value in args.items:
+#             sys.argv.append(key)
+#             sys.argv.append(value)
+#         if snakemake.input.cov:
+#             args["--coverage"] = True
+#     except NameError as err:
+#         pass
 
 
 def main():
     """Entry point."""
     try:
-        parse_args()
+        # parse_args()
         args = docopt(__doc__)
     except DocoptExit:
         raise DocoptExit

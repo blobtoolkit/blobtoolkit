@@ -9,6 +9,7 @@ rule generate_images:
         "{blobdir}/cumulative.png"
     params:
         blobdir = lambda wc: wc.blobdir,
+        cov = lambda wc: " --cov " if reads_by_prefix(config) else ""
         host = "http://localhost",
         ports = "8000-8099",
         timeout = set_view_timeout(config)
@@ -17,5 +18,11 @@ rule generate_images:
         "logs/{blobdir}/generate_images.log"
     benchmark:
         "logs/{blobdir}/generate_images.benchmark.txt"
-    script:
-        """../lib/generate_static_images.py"""
+    # script:
+    #     """../lib/generate_static_images.py"""
+    shell:
+        """(btk pipeline generate-static-images \
+            --blobdir {params.blobdir} {params.cov} \
+            --host {params.host} \
+            --ports {params.ports} \
+            --timeout {params.timeout}) 2> {log}"""

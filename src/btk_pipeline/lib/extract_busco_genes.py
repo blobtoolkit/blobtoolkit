@@ -33,23 +33,23 @@ logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
 
-def parse_args():
-    """Parse snakemake args if available."""
-    args = {}
-    try:
-        args["--busco"] = snakemake.input.busco
-        args["--out"] = snakemake.output.fasta
-    except NameError as err:
-        pass
-    for key, value in args.items:
-        sys.argv.append(key)
-        sys.argv.append(value)
+# def parse_args():
+#     """Parse snakemake args if available."""
+#     args = {}
+#     try:
+#         args["--busco"] = snakemake.input.busco
+#         args["--out"] = snakemake.output.fasta
+#     except NameError as err:
+#         pass
+#     for key, value in args.items:
+#         sys.argv.append(key)
+#         sys.argv.append(value)
 
 
 def main():
     """Entry point."""
     try:
-        parse_args()
+        # parse_args()
         args = docopt(__doc__)
     except DocoptExit:
         raise DocoptExit

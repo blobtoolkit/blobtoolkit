@@ -31,18 +31,18 @@ logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
 
-def parse_args():
-    """Parse snakemake args if available."""
-    args = {}
-    try:
-        args["--in"] = snakemake.input.busco
-        args["--mask"] = snakemake.input.mask
-        args["--out"] = snakemake.output.tsv
-        for key, value in args.items:
-            sys.argv.append(key)
-            sys.argv.append(value)
-    except NameError as err:
-        pass
+# def parse_args():
+#     """Parse snakemake args if available."""
+#     args = {}
+#     try:
+#         args["--in"] = snakemake.input.busco
+#         args["--mask"] = snakemake.input.mask
+#         args["--out"] = snakemake.output.tsv
+#         for key, value in args.items:
+#             sys.argv.append(key)
+#             sys.argv.append(value)
+#     except NameError as err:
+#         pass
 
 
 def load_mask(filename):
@@ -97,7 +97,7 @@ def parse_busco_summary(filename, mask, header):
 def main():
     """Entry point."""
     try:
-        parse_args()
+        # parse_args()
         args = docopt(__doc__)
     except DocoptExit:
         raise DocoptExit
