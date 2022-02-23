@@ -91,9 +91,9 @@ def main():
     except DocoptExit:
         raise DocoptExit
     try:
-        config = args["--config"]
+        config = os.path.abspath(args["--config"])
         if args["--workdir"] is not None:
-            workdir = args["--workdir"]
+            workdir = os.path.abspath(args["--workdir"])
         else:
             workdir = os.path.abspath(os.path.dirname(config))
         if config != "%s/config.yaml" % workdir:
