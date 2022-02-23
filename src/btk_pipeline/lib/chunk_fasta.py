@@ -36,10 +36,10 @@ logger_config = {
     "format": "%(asctime)s [%(levelname)s] line %(lineno)d %(message)s",
     "filemode": "w",
 }
-try:
-    logger_config.update({"filename": snakemake.log[0]})
-except NameError as err:
-    pass
+# try:
+#     logger_config.update({"filename": snakemake.log[0]})
+# except NameError as err:
+#     pass
 logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
@@ -236,38 +236,38 @@ def write_bedfiles(bed_data, args):
         ofh.writelines(rows)
 
 
-def parse_args():
-    """Parse snakemake args if available."""
-    args = {}
-    try:
-        args["--in"] = snakemake.input.fasta
-        args["--chunk"] = str(snakemake.params.chunk)
-        args["--overlap"] = str(snakemake.params.overlap)
-        args["--max-chunks"] = str(snakemake.params.max_chunks)
-        args["--min-length"] = str(snakemake.params.min_length)
-        try:
-            args["--busco"] = snakemake.input.busco
-        except AttributeError:
-            args["--busco"] = "None"
-        try:
-            args["--out"] = snakemake.output.fasta
-        except AttributeError:
-            args["--out"] = "None"
-        try:
-            args["--bed"] = snakemake.params.bed
-        except AttributeError:
-            args["--bed"] = "None"
-        for key, value in args.items():
-            sys.argv.append(key)
-            sys.argv.append(value)
-    except NameError as err:
-        pass
+# def parse_args():
+#     """Parse snakemake args if available."""
+#     args = {}
+#     try:
+#         args["--in"] = snakemake.input.fasta
+#         args["--chunk"] = str(snakemake.params.chunk)
+#         args["--overlap"] = str(snakemake.params.overlap)
+#         args["--max-chunks"] = str(snakemake.params.max_chunks)
+#         args["--min-length"] = str(snakemake.params.min_length)
+#         try:
+#             args["--busco"] = snakemake.input.busco
+#         except AttributeError:
+#             args["--busco"] = "None"
+#         try:
+#             args["--out"] = snakemake.output.fasta
+#         except AttributeError:
+#             args["--out"] = "None"
+#         try:
+#             args["--bed"] = snakemake.params.bed
+#         except AttributeError:
+#             args["--bed"] = "None"
+#         for key, value in args.items():
+#             sys.argv.append(key)
+#             sys.argv.append(value)
+#     except NameError as err:
+#         pass
 
 
 def main():
     """Entry point."""
     try:
-        parse_args()
+        # parse_args()
         args = docopt(__doc__)
     except DocoptExit:
         raise DocoptExit

@@ -16,5 +16,13 @@ rule chunk_nohit_fasta:
         "logs/{assembly}/chunk_fasta.log"
     benchmark:
         "logs/{assembly}/chunk_fasta.benchmark.txt"
-    script:
-        "../lib/chunk_fasta.py"
+    shell:
+        """(btk pipeline chunk-fasta \
+            --in {input.fasta} \
+            --chunk {params.chunk} \
+            --overlap {params.overlap} \
+            --max-chunks {params.max_chunks} \
+            --min-length {params.min_length} \
+            --busco None \
+            --out {output.bed} \
+            --bed None) 2> {log}"""

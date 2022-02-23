@@ -18,5 +18,13 @@ rule get_chunked_stats:
         "logs/{assembly}/get_seq_stats.log"
     benchmark:
         "logs/{assembly}/get_seq_stats.benchmark.txt"
-    script:
-        "../lib/chunk_fasta.py"
+    shell:
+        """(btk pipeline chunk-fasta \
+            --in {input.fasta} \
+            --chunk {params.chunk} \
+            --overlap {params.overlap} \
+            --max-chunks {params.max_chunks} \
+            --min-length {params.min_length} \
+            --busco None \
+            --out None \
+            --bed {params.bed}) 2> {log}"""

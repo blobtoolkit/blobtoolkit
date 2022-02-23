@@ -17,5 +17,13 @@ rule chunk_fasta_by_busco:
         "logs/{assembly}/chunk_fasta_by_busco.log"
     benchmark:
         "logs/{assembly}/chunk_fasta_by_busco.benchmark.txt"
-    script:
-        "../lib/chunk_fasta.py"
+    shell:
+        """(btk pipeline chunk-fasta \
+            --in {input.fasta} \
+            --chunk {params.chunk} \
+            --overlap {params.overlap} \
+            --max-chunks {params.max_chunks} \
+            --min-length {params.min_length} \
+            --busco {input.busco} \
+            --out {output.bed} \
+            --bed None) 2> {log}"""
