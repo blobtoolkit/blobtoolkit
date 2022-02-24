@@ -81,7 +81,7 @@ def main():
 
         for view in views:
             cmds.append(
-                "blobtools view --host %s --timeout %d --ports %s %s --out %s/ %s"
+                "blobtools view --host %s --timeout %s --ports %s %s --out %s/ %s"
                 % (
                     args["--host"],
                     args["--timeout"],
