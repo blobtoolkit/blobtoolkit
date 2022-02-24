@@ -25,5 +25,5 @@ rule chunk_fasta_by_busco:
             --max-chunks {params.max_chunks} \
             --min-length {params.min_length} \
             --busco {input.busco} \
-            --out {output.bed} \
+            --out {output.fasta} \
             --bed None) 2> {log}"""
