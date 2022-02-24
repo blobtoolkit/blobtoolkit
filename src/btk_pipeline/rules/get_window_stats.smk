@@ -7,7 +7,7 @@ rule get_window_stats:
     output:
         tsv = "{assembly}.window_stats.tsv"
     params:
-        window = " --window ".join(set_stats_windows(config)),
+        window = " --window ".join([str(window) for window in set_stats_windows(config)]),
     threads: 1
     log:
         "logs/{assembly}/get_window_stats.log"
