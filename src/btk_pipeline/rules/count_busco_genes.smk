@@ -8,7 +8,7 @@ rule count_busco_genes:
     output:
         tsv = "{assembly}.chunk_stats.tsv"
     params:
-        busco = lambda wc: " --in ".join(expand("%s/%s.busco.{lineage}/full_table.tsv.gz" % (busco_path, wc.assembly), lineage=config['busco']['lineages'])),
+        busco = lambda wc: " --in ".join(expand("%s.busco.{lineage}/full_table.tsv.gz" % wc.assembly, lineage=config['busco']['lineages'])),
     threads: 1
     log:
         "logs/{assembly}/count_busco_genes.log"
