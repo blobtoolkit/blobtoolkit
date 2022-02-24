@@ -93,11 +93,11 @@ def main():
             )
 
         cmds.append(
-            "blobtools filter --summary %s.summary.json %s/%s"
+            "blobtools filter --summary %s.summary.json %s"
             % (args["--blobdir"], blob_path)
         )
 
-        cmds.append("blobtools add --key static_plots=true %s/%s" % (blob_path))
+        cmds.append("blobtools add --key static_plots=true %s" % blob_path)
 
         for cmd in cmds:
             logger.info(cmd)
