@@ -56,9 +56,9 @@ def file_ready(file_path):
         parent = os.path.dirname(os.path.abspath(file_path))
         os.chown(parent, os.stat(parent).st_uid, os.stat(parent).st_gid)
         time.sleep(1)
-        if os.path.isfile(file_path):
-            return True
-        raise ValueError("%s isn't a file!" % file_path)
+    if os.path.isfile(file_path):
+        return True
+    raise ValueError("%s isn't a file!" % file_path)
 
 
 def test_loc(args):
@@ -303,6 +303,7 @@ def static_view(args, loc, viewer):
                         print("waiting for file '%s'" % file_name)
                         file_ready(file_name)
                     except Exception as err:
+                        unstable = True
                         time.sleep(1)
 
         for preview in args["--preview"]:

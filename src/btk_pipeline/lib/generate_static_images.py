@@ -93,8 +93,8 @@ def main():
             )
 
         cmds.append(
-            "blobtools filter --summary %s.summary.json %s"
-            % (args["--blobdir"], blob_path)
+            "blobtools filter --summary %s/%s.summary.json %s"
+            % (blob_path, args["--blobdir"], blob_path)
         )
 
         cmds.append("blobtools add --key static_plots=true %s" % blob_path)
@@ -118,7 +118,7 @@ def main():
         for filename in os.listdir(blob_path):
             p = Path("%s/%s" % (blob_path, filename))
             parts = filename.split(".")
-            if filename.startswith(blob_path):
+            if filename.startswith(args["--blobdir"]):
                 if (
                     filename.endswith("png")
                     or filename.endswith("svg")
