@@ -3,12 +3,11 @@
 """
 Add summary data to metadata.
 
-Usage: btk pipeline add-summary-to-metadata --config FILE --out FILE --gitdir PATH
+Usage: btk pipeline add-summary-to-metadata --config FILE --out FILE
 
 Options:
     --config FILE   YAML format config file
     --out FILE      Output file
-    --gitdir PATH   Path to pipeline .git directory
 """
 
 import logging

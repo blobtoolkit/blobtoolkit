@@ -6,6 +6,8 @@ rule extract_busco_genes:
         busco = expand("%s/%s.busco.{lineage}/full_table.tsv.gz" % (busco_path, config["assembly"]["prefix"]), lineage=get_basal_lineages(config)),
     output:
         fasta = "{assembly}.busco_genes.fasta"
+    params:
+        busco = lambda wc: " --in ".join(expand("%s/%s.busco.{lineage}/full_table.tsv.gz" % (busco_path, wc.assembly), lineage=config['busco']['lineages'])),
     threads: 1
     log:
         "logs/{assembly}/extract_busco_genes.log"
@@ -15,5 +17,5 @@ rule extract_busco_genes:
     #     "../lib/extract_busco_genes.py"
     shell:
         """(btk pipeline extract-busco-genes \
-            --in {input.busco} \
+            --busco {input.busco} \
             --out {output.fasta}) 2> {log}"""

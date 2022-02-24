@@ -6,7 +6,9 @@ rule count_busco_genes:
         busco = expand("{{assembly}}.busco.{lineage}/full_table.tsv.gz", lineage=config["busco"]["lineages"]),
         mask = "%s/{assembly}.chunk_stats.tsv" % chunk_stats_path
     output:
-        tsv = "{assembly}.chunk_stats.tsv",
+        tsv = "{assembly}.chunk_stats.tsv"
+    params:
+        busco = lambda wc: " --in ".join(expand("%s/%s.busco.{lineage}/full_table.tsv.gz" % (busco_path, wc.assembly), lineage=config['busco']['lineages'])),
     threads: 1
     log:
         "logs/{assembly}/count_busco_genes.log"
@@ -16,6 +18,6 @@ rule count_busco_genes:
     #     "../lib/count_busco_genes.py"
     shell:
         """(btk pipeline count-busco-genes \
-            --in {input.busco} \
+            --in {params.busco} \
             --mask {input.mask} \
             --out {output.tsv}) 2> {log}"""
