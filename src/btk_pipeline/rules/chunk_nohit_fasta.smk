@@ -24,5 +24,5 @@ rule chunk_nohit_fasta:
             --max-chunks {params.max_chunks} \
             --min-length {params.min_length} \
             --busco None \
-            --out {output.bed} \
+            --out {output.fasta} \
             --bed None) 2> {log}"""
