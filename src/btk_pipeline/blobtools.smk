@@ -25,7 +25,7 @@ Contact:
   blobtoolkit@genomehubs.org
 
 License:
-  © 2021 Genome Research Limited, MIT License
+  © 2022 Genome Research Limited, MIT License
 """
 
 include: "lib/functions.py"
@@ -36,6 +36,9 @@ window_stats_path = "../window_stats"
 diamond_path = "../diamond"
 blastn_path = "../blastn"
 diamond_blastp_path = "../diamond_blastp"
+
+working_dir = os.getcwd()
+parent_dir = os.path.dirname(working_dir)
 
 rule all:
     """

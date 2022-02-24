@@ -25,7 +25,7 @@ Contact:
   blobtoolkit@genomehubs.org
 
 License:
-  © 2021 Genome Research Limited  % config["assembly"]["prefix"], MIT License
+  © 2022 Genome Research Limited  % config["assembly"]["prefix"], MIT License
 """
 
 include: "lib/functions.py"
