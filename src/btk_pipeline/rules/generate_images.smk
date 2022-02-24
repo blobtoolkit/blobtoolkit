@@ -9,7 +9,7 @@ rule generate_images:
         "{blobdir}/cumulative.png"
     params:
         blobdir = lambda wc: wc.blobdir,
-        cov = lambda wc: " --cov " if reads_by_prefix(config) else ""
+        cov = lambda wc: " --cov " if reads_by_prefix(config) else "",
         host = "http://localhost",
         ports = "8000-8099",
         timeout = set_view_timeout(config)
