@@ -16,6 +16,6 @@ rule count_busco_genes:
     #     "../lib/count_busco_genes.py"
     shell:
         """(btk pipeline count-busco-genes \
-            --in {input.fasta} \
+            --in {input.busco} \
             --mask {input.mask} \
             --out {output.tsv}) 2> {log}"""

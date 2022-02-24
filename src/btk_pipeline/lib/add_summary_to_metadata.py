@@ -26,6 +26,7 @@ from docopt import docopt
 from functions import read_similarity_settings
 from functions import reads_by_prefix
 from tolkein import tofile
+from version import __version__
 
 logger_config = {
     "level": logging.INFO,
@@ -42,43 +43,13 @@ logger = logging.getLogger()
 logger.info("Starting script: " + __file__)
 
 
-def add_git_meta(meta, args):
-    """Add git info to metadata."""
-    p = subprocess.Popen(
-        ["git", "--git-dir", args["--gitdir"], "rev-parse", "--short", "HEAD"],
-        stdout=subprocess.PIPE,
-        encoding="utf-8",
-    )
-    (output, err) = p.communicate()
-    p_status = p.wait()
-    meta["settings"]["commit"] = output.rstrip("\n")
-
-    p = subprocess.Popen(
-        ["git", "--git-dir", args["--gitdir"], "remote", "-v"],
-        stdout=subprocess.PIPE,
-        encoding="utf-8",
-    )
-    (output, err) = p.communicate()
-    p_status = p.wait()
-    try:
-        meta["settings"]["pipeline"] = output.split()[1]
-    except IndexError:
-        meta["settings"]["pipeline"] = "UNKNOWN"
-
-    p = subprocess.Popen(
-        ["git", "--git-dir", args["--gitdir"], "describe", "--tags", "--abbrev=0"],
-        stdout=subprocess.PIPE,
-        encoding="utf-8",
-    )
-    (output, err) = p.communicate()
-    p_status = p.wait()
-    try:
-        meta["settings"]["release"] = output.split()[0]
-    except IndexError:
-        pass
+def add_pipeline_version(meta):
+    """Add pipeline version info to metadata."""
+    meta["settings"]["pipeline"] = "https://github.com/blobtoolkit/blobtoolkit"
+    meta["settings"]["release"] = __version__
 
 
-def add_software_versions(meta, args):
+def add_software_versions(meta):
     """Add software versions to meta."""
     programs = {
         "blastn": {"flag": "-version", "regex": r":\s*(\S+)$"},
@@ -126,30 +97,29 @@ def add_software_versions(meta, args):
     meta["settings"]["software_versions"] = versions
 
 
-def parse_args():
-    """Parse snakemake args if available."""
-    args = {}
-    try:
-        args["--config"] = snakemake.config
-        args["--out"] = str(snakemake.output)
-        args["--gitdir"] = (
-            git.Repo(
-                os.path.dirname(os.path.abspath(__file__)),
-                search_parent_directories=True,
-            ).working_tree_dir
-            + "/.git"
-        )
-        for key, value in args.items:
-            sys.argv.append(key)
-            sys.argv.append(value)
-    except NameError as err:
-        pass
+# def parse_args():
+#     """Parse snakemake args if available."""
+#     args = {}
+#     try:
+#         args["--config"] = snakemake.config
+#         args["--out"] = str(snakemake.output)
+#         args["--gitdir"] = (
+#             git.Repo(
+#                 os.path.dirname(os.path.abspath(__file__)),
+#                 search_parent_directories=True,
+#             ).working_tree_dir
+#             + "/.git"
+#         )
+#         for key, value in args.items:
+#             sys.argv.append(key)
+#             sys.argv.append(value)
+#     except NameError as err:
+#         pass
 
 
 def main():
     """Entry point."""
     try:
-        parse_args()
         args = docopt(__doc__)
     except DocoptExit:
         raise DocoptExit
@@ -175,8 +145,8 @@ def main():
                 value["url"] = value["url"].split(";")
             elif "url" not in value:
                 value["url"] = []
-        add_git_meta(meta, args)
-        add_software_versions(meta, args)
+        add_pipeline_version(meta)
+        add_software_versions(meta)
 
         yaml.add_representer(
             OrderedDict,
