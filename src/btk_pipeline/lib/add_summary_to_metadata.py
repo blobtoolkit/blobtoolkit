@@ -32,10 +32,6 @@ logger_config = {
     "format": "%(asctime)s [%(levelname)s] line %(lineno)d %(message)s",
     "filemode": "w",
 }
-try:
-    logger_config.update({"filename": snakemake.log[0]})
-except NameError as err:
-    pass
 logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 

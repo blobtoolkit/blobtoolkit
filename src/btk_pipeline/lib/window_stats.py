@@ -30,10 +30,6 @@ logger_config = {
     "format": "%(asctime)s [%(levelname)s] line %(lineno)d %(message)s",
     "filemode": "w",
 }
-try:
-    logger_config.update({"filename": snakemake.log[0]})
-except NameError as err:
-    pass
 logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
@@ -174,9 +170,8 @@ def main():
         suffix = outfile.suffix
         filename = outfile.stem
         for window in args["--window"]:
-            values = calculate_window_stats(
-                lengths, chunks, float(window), interval, args
-            )
+            window = float(window)
+            values = calculate_window_stats(lengths, chunks, window, interval, args)
             rows = []
             header = None
             for seqid, obj in values.items():
