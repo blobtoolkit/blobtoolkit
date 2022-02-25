@@ -71,17 +71,17 @@ jobs:
           blobtools -v
       - name: Install dependencies
         run: sudo apt-get install -y firefox xvfb
-      - name: Generate static plot
-        run: |
-          blobtools view \
-              --host http://localhost \
-              --timeout 60 \
-              --ports 8000-8099 \
-              --view blob \
-              --param plotShape=circle \
-              --param largeFonts=true \
-              --format png \
-              _
-      - name: Test plot exists
-        run: test -s "FXWY01.blob.circle.png" && exit 0
-          exit 1
+      # - name: Generate static plot
+      #   run: |
+      #     blobtools view \
+      #         --host http://localhost \
+      #         --timeout 60 \
+      #         --ports 8000-8099 \
+      #         --view blob \
+      #         --param plotShape=circle \
+      #         --param largeFonts=true \
+      #         --format png \
+      #         _
+      # - name: Test plot exists
+      #   run: test -s "FXWY01.blob.circle.png" && exit 0
+      #     exit 1
