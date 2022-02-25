@@ -1,4 +1,4 @@
-# BlobToolKit (v3.0.0)
+# BlobToolKit (v"v3.0.1")
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/150091036.svg)](https://zenodo.org/badge/latestdoi/150091036)
@@ -22,7 +22,7 @@ To learn more about the development of the BlobTools approach, take a look at th
 
 ## Installing
 
-As of version 3.0.0, BlobTools2 and a local version of the BlobToolKit Viewer can be installed with:
+As of version "v3.0.1", BlobTools2 and a local version of the BlobToolKit Viewer can be installed with:
 
 ```
 pip install blobtoolkit
