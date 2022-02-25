@@ -1,10 +1,10 @@
-# BlobToolKit Viewer (v"v3.0.1")
+# BlobToolKit Viewer (v3.0.1)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1134794.svg)](https://doi.org/10.5281/zenodo.1134794)
 
 ## Upgrading from v2.x.x
 
-From v"v3.0.1", the viewer and api are available as packaged executables. These will be compatible with other v3 BlobToolKit repositories as they are released. Meanwhile, please use the latest `release/v2.6.x` branch as part of the pipeline or with `blobtools view`. To run the v3 viewer, fetch the executables from the release page and add them to your PATH.
+From version 3.0.0, the viewer and api are available as packaged executables. These will be compatible with other v3 BlobToolKit repositories as they are released. Meanwhile, please use the latest `release/v2.6.x` branch as part of the pipeline or with `blobtools view`. To run the v3 viewer, fetch the executables from the release page and add them to your PATH.
 
 To view a demo BlobDir, run the following commands in separate terminal windows:
 
