@@ -36,7 +36,7 @@ def main():
     """Entry point."""
     if len(sys.argv) > 2:
         try:
-            args = docopt(__doc__, help=False, version=__version__)
+            args = docopt(__doc__, help=False, version="v%s" % __version__)
         except DocoptExit:
             args = {"<command>": sys.argv[2]}
         if args["<command>"]:

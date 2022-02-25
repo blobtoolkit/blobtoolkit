@@ -203,7 +203,7 @@ def cli():
     if len(sys.argv) == sys.argv.index(name) + 1:
         args = docopt(__doc__, argv=[])
     else:
-        args = docopt(__doc__, version=__version__)
+        args = docopt(__doc__, version="v%s" % __version__)
     main(args)
 
 
