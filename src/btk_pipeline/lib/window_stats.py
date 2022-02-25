@@ -188,7 +188,7 @@ def main():
                     rows.append("\t".join(row) + "\n")
             filetag = ""
             if window != 1:
-                filetag = ".%s" % re.replace(r"\.0$", "", str(window))
+                filetag = ".%s" % re.sub(r"\.0$", "", str(window))
             with open("%s%s%s" % (filename, filetag, suffix), "w") as fh:
                 fh.writelines(rows)
     except Exception as err:
