@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 
+# skip tests
+
+exit
+
 git stash -k -u
 
 # lint code in lib directory
-echo "pylint --rcfile=.pylintrc lib -f parseable -r n" &&
-pylint --rcfile=.pylintrc lib -f parseable -r n &&
+echo "pylint --rcfile=.pylintrc src/blobtools/lib -f parseable -r n" &&
+pylint --rcfile=.pylintrc src/blobtools/lib -f parseable -r n &&
 # check codestyle
-echo "pycodestyle lib --max-line-length=120" &&
-pycodestyle lib --max-line-length=120 &&
+echo "pycodestyle src/blobtools/lib --max-line-length=120" &&
+pycodestyle src/blobtools/lib --max-line-length=120 &&
 # check docstyle
-echo "pydocstyle lib" &&
-pydocstyle lib &&
+echo "pydocstyle src/blobtools/lib" &&
+pydocstyle src/blobtools/lib &&
 
 # lint code in test directory with alternate config
 echo "pylint --rcfile=.pylintrc_tests tests/unit_tests/* -f parseable -r n" &&
