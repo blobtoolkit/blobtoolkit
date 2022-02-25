@@ -49,6 +49,7 @@ jobs:
         run: |
           mkdir -p src/blobtools/bin
           cp dist/artifact/*-linux src/blobtools/bin/
+          rm -r dist/artifact
           chmod 755 src/blobtools/bin/*
           ./pip_install_latest.sh manylinux2014_x86_64
           blobtools -v
@@ -75,6 +76,7 @@ jobs:
         run: |
           mkdir -p src/blobtools/bin
           cp dist/artifact/*-macos src/blobtools/bin/
+          rm -r dist/artifact
           chmod 755 src/blobtools/bin/*
           ./pip_install_latest.sh macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_10_9_x86_64
@@ -101,7 +103,8 @@ jobs:
       - name: Build and publish
         run: |
           mkdir -p src/blobtools/bin
-          cp dist/artifact/*-macos src/blobtools/bin/
+          cp dist/artifact/*.exe src/blobtools/bin/
+          rm -r dist/artifact
           chmod 755 src/blobtools/bin/*
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name win_amd64
           ls dist

@@ -57,6 +57,7 @@ LOGGER = tolog.logger(__name__)
 
 def cli():
     """Entry point."""
+    args = {}
     if len(sys.argv) > 2:
         try:
             args = docopt(__doc__, help=False, version=__version__)
@@ -71,7 +72,7 @@ def cli():
             args = {"<command>": sys.argv[1]}
     else:
         print(__doc__)
-    if args["<command>"]:
+    if "<command>" in args and args["<command>"]:
         args.update({"<tool>": os.path.basename(sys.argv[0])})
         # load <command> from entry_points
         command_index = sys.argv.index(args["<command>"])
