@@ -16,8 +16,8 @@ Options:
 
 import logging
 import math
+import re
 import statistics
-import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -188,7 +188,7 @@ def main():
                     rows.append("\t".join(row) + "\n")
             filetag = ""
             if window != 1:
-                filetag = ".%s" % str(window)
+                filetag = ".%s" % re.replace(r"\.0$", "", str(window))
             with open("%s%s%s" % (filename, filetag, suffix), "w") as fh:
                 fh.writelines(rows)
     except Exception as err:
