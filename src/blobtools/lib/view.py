@@ -49,9 +49,14 @@ from .host import test_port
 from .version import __version__
 
 
-def file_ready(file_path):
+def file_ready(file_path, timeout, callback):
     """Check if file is ready."""
+    start_time = time.time()
     while not os.path.exists(file_path):
+        elapsed_time = time.time() - start_time
+        if timeout and elapsed_time > timeout:
+            callback("Timeout waiting for file")
+            return False
         # flush nfs cache by chowning parent to current owner
         parent = os.path.dirname(os.path.abspath(file_path))
         os.chown(parent, os.stat(parent).st_uid, os.stat(parent).st_gid)
@@ -301,7 +306,7 @@ def static_view(args, loc, viewer):
                         unstable = False
                         file_name = "%s/%s" % (outdir, file)
                         print("waiting for file '%s'" % file_name)
-                        file_ready(file_name)
+                        file_ready(file_name, timeout, handle_error)
                     except Exception as err:
                         unstable = True
                         time.sleep(1)
