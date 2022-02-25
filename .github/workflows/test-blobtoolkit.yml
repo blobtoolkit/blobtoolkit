@@ -49,6 +49,7 @@ jobs:
           mkdir -p src/blobtools/bin
           cp dist/artifact/*-linux src/blobtools/bin/
           ./pip_install_latest.sh manylinux2014_x86_64
+          blobtools -v
       - uses: actions/upload-artifact@v2
         with:
           path: ./dist/*
@@ -67,7 +68,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install dist/artifact/*linux*.whl
-          blobtoolkit -v
+          blobtools -v
       - name: Generate static plot
         run: |
           blobtools view \
