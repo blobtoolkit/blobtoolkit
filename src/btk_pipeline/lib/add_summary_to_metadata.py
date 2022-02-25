@@ -49,7 +49,7 @@ def add_software_versions(meta):
     """Add software versions to meta."""
     programs = {
         "blastn": {"flag": "-version", "regex": r":\s*(\S+)$"},
-        "blobtools": {"regex": r"\s+v(\S+)$"},
+        "blobtools": {"regex": r"\s*v(\S+)$"},
         "busco": {"regex": r"\s+(\S+)$"},
         "diamond": {"regex": r"version\s*(\S+)$"},
         "minimap2": {"regex": r"(\S+)"},
