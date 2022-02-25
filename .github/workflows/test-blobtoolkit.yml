@@ -69,6 +69,8 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install dist/artifact/*linux*.whl
           blobtools -v
+      - name: Install dependencies
+        run: sudo apt-get install -y firefox xvfb
       - name: Generate static plot
         run: |
           blobtools view \

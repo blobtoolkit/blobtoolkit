@@ -4,70 +4,102 @@ on:
     tags:
       - "*"
 jobs:
-  package-blobtoolkit-linux:
+  package-ui:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Fetch viewer
-        run: |
-          mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
-          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-linux
-          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-linux | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-linux
-          chmod 755 src/blobtools/bin/*
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: npm install -g pkg
+      - run: ./package-ui.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./dist/*
+
+  package-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: npm install -g pkg
+      - run: ./package-api.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./dist/*
+
+  package-blobtoolkit-linux:
+    runs-on: ubuntu-latest
+    needs:
+      - package-ui
+      - package-api
+    steps:
+      - uses: actions/checkout@v2
+      - name: Collect artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ./dist
       - name: Install dependencies
         run: |
-          ls src/blobtools/bin
           python3 -m pip install --upgrade pip
           pip install setuptools wheel twine
       - name: Build and publish
         run: |
+          mkdir -p src/blobtools/bin
+          cp dist/artifact/*-linux src/blobtools/bin/
           ./pip_install_latest.sh manylinux2014_x86_64
-          ls dist
+          blobtools -v
       - uses: actions/upload-artifact@v2
         with:
           path: ./dist/*
 
   package-blobtoolkit-macos:
     runs-on: macos-11
+    needs:
+      - package-ui
+      - package-api
     steps:
       - uses: actions/checkout@v2
-      - name: Fetch viewer
-        run: |
-          mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
-          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-macos
-          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-macos | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-macos
-          chmod 755 src/blobtools/bin/*
+      - name: Collect artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ./dist
       - name: Install dependencies
         run: |
-          ls src/blobtools/bin
           python3 -m pip install --upgrade pip
-          pip install requests setuptools wheel twine
+          pip install setuptools wheel twine
       - name: Build and publish
         run: |
+          mkdir -p src/blobtools/bin
+          cp dist/artifact/*-macos src/blobtools/bin/
           ./pip_install_latest.sh macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_10_9_x86_64
-          ls dist
+          blobtools -v
       - uses: actions/upload-artifact@v2
         with:
           path: ./dist/*.whl
 
   package-blobtoolkit-windows:
     runs-on: ubuntu-latest
+    needs:
+      - package-ui
+      - package-api
     steps:
       - uses: actions/checkout@v2
-      - name: Fetch viewer
-        run: |
-          mkdir -p src/blobtools/bin && rm -rf src/blobtools/bin/*
-          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep api-win.exe | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-api-win.exe
-          curl -L https://github.com$(curl -sL https://github.com/blobtoolkit/viewer/releases/latest | grep href | grep viewer-win.exe | cut -d'"' -f2) > src/blobtools/bin/blobtoolkit-viewer-win.exe
-          chmod 755 src/blobtools/bin/*
+      - name: Collect artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ./dist
       - name: Install dependencies
         run: |
-          ls src/blobtools/bin
           python3 -m pip install --upgrade pip
           pip install setuptools wheel twine
       - name: Build and publish
         run: |
+          mkdir -p src/blobtools/bin
+          cp dist/artifact/*-macos src/blobtools/bin/
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name win_amd64
           ls dist
       - uses: actions/upload-artifact@v2
