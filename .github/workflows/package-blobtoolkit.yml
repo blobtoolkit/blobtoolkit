@@ -124,7 +124,8 @@ jobs:
         with:
           path: ./dist
       - run: |
-          mv dist/artifact/* dist/
+          mv dist/artifact/*.whl dist/
+          mv dist/artifact/*.tar.gz dist/
           rm -r dist/artifact
           ls -lh dist
       - name: Publish package to PyPI
