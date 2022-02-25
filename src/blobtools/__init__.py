@@ -1,4 +1,4 @@
-"""GenomeHubs."""
+"""BlobToolKit."""
 
 from .blobtools import cli
 from .lib import add

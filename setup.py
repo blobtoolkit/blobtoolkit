@@ -184,6 +184,11 @@ setup(
         "tolkein>=0.4.0",
         "tqdm==4.62.3",
         "ujson>=3.0.0",
+        # Additional pipeline dependencies
+        "defusedxml==0.7.1",
+        "GitPython==3.1.26",
+        "requests==2.27.1",
+        "snakemake==6.15.3",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
@@ -208,6 +213,7 @@ setup(
     entry_points={
         "console_scripts": [
             "blobtools = blobtools:cli",
+            "btk = btk:cli",
         ],
         "blobtools.subcmd": [
             "add = blobtools.lib.add:cli",
@@ -218,6 +224,23 @@ setup(
             "replace = blobtools.lib.add:cli",
             "validate = blobtools.lib.validate:cli",
             "view = blobtools.lib.view:cli",
+        ],
+        "btk.subcmd": [
+            "pipeline = btk_pipeline:main",
+            # "blobtools = blobtools:cli",
+        ],
+        "pipeline.subcmd": [
+            "data = btk_pipeline.lib.data:main",
+            "run = btk_pipeline.lib.run:main",
+            "add-summary-to-metadata = btk_pipeline.lib.add_summary_to_metadata:main",
+            "chunk-fasta = btk_pipeline.lib.chunk_fasta:main",
+            "count-busco-genes = btk_pipeline.lib.count_busco_genes:main",
+            "extract-busco-genes = btk_pipeline.lib.extract_busco_genes:main",
+            "generate-config = btk_pipeline.lib.generate_config:main",
+            "generate-static-images = btk_pipeline.lib.generate_static_images:main",
+            "transfer-completed = btk_pipeline.lib.transfer_completed:main",
+            "unchunk-blast = btk_pipeline.lib.unchunk_blast:main",
+            "window-stats = btk_pipeline.lib.window_stats:main",
         ],
     },
     project_urls={

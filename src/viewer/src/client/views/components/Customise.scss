@@ -1,0 +1,38 @@
+@import 'web-fonts';
+@import 'colors';
+@import url(web-fonts-url('Open Sans', 'Comfortaa'));
+
+
+.columnGroup {
+  margin:0 0 0.5em 0.5em;
+  font-weight: bold;
+  display:inline-block;
+  min-width:15em;
+  font-size: 0.75em;
+}
+
+.field_container {
+  min-width:8em;
+  display: inline-block;
+  margin-right:0.5em;
+  cursor: pointer;
+  font-size: 0.75em;
+  // padding-left:0.3em;
+  // border-left: 1px solid $darkColor;
+
+  select {
+    margin-left: 0.5em;
+  }
+
+  select ~ select {
+    margin-right: 0.5em;
+  }
+}
+
+.field_container:hover {
+  color: $highlightColor;
+}
+
+.field_title {
+
+}

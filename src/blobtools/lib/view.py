@@ -49,16 +49,21 @@ from .host import test_port
 from .version import __version__
 
 
-def file_ready(file_path):
+def file_ready(file_path, timeout, callback):
     """Check if file is ready."""
+    start_time = time.time()
     while not os.path.exists(file_path):
+        elapsed_time = time.time() - start_time
+        if timeout and elapsed_time > timeout:
+            callback("Timeout waiting for file")
+            return False
         # flush nfs cache by chowning parent to current owner
         parent = os.path.dirname(os.path.abspath(file_path))
         os.chown(parent, os.stat(parent).st_uid, os.stat(parent).st_gid)
         time.sleep(1)
-        if os.path.isfile(file_path):
-            return True
-        raise ValueError("%s isn't a file!" % file_path)
+    if os.path.isfile(file_path):
+        return True
+    raise ValueError("%s isn't a file!" % file_path)
 
 
 def test_loc(args):
@@ -223,6 +228,9 @@ def static_view(args, loc, viewer):
     qstr = "staticThreshold=Infinity"
     qstr += "&nohitThreshold=Infinity"
     qstr += "&plotGraphics=svg"
+    file_stem = Path(args["DIRECTORY"]).name
+    if file_stem == "_":
+        file_stem = "FXWY01"
     if args["--format"] == "svg":
         qstr += "&svgThreshold=Infinity"
     shape = "circle"
@@ -276,7 +284,7 @@ def static_view(args, loc, viewer):
                 except Exception as err:
                     handle_error(err)
             for fmt in args["--format"]:
-                file = "%s.%s" % (Path(args["DIRECTORY"]).name, view)
+                file = "%s.%s" % (file_stem, view)
                 if view == "blob":
                     file += ".%s" % shape
                 elif view == "busco":
@@ -301,8 +309,9 @@ def static_view(args, loc, viewer):
                         unstable = False
                         file_name = "%s/%s" % (outdir, file)
                         print("waiting for file '%s'" % file_name)
-                        file_ready(file_name)
+                        file_ready(file_name, timeout, handle_error)
                     except Exception as err:
+                        unstable = True
                         time.sleep(1)
 
         for preview in args["--preview"]:

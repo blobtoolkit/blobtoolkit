@@ -1,0 +1,213 @@
+@import 'web-fonts';
+@import 'colors';
+@import url(web-fonts-url('Open Sans', 'Comfortaa'));
+
+.container {
+  max-width: 100%;
+}
+
+.scroller {
+  overflow-x: auto;
+  white-space: nowrap;
+  font-size:0.75em;
+  padding-bottom:0.5em;
+}
+
+.group {
+  border: none;
+  display: inline-block;
+  width: auto;
+  // flex: 0 40em;
+  vertical-align: top;
+  border-left:1px solid $darkColor;
+  margin-left:-1px;
+  // background-color: rgba($shadeColor,0.05);
+  box-sizing: border-box;
+}
+
+.group .zero {
+  // background-color: rgba($highlightColor,0.05);
+}
+
+.header {
+  border: none;
+  display: inline-block;
+  vertical-align: top;
+  font-weight: bold;
+  background-color: $deepColor;
+  border-left:1px solid $lightColor;
+  // margin-left:-1px;
+  color:$lightColor;
+  padding-left: 0.5em;
+  box-sizing: border-box;
+}
+
+// .header ~ .header {
+//   margin-left:0;
+// }
+
+
+.outer {
+  display:block;
+  text-align: left;
+  box-sizing: border-box;
+  // margin-left:-1px;
+}
+
+// .outer.zero.d1 {
+//   background-color: mix(white, $warnColor, 50%);
+// }
+// .outer.zero.d2 {
+//   background-color: mix(white, $warnColor, 45%);
+// }
+// .outer.zero.d3 {
+//   background-color: mix(white, $warnColor, 40%);
+// }
+// .outer.zero.d4 {
+//   background-color: mix(white, $warnColor, 35%);
+// }
+// .outer.zero.d5 {
+//   background-color: mix(white, $warnColor, 30%);
+// }
+// .outer.zero.d6 {
+//   background-color: mix(white, $warnColor, 25%);
+// }
+// .outer.zero.d7 {
+//   background-color: mix(white, $warnColor, 20%);
+// }
+// .outer.zero.d8 {
+//   background-color: mix(white, $warnColor, 15%);
+// }
+// .outer.zero.d9 {
+//   background-color: mix(white, $warnColor, 10%);
+// }
+//
+//
+// .outer.partial.d1 {
+//   background-color: mix(white, $partialColor, 50%);
+// }
+// .outer.partial.d2 {
+//   background-color: mix(white, $partialColor, 45%);
+// }
+// .outer.partial.d3 {
+//   background-color: mix(white, $partialColor, 40%);
+// }
+// .outer.partial.d4 {
+//   background-color: mix(white, $partialColor, 35%);
+// }
+// .outer.partial.d5 {
+//   background-color: mix(white, $partialColor, 30%);
+// }
+// .outer.partial.d6 {
+//   background-color: mix(white, $partialColor, 25%);
+// }
+// .outer.partial.d7 {
+//   background-color: mix(white, $partialColor, 20%);
+// }
+// .outer.partial.d8 {
+//   background-color: mix(white, $partialColor, 15%);
+// }
+// .outer.partial.d9 {
+//   background-color: mix(white, $partialColor, 10%);
+// }
+
+.outer.d0 {
+  // background-color: mix(white, $partialColor, 95%);
+}
+.outer.d1 {
+  background-color: mix(white, $partialColor, 97%);
+}
+.outer.d2 {
+  background-color: mix(white, $partialColor, 94%);
+}
+.outer.d3 {
+  background-color: mix(white, $partialColor, 91%);
+}
+.outer.d3 {
+  background-color: mix(white, $partialColor, 88%);
+}
+.outer.d4 {
+  background-color: mix(white, $partialColor, 85%);
+}
+.outer.d5 {
+  background-color: mix(white, $partialColor, 82%);
+}
+.outer.d6 {
+  background-color: mix(white, $partialColor, 79%);
+}
+.outer.d7 {
+  background-color: mix(white, $partialColor, 76%);
+}
+.outer.d8 {
+  background-color: mix(white, $partialColor, 73%);
+}
+.outer.d9 {
+  background-color: mix(white, $partialColor, 70%);
+}
+
+.outer ~ .outer {
+  margin-top:2px;
+}
+
+
+
+.name {
+  border: none;
+  padding-left: 0.5em;
+  display:inline-block;
+  overflow:hidden;
+  box-sizing: border-box;
+  span.search {
+    cursor:pointer;
+  }
+  span.search:hover {
+    text-decoration: underline;
+    color: $highlightColor;
+  }
+
+}
+
+.name.target_node {
+  border-right: 0.5em solid $highlightColor;
+}
+
+.progress_outer.target_node {
+  width: calc(100% - 0.5em);
+}
+
+.progress_outer.partial.target_node {
+  width: calc(100% - 0.5em);
+}
+
+.total {
+  color: $shadeColor;
+}
+
+.progress {
+  height: 100%;
+  min-width:2px;
+  max-width:100%;
+  background-color: $completeColor;
+}
+
+.progress_outer {
+  height: 0.4em;
+  margin-top: 0.2em;
+  width: calc(100% - 1em);
+  background-color: mix(white, $partialColor, 60%); //mix($warnColor $deepColor 50%);
+}
+
+.progress_outer.partial {
+  height: 0.4em;
+  margin-top: 0.2em;
+  width: calc(100% - 1em);
+  background-color: $deepColor;
+}
+
+
+
+
+.leaf {
+  width: auto;
+  box-sizing: border-box;
+}

@@ -1,0 +1,92 @@
+@import 'web-fonts';
+@import 'colors';
+@import url(web-fonts-url('Open Sans', 'Comfortaa'));
+
+.menu {
+  position:absolute;
+  left:0;
+  top:4em;
+  height:calc( 100% - 4em );
+  width:30em;
+  background-color: $shadeColor;
+  overflow-y: auto;
+  overflow-x:hidden;
+  box-shadow: 0px 0px 8px 4px $darkColor;
+}
+
+.menu_item {
+  position:relative;
+  width:calc(100% - 2em);
+  height:4em;
+  margin-top:0.5em;
+  padding:1em;
+  background-color: $darkColor;
+  overflow:hidden;
+  color:$paleColor;
+  cursor:pointer;
+}
+
+.menu_subtitle {
+  display:inline-block;
+  position:absolute;
+  right:0.5em;
+  bottom:0.5em;
+}
+
+.menu_item:hover,
+.menu_item.active {
+  background-color: $highlightColor;
+  color: $lightColor;
+}
+
+.outer {
+  width:100%;
+  height:auto;
+}
+
+.header {
+  position:relative;
+  top:0;
+  left:0;
+  margin-top:0.5em;
+  height: 2em;
+  width: 100%;
+  line-height:2em;
+  background-color: $highlightColor;
+  color: $lightColor;
+
+  h1 {
+    font-size:1em;
+    margin:0 0 0 0.5em;
+
+  }
+
+  .header_buttons {
+    float:right;
+    text-align:right;
+    height:2em;
+    color:$darkColor;
+  }
+
+  .header_button {
+    float:right;
+    width:1.5em;
+    text-align:center;
+    height:2em;
+    line-height:2em;
+  }
+}
+
+.content {
+  width:100%;
+  height:auto;
+  background-color: $shadeColor;
+}
+
+.full_height {
+  height:100%;
+}
+
+.inline {
+  display:inline-block;
+}

@@ -1,0 +1,26 @@
+@import 'colors';
+
+.outer {
+  flex: 1 0 auto;
+  min-height: 0;
+  min-width: 100%;
+  padding: 0.5em;
+  padding-right: 2em;
+  max-width: calc(100vh - 6em);
+  // margin:0 auto;
+  color: $deepColor;
+}
+
+.title {
+  font-weight:bold;
+  color: $darkColor;
+  display: inline;
+  // padding: 0.25em 0.25em;
+  margin-right: 0.25em;
+}
+
+.expand {
+  cursor: pointer;
+  color: $shadeColor;
+  font-style: italic;
+}

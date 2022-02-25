@@ -1,0 +1,43 @@
+@import 'web-fonts';
+@import 'colors';
+@import url(web-fonts-url('Open Sans', 'Comfortaa'));
+
+.outer {
+  position:relative;
+  top:4em;
+  height: calc(100vh - 4em);
+  max-height: 100vw;
+  width: 100%;
+  max-width: calc(100vh - 4em);
+  margin:0 0 0 440px;
+  background-color: $lightColor;
+  color:$deepColor;
+  font-family:'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  line-height:1em;
+}
+
+.search_box {
+  margin-top: 0.7em;
+  width:100%;
+  border: solid $shadeColor 0.1em;
+  font-family:'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.5em;
+}
+
+ul.autocomplete {
+
+  margin-top: 0;
+  padding-left: 0;
+  list-style-type: none;
+
+  li {
+    background-color: rgba($shadeColor,0.25);
+    display:block;
+    padding:0.5em;
+    cursor:pointer;
+  }
+
+  li:hover {
+    background-color: $shadeColor;
+  }
+}

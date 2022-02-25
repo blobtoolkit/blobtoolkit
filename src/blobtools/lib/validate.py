@@ -9,7 +9,7 @@ Usage:
     blobtools validate [--basic] [--example] DIRECTORY
 
 Arguments:
-    DIRECTORY             Directory containing one or more BlobDirs.
+    DIRECTORY             BlobDir directory.
 
 Options:
     --basic    Only require basic metadata.

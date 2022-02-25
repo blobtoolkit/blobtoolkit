@@ -15,3 +15,7 @@ recursive-exclude tests *
 recursive-include src/blobtools/example *
 recursive-include src/blobtools/schema *
 recursive-include src/blobtools/bin *
+recursive-include src/btk_pipeline *.smk
+recursive-include src/btk_pipeline/rules *
+recursive-include src/btk_pipeline/lib *
+recursive-include src/btk/lib *

@@ -1,0 +1,28 @@
+@import 'colors';
+
+div.outer {
+  height:100%;
+  // width:800px;
+  padding:1em 2em 4em 2em;
+  font-size:1.2em;
+
+  a, span.toggle_menu {
+    color:$highlightColor;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+
+  a:visited {
+    color:$highlightColor;
+    text-decoration:underline;
+  }
+
+  img {
+    width:100%;
+  }
+}
+
+span.no_table {
+  display:block;
+  margin-top:1em;
+}

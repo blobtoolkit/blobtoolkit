@@ -195,12 +195,8 @@ def main(args):
 def cli():
     """Entry point."""
     name = __name__.split(".")[-1]
-    if name == "add":
-        if "create" in sys.argv:
-            name = "create"
-        elif "replace" in sys.argv:
-            name = "replace"
-    if len(sys.argv) == sys.argv.index(name) + 1:
+    command_index = sys.argv.index(name)
+    if len(sys.argv) == command_index + 1:
         args = docopt(__doc__, argv=[])
     else:
         args = docopt(__doc__, version=__version__)

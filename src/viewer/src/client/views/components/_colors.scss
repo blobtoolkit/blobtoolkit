@@ -1,0 +1,19 @@
+/* Coolors Exported Palette - coolors.co/d7cdcc-ffffff-59656f-9c528b-1d1e2c */
+
+/* RGB */
+$darkColor: rgb(49, 50, 63);
+$lightColor: rgb(255, 255, 255);
+$shadeColor: rgb(89, 101, 111);
+$deepColor: rgb(65,74,81);
+$highlightColor: rgb(156, 82, 139);
+$paleColor: rgb(215, 205, 204);
+$brightColor: rgb(255,255,30);
+$clearColor: none;
+$completeColor: rgb(51,160,44);
+$partialColor: $shadeColor;
+// $partialColor: rgb(253,191,111);
+$warnColor: rgb(251,154,153);
+
+@mixin fadeFromPercent($fadeFromDirection,$FadeFromColor,$fadeFromPercent) {
+  background:linear-gradient(to $fadeFromDirection,$clearColor 0%,$clearColor $fadeFromPercent,rgba($FadeFromColor,1) $fadeFromPercent,rgba($FadeFromColor,0) 100%);
+}
