@@ -84,5 +84,5 @@ jobs:
               --format png \
               _
       - name: Test plot exists
-        run: test -s "FXWY01.blob.circle.png" && exit 0
-          exit 1
+        run: |
+          test -s "FXWY01.blob.circle.png" && exit 0 || exit 1
