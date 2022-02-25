@@ -228,6 +228,9 @@ def static_view(args, loc, viewer):
     qstr = "staticThreshold=Infinity"
     qstr += "&nohitThreshold=Infinity"
     qstr += "&plotGraphics=svg"
+    file_stem = Path(args["DIRECTORY"]).name
+    if file_stem == "_":
+        file_stem = "FXWY01"
     if args["--format"] == "svg":
         qstr += "&svgThreshold=Infinity"
     shape = "circle"
@@ -281,7 +284,7 @@ def static_view(args, loc, viewer):
                 except Exception as err:
                     handle_error(err)
             for fmt in args["--format"]:
-                file = "%s.%s" % (Path(args["DIRECTORY"]).name, view)
+                file = "%s.%s" % (file_stem, view)
                 if view == "blob":
                     file += ".%s" % shape
                 elif view == "busco":
@@ -442,7 +445,7 @@ def cli():
     if len(sys.argv) == sys.argv.index(__name__.split(".")[-1]) + 1:
         args = docopt(__doc__, argv=[])
     else:
-        args = docopt(__doc__, version="v%s" % __version__)
+        args = docopt(__doc__, version=__version__)
     if not os.path.exists(os.environ["HOME"]):
         os.mkdir(os.environ["HOME"])
     main(args)

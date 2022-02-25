@@ -239,7 +239,7 @@ def cli():
     if len(sys.argv) == sys.argv.index(__name__.split(".")[-1]) + 1:
         args = docopt(__doc__, argv=[])
     else:
-        args = docopt(__doc__, version="v%s" % __version__)
+        args = docopt(__doc__, version=__version__)
     try:
         main(args)
     except KeyboardInterrupt:

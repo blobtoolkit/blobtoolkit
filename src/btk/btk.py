@@ -32,14 +32,14 @@ def cli():
     """Entry point."""
     if len(sys.argv) > 2:
         try:
-            args = docopt(__doc__, help=False, version="v%s" % __version__)
+            args = docopt(__doc__, help=False, version=__version__)
         except DocoptExit:
             args = {
                 "<command>": " ".join(sys.argv[1:2]),
             }
     elif len(sys.argv) > 1:
         try:
-            args = docopt(__doc__, help=False, version="v%s" % __version__)
+            args = docopt(__doc__, help=False, version=__version__)
         except DocoptExit:
             args = {"<command>": sys.argv[1]}
     else:
