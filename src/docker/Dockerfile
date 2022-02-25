@@ -1,7 +1,7 @@
 FROM continuumio/miniconda3:4.10.3p0-alpine
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION=3.0.3
+ARG VERSION=3.0.4
 LABEL version=$VERSION
 ENV CONTAINER_VERSION=$VERSION
 
