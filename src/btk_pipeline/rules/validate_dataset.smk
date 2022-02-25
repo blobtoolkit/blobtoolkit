@@ -18,4 +18,4 @@ rule validate_dataset:
     benchmark:
         "logs/{blobdir}/validate_dataset.benchmark.txt"
     shell:
-        """validate.py {params.blobdir}/meta.json > {log} 2>&1"""
+        """blobtools validate {params.blobdir} > {log} 2>&1"""
