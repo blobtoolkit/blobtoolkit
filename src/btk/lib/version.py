@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
 """blobtoolkit version."""
 
-__version__ = "blobtoolkit v3.0.2"
+__version__ = "blobtoolkit v3.0.3"
