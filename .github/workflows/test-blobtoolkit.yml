@@ -1,0 +1,53 @@
+name: test-blobtoolkit
+on:
+  - push
+
+jobs:
+  package-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: npm install -g pkg
+      - run: ./package-ui.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./dist/*
+
+  package-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: npm install -g pkg
+      - run: ./package-api.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./dist/*
+
+  package-blobtoolkit-linux:
+    runs-on: ubuntu-latest
+    needs:
+      - package-ui
+      - package-api
+    steps:
+      - uses: actions/checkout@v2
+      - name: Collect artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ./dist
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install setuptools wheel twine
+      - name: Build and publish
+        run: |
+          cp dist/artifact/*-linux src/blobtools/bin/
+          ./pip_install_latest.sh manylinux2014_x86_64
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     path: ./dist/*
