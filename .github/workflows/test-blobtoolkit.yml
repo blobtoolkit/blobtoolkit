@@ -46,6 +46,7 @@ jobs:
           pip install setuptools wheel twine
       - name: Build and publish
         run: |
+          mkdir -p src/blobtools/bin
           cp dist/artifact/*-linux src/blobtools/bin/
           ./pip_install_latest.sh manylinux2014_x86_64
       # - uses: actions/upload-artifact@v2
