@@ -1,7 +1,7 @@
 FROM continuumio/miniconda3:4.10.3p0-alpine
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION="3.0.0"
+ARG VERSION=3.0.5
 LABEL version=$VERSION
 ENV CONTAINER_VERSION=$VERSION
 
@@ -11,7 +11,8 @@ RUN apk add --no-cache \
     firefox-esr \
     mesa-gl \
     mesa-dri-swrast \
-    ttf-freefont
+    ttf-freefont \
+    xvfb
 
 ENV SERVICE_USER ${SERVICE_USER:-blobtoolkit}
 ENV SERVICE_HOME ${SERVICE_HOME:-/home/${SERVICE_USER}}
