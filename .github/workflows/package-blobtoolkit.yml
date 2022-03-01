@@ -4,7 +4,7 @@ env:
 on:
   push:
     tags: "*"
-  branch: "release/*"
+    branches: "release/*"
 
 jobs:
   package-ui:
