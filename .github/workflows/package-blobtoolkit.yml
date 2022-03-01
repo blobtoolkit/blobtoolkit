@@ -3,7 +3,8 @@ env:
   VERSION: 3.0.8
 on:
   push:
-    tags: ${{ env.VERSION }}
+    tags: "*"
+  branch: "release/*"
 
 jobs:
   package-ui:
