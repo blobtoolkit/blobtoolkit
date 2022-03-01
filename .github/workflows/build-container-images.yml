@@ -1,13 +1,10 @@
 name: build-container-images
 
 env:
-  VERSION: 3.0.10
+  VERSION: 3.1.0
 
 on:
   - push
-
-env:
-  IMAGE_NAME: genomehubs/blobtoolkit
 
 jobs:
   build-and-push-full-image:
