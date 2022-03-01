@@ -2,9 +2,8 @@ name: release-blobtoolkit
 env:
   VERSION: 3.0.7
 on:
-  push:
-    tags:
-      - ${{env.VERSION}}
+  - push
+
 jobs:
   package-ui:
     runs-on: ubuntu-latest
