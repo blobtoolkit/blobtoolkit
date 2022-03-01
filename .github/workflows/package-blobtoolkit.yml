@@ -2,7 +2,8 @@ name: release-blobtoolkit
 env:
   VERSION: 3.0.7
 on:
-  - push
+  push:
+    tags: ${{ env.VERSION }}
 
 jobs:
   package-ui:
@@ -113,32 +114,12 @@ jobs:
         with:
           path: ./dist/*.whl
 
-  upload-to-pypi:
+  create-github-release:
     runs-on: ubuntu-latest
     needs:
       - package-blobtoolkit-linux
       - package-blobtoolkit-macos
       - package-blobtoolkit-windows
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          path: ./dist
-      - run: |
-          mv dist/artifact/*.whl dist/
-          mv dist/artifact/*.tar.gz dist/
-          rm -r dist/artifact
-          ls -lh dist
-      - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.5.0
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          repository_url: https://upload.pypi.org/legacy/
-
-  create-github-release:
-    runs-on: ubuntu-latest
-    needs: upload-to-pypi
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
@@ -156,9 +137,29 @@ jobs:
             dist/artifact/blobtoolkit-viewer-*
             dist/artifact/blobtoolkit-viewer.tgz*
 
-  build-and-push-blobtoolkit:
+  upload-to-pypi:
     runs-on: ubuntu-latest
     needs: create-github-release
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          path: ./dist
+      - run: |
+          mv dist/artifact/*.whl dist/
+          mv dist/artifact/*.tar.gz dist/
+          rm -r dist/artifact
+          ls -lh dist
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.5.0
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          repository_url: https://upload.pypi.org/legacy/
+
+  build-and-push-blobtoolkit:
+    runs-on: ubuntu-latest
+    needs: upload-to-pypi
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -182,7 +183,7 @@ jobs:
 
   build-and-push-api:
     runs-on: ubuntu-latest
-    needs: create-github-release
+    needs: upload-to-pypi
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -206,7 +207,7 @@ jobs:
 
   build-and-push-viewer:
     runs-on: ubuntu-latest
-    needs: create-github-release
+    needs: upload-to-pypi
     steps:
       - name: Checkout
         uses: actions/checkout@v2
