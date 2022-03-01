@@ -1,23 +1,18 @@
-FROM continuumio/miniconda3:4.10.3p0-alpine
+FROM ubuntu:20.04
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
 ARG VERSION=3.0.5
 LABEL version=$VERSION
 ENV CONTAINER_VERSION=$VERSION
 
-RUN apk add --no-cache \
+RUN apt-get update \
+    && DEBIAN_FRONTEND="noninteractive" apt-get -y --no-install-recommends install \
     dbus-x11 \
-    dumb-init \
-    firefox-esr \
-    mesa-gl \
-    mesa-dri-swrast \
-    ttf-freefont \
-    xvfb
-
-ENV SERVICE_USER ${SERVICE_USER:-blobtoolkit}
-ENV SERVICE_HOME ${SERVICE_HOME:-/home/${SERVICE_USER}}
-
-RUN adduser -h ${SERVICE_HOME} -s /sbin/nologin -u 1000 -D ${SERVICE_USER}
+    firefox \
+    ttf-mscorefonts-installer \
+    wget \
+    xvfb \
+    x11-utils
 
 RUN mkdir -p /blobtoolkit/conf \
     && mkdir -p /blobtoolkit/data/assembly \
@@ -32,12 +27,10 @@ RUN mkdir -p /blobtoolkit/conf \
     && mkdir -p /nfs \
     && mkdir -p /lustre
 
-RUN chown -R blobtoolkit:blobtoolkit /blobtoolkit \
+RUN useradd -m blobtoolkit \
+    && chown -R blobtoolkit:blobtoolkit /blobtoolkit \
     && chown -R blobtoolkit:blobtoolkit /nfs \
     && chown -R blobtoolkit:blobtoolkit /lustre
-
-RUN apk add --no-cache \
-    wget
 
 USER blobtoolkit
 
@@ -61,18 +54,16 @@ COPY env.yaml /tmp/env.yaml
 
 RUN $CONDA_DIR/bin/mamba env create -f /tmp/env.yaml
 
-ENV CONDA_DEFAULT_ENV btk_env
+ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/btk_env
 
-ENV PATH $CONDA_DIR/bin:/blobtoolkit/blobtools2:/blobtoolkit/specification:$CONDA_DIR/envs/btk_env/bin:$PATH
+ENV PATH $CONDA_DEFAULT_ENV/bin:$PATH
 
-ENV PYTHONPATH $CONDA_DIR/envs/btk_env/lib/python3.8/site-packages:$PYTHONPATH
+ENV PYTHONPATH $CONDA_DEFAULT_ENV/lib/python3.8/site-packages:$PYTHONPATH
 
 WORKDIR /blobtoolkit
 
 COPY startup.sh /blobtoolkit
 
 EXPOSE 8000 8080
-
-ENV PATH $CONDA_DIR/envs/btk_env/bin:$PATH
 
 CMD /blobtoolkit/startup.sh
