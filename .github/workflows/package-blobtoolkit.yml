@@ -156,7 +156,7 @@ jobs:
             dist/artifact/blobtoolkit-viewer-*
             dist/artifact/blobtoolkit-viewer.tgz*
 
-  build-and-push-full-image:
+  build-and-push-blobtoolkit:
     runs-on: ubuntu-latest
     needs: create-github-release
     steps:
@@ -177,9 +177,7 @@ jobs:
         with:
           context: src/docker
           push: true
-          tags:
-            - ${{ env.VERSION }}
-            - latest
+          tags: ${{ env.VERSION }}, latest
           labels: ${{ steps.meta.outputs.labels }}
 
   build-and-push-api:
@@ -203,9 +201,7 @@ jobs:
         with:
           context: src/docker/api
           push: true
-          tags:
-            - ${{ env.VERSION }}
-            - latest
+          tags: ${{ env.VERSION }}, latest
           labels: ${{ steps.meta.outputs.labels }}
 
   build-and-push-viewer:
@@ -229,7 +225,5 @@ jobs:
         with:
           context: src/docker/viewer
           push: true
-          tags:
-            - ${{ env.VERSION }}
-            - latest
+          tags: ${{ env.VERSION }}, latest
           labels: ${{ steps.meta.outputs.labels }}
