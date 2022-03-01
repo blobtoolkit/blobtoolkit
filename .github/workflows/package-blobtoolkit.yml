@@ -180,7 +180,7 @@ jobs:
         with:
           context: src/docker
           push: true
-          tags: ${{ env.VERSION }}, latest
+          tags: genomehubs/blobtoolkit:${{ env.VERSION }}, genomehubs/blobtoolkit:latest
           labels: ${{ steps.meta.outputs.labels }}
 
   build-and-push-api:
@@ -204,7 +204,7 @@ jobs:
         with:
           context: src/docker/api
           push: true
-          tags: ${{ env.VERSION }}, latest
+          tags: genomehubs/blobtoolkit-api:${{ env.VERSION }}, genomehubs/blobtoolkit-api:latest
           labels: ${{ steps.meta.outputs.labels }}
 
   build-and-push-viewer:
@@ -228,5 +228,5 @@ jobs:
         with:
           context: src/docker/viewer
           push: true
-          tags: ${{ env.VERSION }}, latest
+          tags: genomehubs/blobtoolkit-viewer:${{ env.VERSION }}, genomehubs/blobtoolkit-viewer:latest
           labels: ${{ steps.meta.outputs.labels }}
