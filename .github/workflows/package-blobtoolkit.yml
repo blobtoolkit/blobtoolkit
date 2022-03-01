@@ -1,7 +1,11 @@
 name: release-blobtoolkit
 env:
-  VERSION: 3.1.0
-on: [push]
+  VERSION: 3.0.10
+
+on:
+  push:
+    tags:
+      - "*"
 
 jobs:
   package-ui:
