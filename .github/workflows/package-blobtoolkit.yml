@@ -141,6 +141,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: upload-to-pypi
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          path: ./dist
       - name: create release
         uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
@@ -148,8 +152,12 @@ jobs:
           draft: false
           prerelease: false
           title: "v${{github.ref_name}}"
+          files: |
+            dist/artifact/blobtoolkit-api-*
+            dist/artifact/blobtoolkit-viewer-*
+            dist/artifact/blobtoolkit-viewer.tgz*
 
-build-and-push-full-image:
+  build-and-push-full-image:
     runs-on: ubuntu-latest
     needs: create-github-release
     steps:
