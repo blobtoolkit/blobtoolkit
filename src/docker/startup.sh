@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ ! -z $VIEWER ]]; then
-  blobtools view /blobtoolkit/datasets &
+  blobtools host --api-port 8000 --port 8080 /blobtoolkit/datasets &
   tail -f /dev/null
   exit
 fi
