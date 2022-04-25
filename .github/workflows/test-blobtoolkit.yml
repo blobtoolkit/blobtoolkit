@@ -27,8 +27,8 @@ jobs:
         with:
           path: ./dist/*
 
-  package-blobtoolkit-macos:
-    runs-on: macos-11
+  package-blobtoolkit-linux:
+    runs-on: ubuntu-latest
     needs:
       - package-ui
       - package-api
@@ -45,15 +45,48 @@ jobs:
       - name: Build and publish
         run: |
           mkdir -p src/blobtools/bin
-          cp dist/artifact/*-macos src/blobtools/bin/
+          cp dist/artifact/*-linux src/blobtools/bin/
           rm -r dist/artifact
           chmod 755 src/blobtools/bin/*
-          python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_x86_64
-          python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_amd64
-          ls dist
-          ./pip_install_latest.sh macosx_10_9_x86_64
-          ls dist
+          ./pip_install_latest.sh manylinux2014_x86_64
           blobtools -v
       - uses: actions/upload-artifact@v2
         with:
-          path: ./dist/*.whl
+          path: ./dist/*
+
+  test-commands:
+    runs-on: ubuntu-latest
+    needs:
+      - package-blobtoolkit-linux
+    steps:
+      - uses: actions/checkout@v2
+      - name: Collect artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ./dist
+      - name: Pip install blobtoolkit
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install dist/artifact/*linux*.whl
+          rm -r dist/artifact
+          blobtools -v
+      - name: Install dependencies
+        run: sudo apt-get install -y firefox xvfb
+      - name: Generate static plot
+        run: |
+          blobtools view \
+              --host http://localhost \
+              --timeout 60 \
+              --ports 8000-8099 \
+              --view blob \
+              --param plotShape=circle \
+              --param largeFonts=true \
+              --format png \
+              _
+      - name: Test plot exists
+        run: |
+          test -s "FXWY01.blob.circle.png" && exit 0 || exit 1
+      - uses: actions/upload-artifact@v2
+        with:
+          name: tests
+          path: FXWY01.blob.circle.png
