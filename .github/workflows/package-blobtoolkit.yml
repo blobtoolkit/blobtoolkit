@@ -82,8 +82,9 @@ jobs:
           cp dist/artifact/*-macos src/blobtools/bin/
           rm -r dist/artifact
           chmod 755 src/blobtools/bin/*
-          ./pip_install_latest.sh macosx_11_0_x86_64
-          python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_10_9_x86_64
+          python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_x86_64
+          python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_amd64
+          ./pip_install_latest.sh macosx_10_9_x86_64
           blobtools -v
       - uses: actions/upload-artifact@v2
         with:
