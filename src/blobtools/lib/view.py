@@ -33,20 +33,25 @@ import signal
 import sys
 import time
 from pathlib import Path
+from shutil import which
 from subprocess import PIPE
 from subprocess import Popen
 
 from docopt import docopt
 from pyvirtualdisplay import Display
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from tolkein import tolog
 from tqdm import tqdm
 
 from .host import test_port
 from .version import __version__
+
+LOGGER = tolog.logger(__name__)
 
 
 def file_ready(file_path, timeout, callback):
@@ -134,11 +139,7 @@ def test_loc(args):
                 port = i
             break
     # directory = Path(__file__).resolve().parent.parent
-    cmd = "blobtools host --port %d --api-port %d %s" % (
-        port,
-        api_port,
-        parent,
-    )
+    cmd = "blobtools host --port %d --api-port %d %s" % (port, api_port, parent,)
     process = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE, encoding="ascii")
     loc = "%s:%d/%s" % (args["--host"], port, args["--prefix"])
     if level == "dataset":
@@ -168,9 +169,20 @@ def test_loc(args):
 
 def firefox_driver(args):
     """Start firefox."""
-    import geckodriver_autoinstaller
+    if not which("firefox") or which("geckodriver"):
+        try:
+            LOGGER.info("Firefox and geckodriver must be available for blobtools view")
+            LOGGER.info("Attempting to install the appropriate geckodriver version")
+            import geckodriver_autoinstaller
 
-    geckodriver_autoinstaller.install()
+            geckodriver_autoinstaller.install()
+            LOGGER.info("Successfully installed geckodriver")
+
+        except Exception:
+            LOGGER.error(
+                "Unable to install automatically. Try `conda install -c conda-forge firefox geckodriver` or `blobtools view --driver chromium` to use chrome browser."
+            )
+            sys.exit(1)
 
     outdir = os.path.abspath(args["--out"])
     os.makedirs(Path(outdir), exist_ok=True)
@@ -189,10 +201,9 @@ def firefox_driver(args):
     options.headless = not args["--interactive"]
     display = Display(visible=0, size=(800, 600))
     display.start()
+
     driver = webdriver.Firefox(
-        options=options,
-        firefox_profile=profile,
-        service_log_path=args["--driver-log"],
+        options=options, firefox_profile=profile, service_log_path=args["--driver-log"],
     )
     time.sleep(2)
     return driver, display
@@ -200,8 +211,19 @@ def firefox_driver(args):
 
 def chromium_driver(args):
     """Start chromium browser."""
-    import chromedriver_binary
+    os.environ["WDM_LOG_LEVEL"] = "0"
+    try:
+        LOGGER.info("Chrome and chromedriver must be available for blobtools view")
+        LOGGER.info("Attempting to install the appropriate chromedriver version")
+        from webdriver_manager.chrome import ChromeDriverManager
 
+        service_object = Service(ChromeDriverManager().install())
+        LOGGER.info("Successfully installed chromedriver")
+    except Exception:
+        LOGGER.error(
+            "Unable to install automatically. Check Chrome is available or try `blobtools view --driver firefox` to use firefox browser."
+        )
+        sys.exit(1)
     outdir = os.path.abspath(args["--out"])
     os.makedirs(Path(outdir), exist_ok=True)
 
@@ -216,6 +238,7 @@ def chromium_driver(args):
     display.start()
     driver = webdriver.Chrome(
         options=options,
+        service=service_object,
         # executable_path=add option to set binary location,
         service_log_path=args["--driver-log"],
     )
@@ -256,10 +279,23 @@ def static_view(args, loc, viewer):
 
     if args["--driver"] == "firefox":
         """View dataset in Firefox."""
-        driver, display = firefox_driver(args)
+        try:
+            driver, display = firefox_driver(args)
+        except Exception as err:
+            LOGGER.error(
+                "Unable to start Firefox. Try `conda install -c conda-forge firefox geckodriver` or `blobtools view --driver chromium` to use Chrome browser."
+            )
+            sys.exit(1)
+
     elif args["--driver"] == "chromium":
         """View dataset in Chromium browser."""
-        driver, display = chromium_driver(args)
+        try:
+            driver, display = chromium_driver(args)
+        except Exception as err:
+            LOGGER.error(
+                "Unable to start Chrome. Try `blobtools view --driver firefox` to use Firefox browser."
+            )
+            sys.exit(1)
     else:
         handle_error("%s is not a valid driver" % args["--driver"])
 
