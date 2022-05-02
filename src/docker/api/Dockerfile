@@ -19,7 +19,7 @@ USER blobtoolkit
 
 WORKDIR /blobtoolkit
 
-RUN curl -Ls https://github.com/blobtoolkit/viewer/releases/download/${VERSION}/blobtoolkit-api-linux > blobtoolkit-api \
+RUN curl -Ls https://github.com/blobtoolkit/blobtoolkit/releases/download/${VERSION}/blobtoolkit-api-linux > blobtoolkit-api \
     && chmod 755 blobtoolkit-api
 
 ENV PATH /blobtoolkit:$PATH
