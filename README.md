@@ -28,7 +28,17 @@ As of version 3.0.0, BlobTools2 and a local version of the BlobToolKit Viewer ca
 pip install blobtoolkit
 ```
 
-The only additional requirement is either firefox or a chromium-based web browser to run blobtools view to start the interactive viewer or to generate plots from the command line.
+The `blobtools view`command requires firefox or a chromium-based browser to start the interactive viewer or to generate plots from the command line, these can be installed with:
+
+```
+conda install -c conda-forge firefox geckodriver
+```
+
+On MacOS, Xquartz is required to provide an X-windows environment. This can be installed without root sure privileges using:
+
+```
+brew install xquartz
+```
 
 ## Example commands
 
@@ -54,6 +64,21 @@ To use a chromium-based browser (e.g. Google Chrome) in place of firefox, add `-
 
 ```
 blobtools view --view snail --host https://blobtoolkit.genomehubs.org --driver chromium mSciVul1_1
+```
+
+## Docker images
+
+A set of Docker images are available from dockerhub:
+
+- `genomehubs/blobtoolkit-blobtools` contains the blobtools executable, which includes the `blobtools view` command to run the Viewer and API
+- `genomehubs/blobtoolkit` contains the blobtools executable along with all pipline dependencies
+- `genomehubs/blobtoolkit-api` contains a standalone version of the BlobToolKit API
+- `genomehubs/blobtoolkit-viewer` contains a standalone version of the BlobToolKit Viewer
+
+The example commands above can all be run using the `genomehubs/blobtoolkit-blobtools` image. To access the API and Viewer running inside the container, it is necessary to map the default ports, 8000 and 8001:
+
+```
+docker run -it --rm --name blobtools -p 8000:8000 -p 8001:8001 genomehubs/blobtoolkit-blobtools:latest blobtools view --local _
 ```
 
 ## Contributing
