@@ -203,7 +203,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: src/docker
+          context: src/docker/blobtools
           push: true
           tags: genomehubs/blobtoolkit-blobtools:${{ env.VERSION }}, genomehubs/blobtoolkit-blobtools:latest
           labels: ${{ steps.meta.outputs.labels }}

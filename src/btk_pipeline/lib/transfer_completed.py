@@ -111,7 +111,7 @@ def main():
     if revision:
         blobdir += ".%d" % int(revision)
     indir = opts["--in"]
-    outdir = "%s/%s" % (opts["--out"], prefix)
+    outdir = "%s/%s" % (opts["--out"], blobdir)
     bindir = opts.get("--bin", None)
     Path(outdir).mkdir(parents=True, exist_ok=True)
     create_pipeline_directory(indir, "%s/%s.pipeline" % (indir, prefix))
