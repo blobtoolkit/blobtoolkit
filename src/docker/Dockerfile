@@ -9,6 +9,7 @@ RUN apt-get update \
     && DEBIAN_FRONTEND="noninteractive" apt-get -y --no-install-recommends install \
     dbus-x11 \
     firefox \
+    firefox-geckodriver \
     ttf-mscorefonts-installer \
     wget \
     xvfb \
