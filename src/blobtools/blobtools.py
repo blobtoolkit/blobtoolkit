@@ -81,7 +81,8 @@ def cli():
                 if args["<command>"] == "replace" and "--replace" not in sys.argv:
                     sys.argv.insert(command_index + 1, "--replace")
                 args["<command>"] = "add"
-                sys.argv[command_index] = "add"
+        sys.argv[command_index] = "add"
+        print(sys.argv)
         for entry_point in working_set.iter_entry_points("%s.subcmd" % args["<tool>"]):
             if entry_point.name == args["<command>"]:
                 subcommand = entry_point.load()

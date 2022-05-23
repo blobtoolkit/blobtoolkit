@@ -195,6 +195,7 @@ def main(args):
 def cli():
     """Entry point."""
     name = __name__.split(".")[-1]
+    print(sys.argv)
     command_index = sys.argv.index(name)
     if len(sys.argv) == command_index + 1:
         args = docopt(__doc__, argv=[])

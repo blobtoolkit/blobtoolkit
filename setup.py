@@ -186,7 +186,6 @@ setup(
         "ujson>=3.0.0",
         # Additional pipeline dependencies
         "defusedxml==0.7.1",
-        "GitPython==3.1.26",
         "requests==2.27.1",
         "snakemake==6.15.3",
     ],  # Optional
@@ -211,10 +210,7 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": [
-            "blobtools = blobtools:cli",
-            "btk = btk:cli",
-        ],
+        "console_scripts": ["blobtools = blobtools:cli", "btk = btk:cli",],
         "blobtools.subcmd": [
             "add = blobtools.lib.add:cli",
             "create = blobtools.lib.add:cli",
@@ -238,6 +234,7 @@ setup(
             "extract-busco-genes = btk_pipeline.lib.extract_busco_genes:main",
             "generate-config = btk_pipeline.lib.generate_config:main",
             "generate-static-images = btk_pipeline.lib.generate_static_images:main",
+            "resume-pipeline = btk_pipeline.lib.resume_pipeline:main",
             "transfer-completed = btk_pipeline.lib.transfer_completed:main",
             "unchunk-blast = btk_pipeline.lib.unchunk_blast:main",
             "window-stats = btk_pipeline.lib.window_stats:main",
