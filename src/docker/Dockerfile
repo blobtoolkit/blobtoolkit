@@ -10,6 +10,7 @@ RUN apt-get update \
     dbus-x11 \
     firefox \
     firefox-geckodriver \
+    rsync \
     ttf-mscorefonts-installer \
     wget \
     xvfb \

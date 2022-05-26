@@ -349,14 +349,18 @@ def parse(files, **kwargs):
     """Parse all text files."""
     parsed = []
     for file in files:
-        parsed = parsed + parse_text(
-            file,
-            delimiter=kwargs["--text-delimiter"],
-            columns=kwargs["--text-cols"],
-            header=kwargs["--text-header"],
-            no_array=kwargs["--text-no-array"],
-            identifiers=kwargs["dependencies"]["identifiers"],
-        )
+        try:
+            fileData = parse_text(
+                file,
+                delimiter=kwargs["--text-delimiter"],
+                columns=kwargs["--text-cols"],
+                header=kwargs["--text-header"],
+                no_array=kwargs["--text-no-array"],
+                identifiers=kwargs["dependencies"]["identifiers"],
+            )
+        except AttributeError:
+            continue
+        parsed = parsed + fileData
     return parsed
 
 
