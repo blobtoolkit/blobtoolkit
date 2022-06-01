@@ -36,6 +36,7 @@ from pathlib import Path
 from shutil import which
 from subprocess import PIPE
 from subprocess import Popen
+from traceback import format_exc
 
 from docopt import docopt
 from pyvirtualdisplay import Display
@@ -169,7 +170,7 @@ def test_loc(args):
 
 def firefox_driver(args):
     """Start firefox."""
-    if not which("firefox") or which("geckodriver"):
+    if not (which("firefox") or which("geckodriver")):
         try:
             LOGGER.info("Firefox and geckodriver must be available for blobtools view")
             LOGGER.info("Attempting to install the appropriate geckodriver version")
@@ -282,6 +283,7 @@ def static_view(args, loc, viewer):
         try:
             driver, display = firefox_driver(args)
         except Exception as err:
+            format_exc(err)
             LOGGER.error(
                 "Unable to start Firefox. Try `conda install -c conda-forge firefox geckodriver` or `blobtools view --driver chromium` to use Chrome browser."
             )
