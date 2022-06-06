@@ -1,15 +1,15 @@
 def input_config(wc):
     """Set sub pipeline inputs."""
     sub_config = {
-        "blastn": ["%s/%s.stats" % (parent_dir, tool) for tool in ["diamond", "windowmasker"]],
-        "blobtools": ["%s/%s.stats" % (parent_dir, tool) for tool in ["blastn", "busco", "diamond", "diamond_blastp", "minimap", "window_stats"]],
-        "busco": ["%s/chunk_stats.stats" % parent_dir],
-        "diamond": ["%s/%s.stats" % (parent_dir, tool) for tool in ["busco", "windowmasker"]],
-        "diamond_blastp": ["%s/busco.stats" % parent_dir],
-        "chunk_stats": ["%s/%s.stats" % (parent_dir, tool) for tool in ["windowmasker"]],
-        "cov_stats": ["%s/%s.stats" % (parent_dir, tool) for tool in ["busco", "chunk_stats", "minimap"]],
-        "window_stats": ["%s/%s.stats" % (parent_dir, tool) for tool in ["chunk_stats", "cov_stats"]],
-        "view": ["%s/blobtools.stats" % parent_dir],
+        "blastn": ["ancient(%s/%s.stats)" % (parent_dir, tool) for tool in ["diamond", "windowmasker"]],
+        "blobtools": ["ancient(%s/%s.stats)" % (parent_dir, tool) for tool in ["blastn", "busco", "diamond", "diamond_blastp", "minimap", "window_stats"]],
+        "busco": ["ancient(%s/chunk_stats.stats)" % parent_dir],
+        "diamond": ["ancient(%s/%s.stats)" % (parent_dir, tool) for tool in ["busco", "windowmasker"]],
+        "diamond_blastp": ["ancient(%s/busco.stats)" % parent_dir],
+        "chunk_stats": ["ancient(%s/%s.stats)" % (parent_dir, tool) for tool in ["windowmasker"]],
+        "cov_stats": ["ancient(%s/%s.stats)" % (parent_dir, tool) for tool in ["busco", "chunk_stats", "minimap"]],
+        "window_stats": ["ancient(%s/%s.stats)" % (parent_dir, tool) for tool in ["chunk_stats", "cov_stats"]],
+        "view": ["ancient(%s/blobtools.stats)" % parent_dir],
     }
     if wc.tool in sub_config:
         return sub_config[wc.tool]

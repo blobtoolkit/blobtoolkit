@@ -82,10 +82,14 @@ def create_static_directory(indir, staticdir):
 
 
 def create_pipeline_directory(indir, outdir):
-    """Move image files to static directory."""
+    """Move stats and log files to pipeline directory."""
     Path(outdir).mkdir(parents=True, exist_ok=True)
     for file in glob.glob(r"%s/*.stats" % indir):
         shutil.move(file, outdir)
+    for file in glob.glob(r"%s/*/logs/**/*.log" % indir):
+        parts = file.split("/")
+        outfile = "-".join([parts[1]] + parts[3:])
+        shutil.move(file, f"{outdir}/logs/{outfile}")
 
 
 def remove_unwanted_files(indir, bindir):

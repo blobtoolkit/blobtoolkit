@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 """
-Transfer completed BlobDirs and intermediate files.
+Restore intermediate files from partial analyses.
 
 Usage:
-  btk pipeline resume-pipeline --in PATH --out PATH
+  btk pipeline resume-pipeline --in PATH [--update-cov] --out PATH
 
 Options:
   --in PATH              Path to input directory.
+  --update-cov           Flag to discard existing coverage data.
   --out PATH             Path to output directory.
 """
 
@@ -36,7 +37,7 @@ def stream_gzip_decompress(stream):
             yield rv
 
 
-def untar_directory(archive, destdir, *, compress=False):
+def untar_directory(archive, destdir, *, update_cov=False, compress=False):
     LOGGER.info("Extracting files from %s to %s", archive, destdir)
     # make sure destdir exists
     Path(destdir).mkdir(parents=True, exist_ok=True)
@@ -63,11 +64,30 @@ def untar_directory(archive, destdir, *, compress=False):
         "blobtools",
         "view",
     ]
+    if update_cov:
+        tools = tools[0:3] + tools[5:8]
     for tool in tools:
         stats_file = Path("%s/%s.stats" % (destdir, tool))
         if stats_file.is_file():
             stats_file.touch()
             sleep(1)
+
+
+def list_accessions(config):
+    """List assembly and read accessions."""
+    try:
+        gca = config["assembly"]["accession"]
+    except KeyError:
+        return None
+    try:
+        paired = [obj["prefix"] for obj in config["reads"]["paired"]]
+    except KeyError:
+        paired = []
+    try:
+        single = [obj["prefix"] for obj in config["reads"]["single"]]
+    except KeyError:
+        single = []
+    return f"{gca} {' '.join(paired+single)}"
 
 
 def main():
@@ -81,7 +101,14 @@ def main():
     accession = config["assembly"]["accession"]
     Path("%s/%s" % (destdir, accession)).mkdir(parents=True, exist_ok=True)
     shutil.copy2(config_file, "%s/%s/config.yaml" % (destdir, accession))
-    tools = ["busco", "diamond", "diamond_blastp", "blastn", "window_stats"]
+    tools = [
+        "busco",
+        "diamond",
+        "diamond_blastp",
+        "blastn",
+        "window_stats",
+        "windowmasker",
+    ]
     for tool in tools:
         Path("%s/%s/%s" % (destdir, accession, tool)).mkdir(parents=True, exist_ok=True)
         for gzfile in glob.glob("%s/*%s*.gz" % (indir, tool)):
@@ -99,11 +126,13 @@ def main():
                     shutil.copyfileobj(fh, ofh)
 
     for tf in glob.glob("%s/*.pipeline.tar" % indir):
-        untar_directory(tf, "%s/%s" % (destdir, accession))
+        untar_directory(
+            tf, "%s/%s" % (destdir, accession), update_cov=opts["--update-cov"]
+        )
     for tf in glob.glob("%s/*.busco*.tar" % indir):
         with tarfile.open(tf) as tfh:
             tfh.extractall(path="%s/%s/busco" % (destdir, accession))
-    # print(data)
+    print(list_accessions(config))
 
 
 if __name__ == "__main__":
