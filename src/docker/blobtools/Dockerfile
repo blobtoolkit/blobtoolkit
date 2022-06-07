@@ -1,12 +1,13 @@
 FROM ubuntu:20.04
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION=3.1.3
+ARG VERSION=3.1.11
 LABEL version=$VERSION
 ENV CONTAINER_VERSION=$VERSION
 
 RUN apt-get update \
     && DEBIAN_FRONTEND="noninteractive" apt-get -y --no-install-recommends install \
+    aria2 \
     dbus-x11 \
     firefox \
     firefox-geckodriver \
@@ -60,7 +61,7 @@ ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/btk_env
 
 ENV PATH $CONDA_DEFAULT_ENV/bin:$PATH
 
-ENV PYTHONPATH $CONDA_DEFAULT_ENV/lib/python3.8/site-packages:$PYTHONPATH
+ENV PYTHONPATH $CONDA_DEFAULT_ENV/lib/python3.10/site-packages:$PYTHONPATH
 
 WORKDIR /blobtoolkit
 
