@@ -38,6 +38,7 @@ from subprocess import PIPE
 from subprocess import Popen
 from traceback import format_exc
 
+import psutil
 from docopt import docopt
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -47,7 +48,6 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from tolkein import tolog
-from tqdm import tqdm
 
 from .host import test_port
 from .version import __version__
@@ -69,7 +69,8 @@ def file_ready(file_path, timeout, callback):
         time.sleep(1)
     if os.path.isfile(file_path):
         return True
-    raise ValueError("%s isn't a file!" % file_path)
+    callback("%s is not a file" % file_path)
+    return False
 
 
 def test_loc(args):
@@ -96,19 +97,22 @@ def test_loc(args):
         return loc, None, None, None, level
     if len(info) == 3:
         port = info[2]
-        available = test_port(port, "test")
-        if available:
-            print("ERROR: No service running on port %s" % port)
-            print("       Unable to connect to %s" % args["--host"])
-            sys.exit(1)
-        else:
-            loc = "%s/%s/%s/dataset/%s" % (
-                args["--host"],
-                args["--prefix"],
-                dataset,
-                dataset,
-            )
-            return loc, None, None, None, level
+        for i in range(0, 10):
+            available = test_port(port, "test")
+            if available:
+                if i == 9:
+                    print("ERROR: No service running on port %s" % port)
+                    print("       Unable to connect to %s" % args["--host"])
+                    sys.exit(1)
+                time.sleep(1)
+            else:
+                loc = "%s/%s/%s/dataset/%s" % (
+                    args["--host"],
+                    args["--prefix"],
+                    dataset,
+                    dataset,
+                )
+                return loc, None, None, None, level
     if args["DIRECTORY"] == "_":
         parent = "_"
         level = "blobdir"
@@ -140,20 +144,15 @@ def test_loc(args):
                 port = i
             break
     # directory = Path(__file__).resolve().parent.parent
-    cmd = "blobtools host --port %d --api-port %d %s" % (port, api_port, parent,)
+    cmd = "blobtools host --port %d --api-port %d %s" % (port, api_port, parent)
     process = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE, encoding="ascii")
     loc = "%s:%d/%s" % (args["--host"], port, args["--prefix"])
     if level == "dataset":
         loc += "/%s/dataset/%s" % (dataset, dataset)
     else:
         loc += "/all"
-    for i in tqdm(
-        range(0, 10),
-        unit="s",
-        ncols=75,
-        desc="Initializing viewer",
-        bar_format="{desc}",
-    ):
+    print("Initializing viewer")
+    for i in range(0, 10):
         poll = process.poll()
         if poll is None:
             if test_port(port, "test"):
@@ -307,10 +306,15 @@ def static_view(args, loc, viewer):
             qstr += "#Filters"
         url = "%s/%s?%s" % (loc, view, qstr)
         print("Loading %s" % url)
-        try:
-            driver.get(url)
-        except Exception as err:
-            handle_error(err)
+        for i in range(0, 10):
+            try:
+                driver.get(url)
+            except Exception as err:
+                if i < 5:
+                    time.sleep(1)
+                    continue
+                handle_error(err)
+            break
 
         for next_view in args["--view"]:
             if next_view != view:
@@ -364,7 +368,7 @@ def static_view(args, loc, viewer):
                     element.click()
                     file_name = "%s/%s" % (outdir, file)
                     print("waiting for file '%s'" % file_name)
-                    file_ready(file_name)
+                    file_ready(file_name, timeout, handle_error)
                 except Exception as err:
                     handle_error(err)
         if viewer is not None:
@@ -447,8 +451,6 @@ def remote_view(args, loc, viewer, port, api_port, level, remote):
             )
         while True:
             time.sleep(5)
-        if viewer is not None:
-            viewer.send_signal(signal.SIGINT)
     except Exception as err:
         print("remote exception")
         print(err)
@@ -471,10 +473,9 @@ def main(args):
             static_view(args, loc, viewer)
     except KeyboardInterrupt:
         pass
-    finally:
-        time.sleep(1)
-        if viewer is not None:
-            viewer.send_signal(signal.SIGINT)
+    time.sleep(1)
+    if viewer is not None:
+        viewer.send_signal(signal.SIGINT)
         time.sleep(1)
 
 
