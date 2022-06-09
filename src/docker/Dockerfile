@@ -8,6 +8,7 @@ ENV CONTAINER_VERSION=$VERSION
 RUN apt-get update \
     && DEBIAN_FRONTEND="noninteractive" apt-get -y --no-install-recommends install \
     aria2 \
+    build-essential \
     dbus-x11 \
     firefox \
     firefox-geckodriver \
@@ -56,6 +57,8 @@ WORKDIR /blobtoolkit
 COPY env.yaml /tmp/env.yaml
 
 RUN $CONDA_DIR/bin/mamba env create -f /tmp/env.yaml
+
+RUN $CONDA_DIR/bin/conda clean --all --yes
 
 ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/btk_env
 

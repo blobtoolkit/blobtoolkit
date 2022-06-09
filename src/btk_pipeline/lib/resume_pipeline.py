@@ -106,6 +106,7 @@ def main():
         "diamond",
         "diamond_blastp",
         "blastn",
+        "chunk_stats",
         "window_stats",
         "windowmasker",
     ]
@@ -122,8 +123,17 @@ def main():
                     "diamond.reference_proteomes.out",
                 )
                 file = file.replace(indir, "%s/%s/%s" % (destdir, accession, tool))
-                with open(file, "wb") as ofh:
-                    shutil.copyfileobj(fh, ofh)
+                if tool == "chunk_stats":
+                    file = file.replace(".tsv", ".mask.bed")
+                    with open(file, "w") as ofh:
+                        next(fh)
+                        for line in fh:
+                            ofh.write(
+                                "\t".join(line.decode("utf-8").split("\t")[:3]) + "\n"
+                            )
+                else:
+                    with open(file, "wb") as ofh:
+                        shutil.copyfileobj(fh, ofh)
 
     for tf in glob.glob("%s/*.pipeline.tar" % indir):
         untar_directory(

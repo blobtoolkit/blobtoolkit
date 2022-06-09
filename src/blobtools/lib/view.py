@@ -68,6 +68,7 @@ def file_ready(file_path, timeout, callback):
         os.chown(parent, os.stat(parent).st_uid, os.stat(parent).st_gid)
         time.sleep(1)
     if os.path.isfile(file_path):
+        print(" - found %s" % file_path)
         return True
     callback("%s is not a file" % file_path)
     return False
@@ -336,7 +337,7 @@ def static_view(args, loc, viewer):
                 file += ".%s" % fmt
                 print("Fetching %s" % file)
                 el_id = "%s_save_%s" % (view, fmt)
-                print("waiting for element %s" % el_id)
+                print(" - waiting for element %s" % el_id)
                 unstable = True
                 start_time = time.time()
                 while unstable:
@@ -350,7 +351,7 @@ def static_view(args, loc, viewer):
                         element.click()
                         unstable = False
                         file_name = "%s/%s" % (outdir, file)
-                        print("waiting for file '%s'" % file_name)
+                        print(" - waiting for file '%s'" % file_name)
                         file_ready(file_name, timeout, handle_error)
                     except Exception as err:
                         unstable = True
