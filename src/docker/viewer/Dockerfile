@@ -1,7 +1,7 @@
 FROM alpine:3.15
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION=3.2.1
+ARG VERSION=3.2.2
 LABEL version=$VERSION
 
 ENV CONTAINER_VERSION=$VERSION
