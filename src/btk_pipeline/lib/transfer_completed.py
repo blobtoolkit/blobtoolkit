@@ -83,7 +83,7 @@ def create_static_directory(indir, staticdir):
 
 def create_pipeline_directory(indir, outdir):
     """Move stats and log files to pipeline directory."""
-    Path(outdir).mkdir(parents=True, exist_ok=True)
+    Path(f"{outdir}/logs").mkdir(parents=True, exist_ok=True)
     for file in glob.glob(r"%s/*.stats" % indir):
         shutil.move(file, outdir)
     for file in glob.glob(r"%s/*/logs/**/*.log" % indir):
