@@ -1,6 +1,6 @@
 name: release-blobtoolkit
 env:
-  VERSION: 3.2.5
+  VERSION: 3.2.6
 
 on:
   push:
