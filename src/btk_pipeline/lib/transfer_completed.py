@@ -41,8 +41,12 @@ def compress_content(indir, destdir):
     """Compress all files in directory."""
     Path(destdir).mkdir(parents=True, exist_ok=True)
     for infile in glob.glob(r"%s/*" % indir):
-        outfile = "%s/%s.gz" % (destdir, Path(infile).name)
-        compress_file(infile, outfile)
+        if Path(infile).is_dir():
+            outdir = "%s/%s" % (destdir, Path(infile).name)
+            compress_content(infile, outdir)
+        else:
+            outfile = "%s/%s.gz" % (destdir, Path(infile).name)
+            compress_file(infile, outfile)
 
 
 def tar_directory(indir, destdir, *, compress=False):
