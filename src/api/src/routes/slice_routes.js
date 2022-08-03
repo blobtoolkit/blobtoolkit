@@ -59,15 +59,19 @@ module.exports = function (app, db) {
     // index can be single value, comma separated, or range
     // open-ended ranges will be expanded to end of dataset
     let dataset = new Dataset(req.params.dataset_id);
-    let meta = await dataset.loadMeta();
-    let ret = list_fields(
-      meta.fields,
-      req.params.dataset_id,
-      req.params.index,
-      {}
-    );
+    try {
+      let meta = await dataset.loadMeta();
+      let ret = list_fields(
+        meta.fields,
+        req.params.dataset_id,
+        req.params.index,
+        {}
+      );
 
-    console.log(ret);
-    res.json(ret);
+      console.log(ret);
+      res.json(ret);
+    } catch (err) {
+      res.sendStatus(404);
+    }
   });
 };

@@ -128,15 +128,19 @@ module.exports = function (app, db) {
     if (meta.hasOwnProperty(req.params.key)) {
       res.json(meta[req.params.key]);
     } else {
-      let result = utils.nestedEntryByKeyValue(
-        meta.fields,
-        "_id",
-        req.params.key,
-        ["_data", "_children"]
-      )[0];
-      if (result) {
-        res.json(result);
-      } else {
+      try {
+        let result = utils.nestedEntryByKeyValue(
+          meta.fields,
+          "_id",
+          req.params.key,
+          ["_data", "_children"]
+        )[0];
+        if (result) {
+          res.json(result);
+        } else {
+          res.sendStatus(404);
+        }
+      } catch (err) {
         res.sendStatus(404);
       }
     }
@@ -169,15 +173,19 @@ module.exports = function (app, db) {
       if (meta.hasOwnProperty(req.params.key)) {
         json = meta[req.params.key];
       } else {
-        let result = utils.nestedEntryByKeyValue(
-          meta.fields,
-          "_id",
-          req.params.key,
-          ["_data", "_children"]
-        )[0];
-        if (result) {
-          json = result;
-        } else {
+        try {
+          let result = utils.nestedEntryByKeyValue(
+            meta.fields,
+            "_id",
+            req.params.key,
+            ["_data", "_children"]
+          )[0];
+          if (result) {
+            json = result;
+          } else {
+            res.sendStatus(404);
+          }
+        } catch (err) {
           res.sendStatus(404);
         }
       }
