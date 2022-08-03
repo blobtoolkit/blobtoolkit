@@ -42,8 +42,10 @@ const config = {
           name(module) {
             const packageName = module.context.match(
               /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-            )[1];
-            return `npm.${packageName.replace("@", "")}`;
+            );
+            if (packageName) {
+              return `npm.${packageName[1].replace("@", "")}`;
+            }
           },
           chunks: "all",
         },
@@ -184,6 +186,10 @@ const config = {
           name: "img/[contenthash].[ext]",
           publicPath: main.mode == "production" ? main.basename + "/" : "/",
         },
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+        type: "asset/resource",
       },
     ],
   },
