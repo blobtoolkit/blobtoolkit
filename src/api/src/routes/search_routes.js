@@ -253,27 +253,36 @@ let meta = [];
 let index = {};
 let keys = {};
 let tree = {};
+let status = "LOADING";
 
 const loadIndex = async () => {
   // TODO: support cancelling this indexing if called again before finished
   // Load dataset IDs first to get an index ready quickly
-  let newMeta = listMeta(dataDirectory, { meta });
-  let newIndex = generateIndex(newMeta);
-  let newKeys = Object.keys(newIndex.values);
-  meta = newMeta;
-  index = newIndex;
-  keys = newKeys;
-  // Load metadata into full index
-  newMeta = readMeta(dataDirectory);
-  newIndex = generateIndex(newMeta);
-  newKeys = Object.keys(newIndex.values);
-  if (config.dataset_table) {
-    newTree = generateTree(newMeta);
-    tree = newTree;
+  await new Promise((r) => setTimeout(r, 2000));
+  try {
+    let newMeta = listMeta(dataDirectory, { meta });
+    let newIndex = generateIndex(newMeta);
+    let newKeys = Object.keys(newIndex.values);
+    meta = newMeta;
+    index = newIndex;
+    keys = newKeys;
+    // Load metadata into full index
+    status = "INDEXING";
+    await new Promise((r) => setTimeout(r, 2000));
+    newMeta = readMeta(dataDirectory);
+    newIndex = generateIndex(newMeta);
+    newKeys = Object.keys(newIndex.values);
+    if (config.dataset_table) {
+      newTree = generateTree(newMeta);
+      tree = newTree;
+    }
+    meta = newMeta;
+    index = newIndex;
+    keys = newKeys;
+    status = "OK";
+  } catch (err) {
+    status = "NOT OK";
   }
-  meta = newMeta;
-  index = newIndex;
-  keys = newKeys;
 };
 
 const autocomplete = (term) => {
@@ -419,6 +428,8 @@ const tabulate = (term) => {
 
 module.exports = {
   loadIndex,
+  status: () => status,
+  total: () => meta.length,
   routes: function (app, db) {
     /**
      * @swagger
@@ -548,10 +559,11 @@ module.exports = {
     app.get("/api/v1/search/reload/:key", async (req, res) => {
       res.setHeader("content-type", "application/json");
       if (req.params.key == config.reloadKey) {
+        status = "RELOADING";
         loadIndex();
-        res.json({ status: "updated" });
+        res.json({ status: "OK" });
       } else {
-        res.json({ status: "invalid key" });
+        res.json({ status: "INVALID KEY" });
       }
     });
   },

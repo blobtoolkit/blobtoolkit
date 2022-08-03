@@ -2,6 +2,7 @@ const apiRoutes = require("./api_routes");
 const datasetRoutes = require("./dataset_routes");
 const fieldRoutes = require("./field_routes");
 const identifierRoutes = require("./identifier_routes");
+const healthRoutes = require("./health_routes");
 const imageRoutes = require("./image_routes");
 const searchRoutes = require("./search_routes");
 // const sliceRoutes = require('./slice_routes');
@@ -12,6 +13,7 @@ module.exports = async function (app, db) {
   apiRoutes(app, db);
   datasetRoutes(app, db);
   fieldRoutes(app, db);
+  healthRoutes(app, db);
   identifierRoutes(app, db);
   imageRoutes(app, db);
   searchRoutes.routes(app, db);
