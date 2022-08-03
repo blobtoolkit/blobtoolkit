@@ -1,8 +1,5 @@
 name: test-blobtoolkit
-on:
-  push:
-    tags:
-      - "*"
+on: [push]
 jobs:
   package-ui:
     runs-on: ubuntu-latest

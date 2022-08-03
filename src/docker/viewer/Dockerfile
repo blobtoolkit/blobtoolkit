@@ -1,7 +1,7 @@
 FROM alpine:3.15
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION=3.1.0
+ARG VERSION=3.2.8
 LABEL version=$VERSION
 
 ENV CONTAINER_VERSION=$VERSION
@@ -19,7 +19,7 @@ USER blobtoolkit
 
 WORKDIR /blobtoolkit
 
-RUN curl -Ls https://github.com/blobtoolkit/viewer/releases/download/${VERSION}/blobtoolkit-viewer-linux > blobtoolkit-viewer \
+RUN curl -Ls https://github.com/blobtoolkit/blobtoolkit/releases/download/${VERSION}/blobtoolkit-viewer-linux > blobtoolkit-viewer \
     && chmod 755 blobtoolkit-viewer
 
 ENV PATH /blobtoolkit:$PATH

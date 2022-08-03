@@ -11,14 +11,11 @@ Options:
 """
 
 import logging
-import os
 import re
 import subprocess
-import sys
 import traceback
 from collections import OrderedDict
 
-import git
 import yaml
 from docopt import DocoptExit
 from docopt import docopt
@@ -68,10 +65,7 @@ def add_software_versions(meta):
             cmd.append(flag)
         try:
             p = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                encoding="utf-8",
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8",
             )
             (output, err) = p.communicate()
             status = p.wait()
@@ -91,26 +85,6 @@ def add_software_versions(meta):
         logger.info("%s: %s", key, version)
         versions.update({key: version})
     meta["settings"]["software_versions"] = versions
-
-
-# def parse_args():
-#     """Parse snakemake args if available."""
-#     args = {}
-#     try:
-#         args["--config"] = snakemake.config
-#         args["--out"] = str(snakemake.output)
-#         args["--gitdir"] = (
-#             git.Repo(
-#                 os.path.dirname(os.path.abspath(__file__)),
-#                 search_parent_directories=True,
-#             ).working_tree_dir
-#             + "/.git"
-#         )
-#         for key, value in args.items:
-#             sys.argv.append(key)
-#             sys.argv.append(value)
-#     except NameError as err:
-#         pass
 
 
 def main():

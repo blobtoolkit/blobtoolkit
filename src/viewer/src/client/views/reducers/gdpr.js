@@ -10,4 +10,4 @@ export const getGdprURL = () => {
   return GDPR_URL;
 };
 
-export const apiUrl = getGdprURL();
+export const gdprUrl = getGdprURL();

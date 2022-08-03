@@ -41,8 +41,12 @@ def compress_content(indir, destdir):
     """Compress all files in directory."""
     Path(destdir).mkdir(parents=True, exist_ok=True)
     for infile in glob.glob(r"%s/*" % indir):
-        outfile = "%s/%s.gz" % (destdir, Path(infile).name)
-        compress_file(infile, outfile)
+        if Path(infile).is_dir():
+            outdir = "%s/%s" % (destdir, Path(infile).name)
+            compress_content(infile, outdir)
+        else:
+            outfile = "%s/%s.gz" % (destdir, Path(infile).name)
+            compress_file(infile, outfile)
 
 
 def tar_directory(indir, destdir, *, compress=False):
@@ -82,10 +86,14 @@ def create_static_directory(indir, staticdir):
 
 
 def create_pipeline_directory(indir, outdir):
-    """Move image files to static directory."""
-    Path(outdir).mkdir(parents=True, exist_ok=True)
+    """Move stats and log files to pipeline directory."""
+    Path(f"{outdir}/logs").mkdir(parents=True, exist_ok=True)
     for file in glob.glob(r"%s/*.stats" % indir):
         shutil.move(file, outdir)
+    for file in glob.glob(r"%s/*/logs/**/*.log" % indir):
+        parts = file.split("/")
+        outfile = "-".join([parts[1]] + parts[3:])
+        shutil.move(file, f"{outdir}/logs/{outfile}")
 
 
 def remove_unwanted_files(indir, bindir):
@@ -111,7 +119,7 @@ def main():
     if revision:
         blobdir += ".%d" % int(revision)
     indir = opts["--in"]
-    outdir = "%s/%s" % (opts["--out"], prefix)
+    outdir = "%s/%s" % (opts["--out"], blobdir)
     bindir = opts.get("--bin", None)
     Path(outdir).mkdir(parents=True, exist_ok=True)
     create_pipeline_directory(indir, "%s/%s.pipeline" % (indir, prefix))

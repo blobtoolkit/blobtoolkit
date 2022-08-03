@@ -38,7 +38,8 @@ def run_command(cmd):
     """Run a command and capture CTRL-C."""
     script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     p = subprocess.Popen(shlex.split(cmd), stdin=subprocess.PIPE, cwd=script_dir)
-    p.wait()
+    exit_code = p.wait()
+    return exit_code
 
 
 def unlock_working_directory(workdir):
@@ -57,7 +58,7 @@ def unlock_working_directory(workdir):
         workdir,
         snakefile,
     )
-    run_command(cmd)
+    exit_code = run_command(cmd)
 
 
 def run_pipeline(workdir, args):
@@ -81,7 +82,7 @@ def run_pipeline(workdir, args):
         workdir,
         snakefile,
     )
-    run_command(cmd)
+    exit_code = run_command(cmd)
 
 
 def main():
@@ -99,9 +100,10 @@ def main():
         if config != "%s/config.yaml" % workdir:
             shutil.copy2(config, "%s/config.yaml" % workdir)
         if args["--unlock"]:
-            unlock_working_directory(workdir)
-            exit(0)
-        run_pipeline(workdir, args)
+            exit_code = unlock_working_directory(workdir)
+            exit(exit_code)
+        exit_code = run_pipeline(workdir, args)
+        exit(exit_code)
 
     except Exception as err:
         logger.error(err)

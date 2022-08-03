@@ -4,7 +4,7 @@ echo "Packaging blobtoolkit-api" &&
 
 echo "Installing dependencies" &&
 
-npm install &&
+npm install --legacy-peer-deps &&
 
 echo "Copying files" &&
 

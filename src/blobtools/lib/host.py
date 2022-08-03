@@ -38,15 +38,49 @@ from .version import __version__
 PIDS = []
 
 
-def kill_child_processes(parent_pid, sig=signal.SIGTERM):
+def iter_user_procs(process):
+    """Iterate through processes owned by the current user."""
+    username = psutil.Process.username(
+        process
+    )  # get username in format used by processes
+    for proc in psutil.process_iter(["username"]):
+        if proc.info["username"] == username:
+            yield proc
+
+
+def close_ports(process, args):
+    """Close processes running on chosen ports."""
+    for proc in iter_user_procs(process):
+        try:
+            for conns in proc.connections(kind="inet"):
+                if conns.laddr.port == args["--api-port"]:
+                    proc.send_signal(signal.SIGTERM)
+                elif conns.laddr.port == args["--port"]:
+                    proc.send_signal(signal.SIGTERM)
+        except psutil.NoSuchProcess:
+            continue
+        except psutil.ZombieProcess:
+            continue
+        except psutil.AccessDenied:
+            continue
+
+
+def kill_child_processes(parent_pid, args=None, sig=signal.SIGTERM):
     """Kill all child processes."""
     try:
         parent = psutil.Process(parent_pid)
     except psutil.NoSuchProcess:
         return
+    # if args:
+    #     close_ports(parent, args)
     children = parent.children(recursive=True)
     for process in children:
-        process.send_signal(sig)
+        try:
+            process.send_signal(sig)
+        except psutil.NoSuchProcess:
+            continue
+        except psutil.ZombieProcess:
+            continue
     parent.send_signal(sig)
 
 
@@ -121,11 +155,7 @@ def start_api(port, api_port, hostname, directory):
     if hostname != "localhost":
         origins += " http://%s:%d http://%s" % (hostname, int(port), hostname)
     if directory == "_":
-        env = dict(
-            os.environ,
-            BTK_API_PORT=api_port,
-            BTK_ORIGINS=origins,
-        )
+        env = dict(os.environ, BTK_API_PORT=api_port, BTK_ORIGINS=origins,)
     else:
         env = dict(
             os.environ,
@@ -134,11 +164,7 @@ def start_api(port, api_port, hostname, directory):
             BTK_ORIGINS=origins,
         )
     process = Popen(
-        shlex.split(cmd),
-        stdout=PIPE,
-        stderr=PIPE,
-        encoding="ascii",
-        env=env,
+        shlex.split(cmd), stdout=PIPE, stderr=PIPE, encoding="ascii", env=env,
     )
     return process
 
@@ -180,12 +206,7 @@ def main(args):
         directory = path.absolute()
     test_port(args["--api-port"], "BlobtoolKit API")
     test_port(args["--port"], "BlobtoolKit viewer")
-    api = start_api(
-        args["--port"],
-        args["--api-port"],
-        args["--hostname"],
-        directory,
-    )
+    api = start_api(args["--port"], args["--api-port"], args["--hostname"], directory,)
     PIDS.append(api.pid)
     print(
         "Starting BlobToolKit API on port %d (pid: %d)"
@@ -246,7 +267,8 @@ def cli():
         pass
     finally:
         for pid in PIDS:
-            kill_child_processes(pid, signal.SIGTERM)
+            kill_child_processes(pid, args=args, sig=signal.SIGKILL)
+            time.sleep(2)
 
 
 if __name__ == "__main__":

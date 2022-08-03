@@ -8,7 +8,7 @@ cp .env.dist .env &&
 
 echo "Installing dependencies" &&
 
-npm install &&
+npm install --legacy-peer-deps &&
 
 echo "Bundling javascript" &&
 

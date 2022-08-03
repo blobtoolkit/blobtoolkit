@@ -33,20 +33,26 @@ import signal
 import sys
 import time
 from pathlib import Path
+from shutil import which
 from subprocess import PIPE
 from subprocess import Popen
+from traceback import format_exc
 
+import psutil
 from docopt import docopt
 from pyvirtualdisplay import Display
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from tqdm import tqdm
+from tolkein import tolog
 
 from .host import test_port
 from .version import __version__
+
+LOGGER = tolog.logger(__name__)
 
 
 def file_ready(file_path, timeout, callback):
@@ -62,8 +68,10 @@ def file_ready(file_path, timeout, callback):
         os.chown(parent, os.stat(parent).st_uid, os.stat(parent).st_gid)
         time.sleep(1)
     if os.path.isfile(file_path):
+        print(" - found %s" % file_path)
         return True
-    raise ValueError("%s isn't a file!" % file_path)
+    callback("%s is not a file" % file_path)
+    return False
 
 
 def test_loc(args):
@@ -90,19 +98,22 @@ def test_loc(args):
         return loc, None, None, None, level
     if len(info) == 3:
         port = info[2]
-        available = test_port(port, "test")
-        if available:
-            print("ERROR: No service running on port %s" % port)
-            print("       Unable to connect to %s" % args["--host"])
-            sys.exit(1)
-        else:
-            loc = "%s/%s/%s/dataset/%s" % (
-                args["--host"],
-                args["--prefix"],
-                dataset,
-                dataset,
-            )
-            return loc, None, None, None, level
+        for i in range(0, 10):
+            available = test_port(port, "test")
+            if available:
+                if i == 9:
+                    print("ERROR: No service running on port %s" % port)
+                    print("       Unable to connect to %s" % args["--host"])
+                    sys.exit(1)
+                time.sleep(1)
+            else:
+                loc = "%s/%s/%s/dataset/%s" % (
+                    args["--host"],
+                    args["--prefix"],
+                    dataset,
+                    dataset,
+                )
+                return loc, None, None, None, level
     if args["DIRECTORY"] == "_":
         parent = "_"
         level = "blobdir"
@@ -134,24 +145,15 @@ def test_loc(args):
                 port = i
             break
     # directory = Path(__file__).resolve().parent.parent
-    cmd = "blobtools host --port %d --api-port %d %s" % (
-        port,
-        api_port,
-        parent,
-    )
+    cmd = "blobtools host --port %d --api-port %d %s" % (port, api_port, parent)
     process = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE, encoding="ascii")
     loc = "%s:%d/%s" % (args["--host"], port, args["--prefix"])
     if level == "dataset":
         loc += "/%s/dataset/%s" % (dataset, dataset)
     else:
         loc += "/all"
-    for i in tqdm(
-        range(0, 10),
-        unit="s",
-        ncols=75,
-        desc="Initializing viewer",
-        bar_format="{desc}",
-    ):
+    print("Initializing viewer")
+    for i in range(0, 10):
         poll = process.poll()
         if poll is None:
             if test_port(port, "test"):
@@ -168,9 +170,20 @@ def test_loc(args):
 
 def firefox_driver(args):
     """Start firefox."""
-    import geckodriver_autoinstaller
+    if not (which("firefox") or which("geckodriver")):
+        try:
+            LOGGER.info("Firefox and geckodriver must be available for blobtools view")
+            LOGGER.info("Attempting to install the appropriate geckodriver version")
+            import geckodriver_autoinstaller
 
-    geckodriver_autoinstaller.install()
+            geckodriver_autoinstaller.install()
+            LOGGER.info("Successfully installed geckodriver")
+
+        except Exception:
+            LOGGER.error(
+                "Unable to install automatically. Try `conda install -c conda-forge firefox geckodriver` or `blobtools view --driver chromium` to use chrome browser."
+            )
+            sys.exit(1)
 
     outdir = os.path.abspath(args["--out"])
     os.makedirs(Path(outdir), exist_ok=True)
@@ -189,10 +202,9 @@ def firefox_driver(args):
     options.headless = not args["--interactive"]
     display = Display(visible=0, size=(800, 600))
     display.start()
+
     driver = webdriver.Firefox(
-        options=options,
-        firefox_profile=profile,
-        service_log_path=args["--driver-log"],
+        options=options, firefox_profile=profile, service_log_path=args["--driver-log"],
     )
     time.sleep(2)
     return driver, display
@@ -200,8 +212,19 @@ def firefox_driver(args):
 
 def chromium_driver(args):
     """Start chromium browser."""
-    import chromedriver_binary
+    os.environ["WDM_LOG_LEVEL"] = "0"
+    try:
+        LOGGER.info("Chrome and chromedriver must be available for blobtools view")
+        LOGGER.info("Attempting to install the appropriate chromedriver version")
+        from webdriver_manager.chrome import ChromeDriverManager
 
+        service_object = Service(ChromeDriverManager().install())
+        LOGGER.info("Successfully installed chromedriver")
+    except Exception:
+        LOGGER.error(
+            "Unable to install automatically. Check Chrome is available or try `blobtools view --driver firefox` to use firefox browser."
+        )
+        sys.exit(1)
     outdir = os.path.abspath(args["--out"])
     os.makedirs(Path(outdir), exist_ok=True)
 
@@ -216,6 +239,7 @@ def chromium_driver(args):
     display.start()
     driver = webdriver.Chrome(
         options=options,
+        service=service_object,
         # executable_path=add option to set binary location,
         service_log_path=args["--driver-log"],
     )
@@ -256,10 +280,24 @@ def static_view(args, loc, viewer):
 
     if args["--driver"] == "firefox":
         """View dataset in Firefox."""
-        driver, display = firefox_driver(args)
+        try:
+            driver, display = firefox_driver(args)
+        except Exception as err:
+            format_exc(err)
+            LOGGER.error(
+                "Unable to start Firefox. Try `conda install -c conda-forge firefox geckodriver` or `blobtools view --driver chromium` to use Chrome browser."
+            )
+            sys.exit(1)
+
     elif args["--driver"] == "chromium":
         """View dataset in Chromium browser."""
-        driver, display = chromium_driver(args)
+        try:
+            driver, display = chromium_driver(args)
+        except Exception as err:
+            LOGGER.error(
+                "Unable to start Chrome. Try `blobtools view --driver firefox` to use Firefox browser."
+            )
+            sys.exit(1)
     else:
         handle_error("%s is not a valid driver" % args["--driver"])
 
@@ -269,10 +307,15 @@ def static_view(args, loc, viewer):
             qstr += "#Filters"
         url = "%s/%s?%s" % (loc, view, qstr)
         print("Loading %s" % url)
-        try:
-            driver.get(url)
-        except Exception as err:
-            handle_error(err)
+        for i in range(0, 10):
+            try:
+                driver.get(url)
+            except Exception as err:
+                if i < 5:
+                    time.sleep(1)
+                    continue
+                handle_error(err)
+            break
 
         for next_view in args["--view"]:
             if next_view != view:
@@ -294,7 +337,7 @@ def static_view(args, loc, viewer):
                 file += ".%s" % fmt
                 print("Fetching %s" % file)
                 el_id = "%s_save_%s" % (view, fmt)
-                print("waiting for element %s" % el_id)
+                print(" - waiting for element %s" % el_id)
                 unstable = True
                 start_time = time.time()
                 while unstable:
@@ -308,7 +351,7 @@ def static_view(args, loc, viewer):
                         element.click()
                         unstable = False
                         file_name = "%s/%s" % (outdir, file)
-                        print("waiting for file '%s'" % file_name)
+                        print(" - waiting for file '%s'" % file_name)
                         file_ready(file_name, timeout, handle_error)
                     except Exception as err:
                         unstable = True
@@ -326,7 +369,7 @@ def static_view(args, loc, viewer):
                     element.click()
                     file_name = "%s/%s" % (outdir, file)
                     print("waiting for file '%s'" % file_name)
-                    file_ready(file_name)
+                    file_ready(file_name, timeout, handle_error)
                 except Exception as err:
                     handle_error(err)
         if viewer is not None:
@@ -409,8 +452,6 @@ def remote_view(args, loc, viewer, port, api_port, level, remote):
             )
         while True:
             time.sleep(5)
-        if viewer is not None:
-            viewer.send_signal(signal.SIGINT)
     except Exception as err:
         print("remote exception")
         print(err)
@@ -433,10 +474,9 @@ def main(args):
             static_view(args, loc, viewer)
     except KeyboardInterrupt:
         pass
-    finally:
-        time.sleep(1)
-        if viewer is not None:
-            viewer.send_signal(signal.SIGINT)
+    time.sleep(1)
+    if viewer is not None:
+        viewer.send_signal(signal.SIGINT)
         time.sleep(1)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "blobtoolkit-viewer",
-  "version": "3.1.0",
+  "version": "3.2.8",
   "repository": "https://github.com/blobtoolkit/viewer",
   "description": "",
   "main": "index.js",
@@ -39,7 +39,7 @@
     "react": "^17.0.2",
     "react-color": "^2.19.3",
     "react-cookie": "^4.1.1",
-    "react-cookie-consent": "^3.0.0",
+    "react-cookie-consent": "^7.4.1",
     "react-csv": "^1.1.2",
     "react-d3-axis": "^0.1.2",
     "react-dom": "^17.0.2",

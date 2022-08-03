@@ -54,11 +54,10 @@ def seqtk_sample_input(config, prefix):
         base_count = meta.get("base_count", None)
         assembly_span = config["assembly"].get("span", None)
         if isinstance(base_count, int) and isinstance(assembly_span, int):
-            ratio = (
-                assembly_span
-                * config["reads"]["coverage"]["max"]
-                / base_count
-            )
+            try:
+                ratio = assembly_span * config["reads"]["coverage"]["max"] / base_count
+            except ZeroDivisionError:
+                pass
     if ratio <= 0.95:
         command = " ".join(
             [
@@ -157,7 +156,7 @@ def taxid_flag(config, tool):
     flags = {
         "blastn": "-negative_taxids",
         "diamond_blastp": "--taxon-exclude",
-        "diamond_blastx": "--taxon-exclude"
+        "diamond_blastx": "--taxon-exclude",
     }
     return "%s %s" % (flags[tool], taxid)
 
