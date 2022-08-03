@@ -186,7 +186,7 @@ setup(
         "ujson>=3.0.0",
         # Additional pipeline dependencies
         "defusedxml==0.7.1",
-        "requests==2.27.1",
+        "requests==2.28.1",
         "snakemake==6.15.3",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
