@@ -182,7 +182,7 @@ setup(
         "pyyaml",
         "selenium==4.3.0",
         "tolkein>=0.4.0",
-        "tqdm==4.62.3",
+        "tqdm==4.64.0",
         "ujson>=3.0.0",
         # Additional pipeline dependencies
         "defusedxml==0.7.1",

@@ -10,7 +10,7 @@ PyYAML==6.0
 selenium==4.3.0
 setuptools==49.2.0
 tolkein==0.4.0
-tqdm==4.62.3
+tqdm==4.64.0
 ujson==5.4.0
 
 defusedxml==0.7.1
