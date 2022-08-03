@@ -258,7 +258,6 @@ let status = "LOADING";
 const loadIndex = async () => {
   // TODO: support cancelling this indexing if called again before finished
   // Load dataset IDs first to get an index ready quickly
-  await new Promise((r) => setTimeout(r, 2000));
   try {
     let newMeta = listMeta(dataDirectory, { meta });
     let newIndex = generateIndex(newMeta);
@@ -268,7 +267,6 @@ const loadIndex = async () => {
     keys = newKeys;
     // Load metadata into full index
     status = "INDEXING";
-    await new Promise((r) => setTimeout(r, 2000));
     newMeta = readMeta(dataDirectory);
     newIndex = generateIndex(newMeta);
     newKeys = Object.keys(newIndex.values);
