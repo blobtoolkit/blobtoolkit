@@ -326,7 +326,10 @@ class MultiArray(Field):
                 record_values = []
                 for arr in record:
                     arr_values = [i for i in arr]
-                    arr_values[slot] = keys[arr_values[slot]]
+                    try:
+                        arr_values[slot] = keys[arr_values[slot]]
+                    except TypeError:
+                        arr_values[slot] = None
                     record_values.append(arr_values)
                 values.append(record_values)
         else:
