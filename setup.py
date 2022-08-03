@@ -174,7 +174,7 @@ setup(
     install_requires=[
         "chromedriver-binary-auto==0.1.1",
         "docopt>=0.6.2",
-        "fastjsonschema==2.15.3",
+        "fastjsonschema==2.16.1",
         "geckodriver-autoinstaller==0.1.0",
         "psutil==5.9.0",
         "pysam==0.19.1",
