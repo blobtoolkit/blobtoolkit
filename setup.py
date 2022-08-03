@@ -177,7 +177,7 @@ setup(
         "fastjsonschema==2.15.3",
         "geckodriver-autoinstaller==0.1.0",
         "psutil==5.9.0",
-        "pysam==0.18.0",
+        "pysam==0.19.1",
         "pyvirtualdisplay==2.2",
         "pyyaml",
         "selenium==4.3.0",
