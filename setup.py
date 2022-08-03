@@ -180,7 +180,7 @@ setup(
         "pysam==0.18.0",
         "pyvirtualdisplay==2.2",
         "pyyaml",
-        "selenium==4.1.0",
+        "selenium==4.3.0",
         "tolkein>=0.4.0",
         "tqdm==4.62.3",
         "ujson>=3.0.0",
