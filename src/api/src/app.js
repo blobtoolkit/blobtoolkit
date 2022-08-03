@@ -5,6 +5,7 @@ const path = require("path");
 const config = require("./config/main");
 const resolve = require("path").resolve;
 const app = express();
+const searchRoutes = require("./routes/search_routes");
 
 app.use(compression());
 app.use(express.static(path.join(__dirname, "public")));
@@ -40,12 +41,14 @@ if (config.https) {
   };
   var secureServer = https
     .createServer(options, app)
-    .listen(config.api_port, function () {
+    .listen(config.api_port, async function () {
       console.log("blobtoolkit-api started on https port: " + config.api_port);
+      await searchRoutes.loadIndex();
     });
 } else {
-  app.listen(config.api_port, function () {
+  app.listen(config.api_port, async function () {
     console.log("blobtoolkit-api started on http port: " + config.api_port);
+    await searchRoutes.loadIndex();
   });
 }
 module.exports = app;

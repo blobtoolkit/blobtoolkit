@@ -58,7 +58,8 @@ const readMeta = (dir, md) => {
       let dsMeta = parseMeta(readYamlSync(path));
       dsMeta.id = dir.replace(/^.+\//, "");
       if (!dsMeta.hasOwnProperty("revision")) {
-        dsMeta.revision = 0;
+        let [prefix, revision] = dsMeta.id.split(".");
+        dsMeta.revision = revision ? revision * 1 : 0;
       }
       if (config.dataset_table) {
         let sumpath = `${dir}/summary.json`;
@@ -80,6 +81,54 @@ const readMeta = (dir, md) => {
       let latest = Math.max(...Object.keys(versions[dsMeta.prefix]));
       Object.keys(versions[dsMeta.prefix]).forEach((version) => {
         md[versions[dsMeta.prefix][version]].latest = latest;
+      });
+    }
+  });
+  return md;
+};
+
+const listMeta = (dir, { md, meta }) => {
+  md = md || meta.slice() || [];
+  versions = {};
+  md.forEach((o, i) => {
+    if (!versions[o.prefix]) {
+      versions[o.prefix] = {};
+    }
+    versions[o.prefix][o.revision] = i;
+  });
+  let files = fs.readdirSync(dir);
+  files.forEach((file) => {
+    let path = dir + "/" + file;
+    if (fs.statSync(path).isDirectory()) {
+      listMeta(path, { md });
+    } else if (
+      (file == "meta.json" || file == "meta.json.gz") &&
+      fs.statSync(path).isFile()
+    ) {
+      let id = dir.replace(/^.+\//, "");
+      let [prefix, revision] = id.split(".");
+      let dsMeta = {
+        id,
+        name: id,
+        prefix,
+        revision: revision ? revision * 1 : 0,
+      };
+      if (config.dataset_table) {
+        dsMeta.summaryStats = {};
+      }
+      if (!versions[dsMeta.prefix]) {
+        versions[dsMeta.prefix] = {};
+      }
+      if (!versions[dsMeta.prefix][dsMeta.revision]) {
+        versions[dsMeta.prefix][dsMeta.revision] = md.length;
+        md.push(dsMeta);
+      }
+      let latest = Math.max(...Object.keys(versions[dsMeta.prefix]));
+      dsMeta.latest = latest;
+      Object.keys(versions[dsMeta.prefix]).forEach((version) => {
+        if (md[versions[dsMeta.prefix][version - 1]]) {
+          md[versions[dsMeta.prefix][version - 1]].latest = latest;
+        }
       });
     }
   });
@@ -200,18 +249,24 @@ const generateTree = (meta) => {
   return tree;
 };
 
-let meta;
-
-let index;
-
-let keys;
-
+let meta = [];
+let index = {};
+let keys = {};
 let tree = {};
 
-const loadIndex = () => {
-  let newMeta = readMeta(dataDirectory);
+const loadIndex = async () => {
+  // TODO: support cancelling this indexing if called again before finished
+  // Load dataset IDs first to get an index ready quickly
+  let newMeta = listMeta(dataDirectory, { meta });
   let newIndex = generateIndex(newMeta);
   let newKeys = Object.keys(newIndex.values);
+  meta = newMeta;
+  index = newIndex;
+  keys = newKeys;
+  // Load metadata into full index
+  newMeta = readMeta(dataDirectory);
+  newIndex = generateIndex(newMeta);
+  newKeys = Object.keys(newIndex.values);
   if (config.dataset_table) {
     newTree = generateTree(newMeta);
     tree = newTree;
@@ -220,8 +275,6 @@ const loadIndex = () => {
   index = newIndex;
   keys = newKeys;
 };
-
-loadIndex();
 
 const autocomplete = (term) => {
   query = term.toUpperCase();
@@ -364,139 +417,142 @@ const tabulate = (term) => {
  *     description: Search index reload key
  */
 
-module.exports = function (app, db) {
-  /**
-   * @swagger
-   * /api/v1/search/tree/target:
-   *   get:
-   *     tags:
-   *       - Search
-   *     description: Returns tree of all publicly available Eukaryotic genome assemblies
-   *     produces:
-   *       - application/json
-   *     responses:
-   *       200:
-   *         description: A tree object
-   *         schema:
-   *           $ref: '#/definitions/Tree'
-   */
+module.exports = {
+  loadIndex,
+  routes: function (app, db) {
+    /**
+     * @swagger
+     * /api/v1/search/tree/target:
+     *   get:
+     *     tags:
+     *       - Search
+     *     description: Returns tree of all publicly available Eukaryotic genome assemblies
+     *     produces:
+     *       - application/json
+     *     responses:
+     *       200:
+     *         description: A tree object
+     *         schema:
+     *           $ref: '#/definitions/Tree'
+     */
 
-  app.get("/api/v1/search/tree/target", async (req, res) => {
-    file = await checkCompression(`${dataDirectory}/targets.json`);
-    if (file) {
-      res.setHeader("content-type", "application/json");
-      if (file.endsWith(".gz")) {
-        res.setHeader("content-encoding", "gzip");
+    app.get("/api/v1/search/tree/target", async (req, res) => {
+      file = await checkCompression(`${dataDirectory}/targets.json`);
+      if (file) {
+        res.setHeader("content-type", "application/json");
+        if (file.endsWith(".gz")) {
+          res.setHeader("content-encoding", "gzip");
+        }
+        res.sendFile(file);
+      } else {
+        res.sendStatus(404);
       }
-      res.sendFile(file);
-    } else {
-      res.sendStatus(404);
-    }
-  });
-  /**
-   * @swagger
-   * /api/v1/search/tree/available:
-   *   get:
-   *     tags:
-   *       - Search
-   *     description: Returns tree of all analysed genome assemblies
-   *     produces:
-   *       - application/json
-   *     responses:
-   *       200:
-   *         description: A tree object
-   *         schema:
-   *           $ref: '#/definitions/Tree'
-   */
+    });
+    /**
+     * @swagger
+     * /api/v1/search/tree/available:
+     *   get:
+     *     tags:
+     *       - Search
+     *     description: Returns tree of all analysed genome assemblies
+     *     produces:
+     *       - application/json
+     *     responses:
+     *       200:
+     *         description: A tree object
+     *         schema:
+     *           $ref: '#/definitions/Tree'
+     */
 
-  app.get("/api/v1/search/tree/available", async (req, res) => {
-    res.setHeader("content-type", "application/json");
-    res.json(tree);
-  });
-  /**
-   * @swagger
-   * /api/v1/search/autocomplete/{term}:
-   *   get:
-   *     tags:
-   *       - Search
-   *     description: Returns an array of available search terms
-   *     produces:
-   *       - application/json
-   *     responses:
-   *       200:
-   *         description: A tree object
-   *         schema:
-   *           type: array
-   *           items:
-   *             $ref: '#/definitions/Tree'
-   *     parameters:
-   *       - $ref: "#/parameters/term"
-   */
-
-  app.get("/api/v1/search/autocomplete/:term", async (req, res) => {
-    res.setHeader("content-type", "application/json");
-    res.json(autocomplete(req.params.term));
-  });
-  /**
-   * @swagger
-   * /api/v1/search/{term}:
-   *   get:
-   *     tags:
-   *       - Search
-   *     description: Returns an array of datasets matching a search term
-   *     produces:
-   *       - application/json
-   *     responses:
-   *       200:
-   *         description: An array of Datasets
-   *         schema:
-   *           type: array
-   *           items:
-   *             $ref: '#/definitions/Dataset'
-   *     parameters:
-   *       - $ref: "#/parameters/term"
-   */
-
-  app.get("/api/v1/search/:term", async (req, res) => {
-    if (req.query && req.query.display == "tsv") {
-      res.setHeader("content-type", "text/tab-separated-values");
-      today = new Date().toISOString().substring(0, 10).replace(/-/g, "");
-      res.setHeader(
-        "content-disposition",
-        `attachment; filename=BlobToolKit_${today}.tsv`
-      );
-      res.send(tabulate(req.params.term));
-    } else {
+    app.get("/api/v1/search/tree/available", async (req, res) => {
       res.setHeader("content-type", "application/json");
-      res.json(search(req.params.term));
-    }
-  });
+      res.json(tree);
+    });
+    /**
+     * @swagger
+     * /api/v1/search/autocomplete/{term}:
+     *   get:
+     *     tags:
+     *       - Search
+     *     description: Returns an array of available search terms
+     *     produces:
+     *       - application/json
+     *     responses:
+     *       200:
+     *         description: A tree object
+     *         schema:
+     *           type: array
+     *           items:
+     *             $ref: '#/definitions/Tree'
+     *     parameters:
+     *       - $ref: "#/parameters/term"
+     */
 
-  /**
-   * @swagger
-   * /api/v1/search/reload/{key}:
-   *   get:
-   *     tags:
-   *       - Search
-   *     description: Reload the search index
-   *     produces:
-   *       - application/json
-   *     responses:
-   *       200:
-   *         description: Request status
-   *         schema:
-   *           type: object
-   *     parameters:
-   *       - $ref: "#/parameters/key"
-   */
+    app.get("/api/v1/search/autocomplete/:term", async (req, res) => {
+      res.setHeader("content-type", "application/json");
+      res.json(autocomplete(req.params.term));
+    });
+    /**
+     * @swagger
+     * /api/v1/search/{term}:
+     *   get:
+     *     tags:
+     *       - Search
+     *     description: Returns an array of datasets matching a search term
+     *     produces:
+     *       - application/json
+     *     responses:
+     *       200:
+     *         description: An array of Datasets
+     *         schema:
+     *           type: array
+     *           items:
+     *             $ref: '#/definitions/Dataset'
+     *     parameters:
+     *       - $ref: "#/parameters/term"
+     */
 
-  app.get("/api/v1/search/reload/:key", async (req, res) => {
-    res.setHeader("content-type", "application/json");
-    if (req.params.key == config.reloadKey) {
-      loadIndex();
-      res.json({ status: "updated" });
-    } else {
-      res.json({ status: "invalid key" });
-    }
-  });
+    app.get("/api/v1/search/:term", async (req, res) => {
+      if (req.query && req.query.display == "tsv") {
+        res.setHeader("content-type", "text/tab-separated-values");
+        today = new Date().toISOString().substring(0, 10).replace(/-/g, "");
+        res.setHeader(
+          "content-disposition",
+          `attachment; filename=BlobToolKit_${today}.tsv`
+        );
+        res.send(tabulate(req.params.term));
+      } else {
+        res.setHeader("content-type", "application/json");
+        res.json(search(req.params.term));
+      }
+    });
+
+    /**
+     * @swagger
+     * /api/v1/search/reload/{key}:
+     *   get:
+     *     tags:
+     *       - Search
+     *     description: Reload the search index
+     *     produces:
+     *       - application/json
+     *     responses:
+     *       200:
+     *         description: Request status
+     *         schema:
+     *           type: object
+     *     parameters:
+     *       - $ref: "#/parameters/key"
+     */
+
+    app.get("/api/v1/search/reload/:key", async (req, res) => {
+      res.setHeader("content-type", "application/json");
+      if (req.params.key == config.reloadKey) {
+        loadIndex();
+        res.json({ status: "updated" });
+      } else {
+        res.json({ status: "invalid key" });
+      }
+    });
+  },
 };

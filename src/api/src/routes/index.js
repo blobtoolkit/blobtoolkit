@@ -8,13 +8,14 @@ const searchRoutes = require("./search_routes");
 const summaryRoutes = require("./summary_routes");
 const swaggerRoutes = require("./swagger_routes");
 
-module.exports = function (app, db) {
+module.exports = async function (app, db) {
   apiRoutes(app, db);
   datasetRoutes(app, db);
   fieldRoutes(app, db);
   identifierRoutes(app, db);
   imageRoutes(app, db);
-  searchRoutes(app, db);
+  searchRoutes.routes(app, db);
+  // sliceRoutes(app, db);
   summaryRoutes(app, db);
   swaggerRoutes(app, db);
 };

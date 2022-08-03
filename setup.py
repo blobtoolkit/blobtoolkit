@@ -177,16 +177,16 @@ setup(
         "fastjsonschema==2.15.3",
         "geckodriver-autoinstaller==0.1.0",
         "psutil==5.9.0",
-        "pysam==0.18.0",
-        "pyvirtualdisplay==2.2",
+        "pysam==0.19.1",
+        "pyvirtualdisplay==3.0",
         "pyyaml",
-        "selenium==4.1.0",
+        "selenium==4.3.0",
         "tolkein>=0.4.0",
-        "tqdm==4.62.3",
+        "tqdm==4.64.0",
         "ujson>=3.0.0",
         # Additional pipeline dependencies
         "defusedxml==0.7.1",
-        "requests==2.27.1",
+        "requests==2.28.1",
         "snakemake==6.15.3",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
