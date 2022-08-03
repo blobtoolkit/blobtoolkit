@@ -178,7 +178,7 @@ setup(
         "geckodriver-autoinstaller==0.1.0",
         "psutil==5.9.0",
         "pysam==0.19.1",
-        "pyvirtualdisplay==2.2",
+        "pyvirtualdisplay==3.0",
         "pyyaml",
         "selenium==4.3.0",
         "tolkein>=0.4.0",

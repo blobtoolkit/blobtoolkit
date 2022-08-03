@@ -5,7 +5,7 @@ psutil==5.9.0
 pysam==0.19.1
 pytest==6.2.5
 pytest_mock==3.7.0
-pyvirtualdisplay==2.2
+pyvirtualdisplay==3.0
 PyYAML==6.0
 selenium==4.3.0
 setuptools==49.2.0
