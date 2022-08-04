@@ -51,10 +51,10 @@ jobs:
           pip install setuptools wheel twine
       - name: Build and publish
         run: |
-          mkdir -p src/blobtools/bin
-          cp dist/artifact/*-linux src/blobtools/bin/
+          mkdir -p src/data/bin
+          cp dist/artifact/*-linux src/data/bin/
           rm -r dist/artifact
-          chmod 755 src/blobtools/bin/*
+          chmod 755 src/data/bin/*
           ./pip_install_latest.sh manylinux2014_x86_64
           blobtools -v
       - uses: actions/upload-artifact@v2
@@ -78,10 +78,10 @@ jobs:
           pip install setuptools wheel twine
       - name: Build and publish
         run: |
-          mkdir -p src/blobtools/bin
-          cp dist/artifact/*-macos src/blobtools/bin/
+          mkdir -p src/data/bin
+          cp dist/artifact/*-macos src/data/bin/
           rm -r dist/artifact
-          chmod 755 src/blobtools/bin/*
+          chmod 755 src/data/bin/*
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_arm64
           ./pip_install_latest.sh macosx_10_9_x86_64
@@ -107,10 +107,10 @@ jobs:
           pip install setuptools wheel twine
       - name: Build and publish
         run: |
-          mkdir -p src/blobtools/bin
-          cp dist/artifact/*.exe src/blobtools/bin/
+          mkdir -p src/data/bin
+          cp dist/artifact/*.exe src/data/bin/
           rm -r dist/artifact
-          chmod 755 src/blobtools/bin/*
+          chmod 755 src/data/bin/*
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name win_amd64
           ls dist
       - uses: actions/upload-artifact@v2
