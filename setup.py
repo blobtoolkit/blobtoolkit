@@ -17,7 +17,7 @@ from os.path import dirname
 from os.path import isfile
 from os.path import join
 
-from setuptools import find_packages
+from setuptools import find_namespace_packages
 from setuptools import setup
 
 # from setuptools.command.install import install
@@ -159,7 +159,11 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(where="src"),  # Required
+    # packages=find_packages(where="src"),  # Required
+    packages=find_namespace_packages(
+        where="src",
+        exclude=["blobtools.bin", "blobtools.example", "blobtools.schema",],
+    ),
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
@@ -222,22 +226,22 @@ setup(
             "view = blobtools.lib.view:cli",
         ],
         "btk.subcmd": [
-            "pipeline = btk_pipeline:main",
+            "pipeline = pipeline:main",
             # "blobtools = blobtools:cli",
         ],
         "pipeline.subcmd": [
-            "data = btk_pipeline.lib.data:main",
-            "run = btk_pipeline.lib.run:main",
-            "add-summary-to-metadata = btk_pipeline.lib.add_summary_to_metadata:main",
-            "chunk-fasta = btk_pipeline.lib.chunk_fasta:main",
-            "count-busco-genes = btk_pipeline.lib.count_busco_genes:main",
-            "extract-busco-genes = btk_pipeline.lib.extract_busco_genes:main",
-            "generate-config = btk_pipeline.lib.generate_config:main",
-            "generate-static-images = btk_pipeline.lib.generate_static_images:main",
-            "resume-pipeline = btk_pipeline.lib.resume_pipeline:main",
-            "transfer-completed = btk_pipeline.lib.transfer_completed:main",
-            "unchunk-blast = btk_pipeline.lib.unchunk_blast:main",
-            "window-stats = btk_pipeline.lib.window_stats:main",
+            "data = pipeline.lib.data:main",
+            "run = pipeline.lib.run:main",
+            "add-summary-to-metadata = pipeline.lib.add_summary_to_metadata:main",
+            "chunk-fasta = pipeline.lib.chunk_fasta:main",
+            "count-busco-genes = pipeline.lib.count_busco_genes:main",
+            "extract-busco-genes = pipeline.lib.extract_busco_genes:main",
+            "generate-config = pipeline.lib.generate_config:main",
+            "generate-static-images = pipeline.lib.generate_static_images:main",
+            "resume-pipeline = pipeline.lib.resume_pipeline:main",
+            "transfer-completed = pipeline.lib.transfer_completed:main",
+            "unchunk-blast = pipeline.lib.unchunk_blast:main",
+            "window-stats = pipeline.lib.window_stats:main",
         ],
     },
     project_urls={

@@ -259,14 +259,17 @@ def main(args):
     """Entry point for validator."""
     script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     schema_level = "basic" if args["--basic"] else "meta"
-    schema = os.path.join(script_dir, "schema", "%s.schema.json" % schema_level)
+    schema_dir = os.path.join(os.path.dirname(script_dir), "data", "schema")
+    schema = os.path.join(schema_dir, "%s.schema.json" % schema_level)
     file = args["DIRECTORY"]
     if os.path.isdir(file):
         file = os.path.join(file, "meta.json")
     if not os.path.isfile(file):
         if args["--example"]:
             print("Validating example file.")
-            file = os.path.join(script_dir, "example", "FXWY01", "meta.json")
+            file = os.path.join(
+                os.path.dirname(script_dir), "data", "example", "FXWY01", "meta.json"
+            )
         else:
             show_error("%s not found" % file, 1)
     validate = fastjsonschema.compile(load_json_file(schema, True))
@@ -289,14 +292,11 @@ def main(args):
     data_schemas = {}
     for type in ["array", "category", "identifier", "multiarray", "variable"]:
         type_schema = os.path.join(
-            script_dir, "schema", "subschemas", "%s.meta.schema.json" % type
+            schema_dir, "subschemas", "%s.meta.schema.json" % type
         )
         validators[type] = fastjsonschema.compile(load_json_file(type_schema, True))
         data_schemas[type] = load_json_file(
-            os.path.join(
-                script_dir, "schema", "subschemas", "%s.data.schema.json" % type
-            ),
-            True,
+            os.path.join(schema_dir, "subschemas", "%s.data.schema.json" % type), True,
         )
 
     for field in meta["fields"]:

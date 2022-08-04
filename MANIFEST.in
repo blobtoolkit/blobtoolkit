@@ -12,10 +12,10 @@ recursive-exclude tests *
 recursive-exclude conda-recipe *
 recursive-exclude ci *
 recursive-exclude tests *
-recursive-include src/blobtools/example *
-recursive-include src/blobtools/schema *
-recursive-include src/blobtools/bin *
-recursive-include src/btk_pipeline *.smk
-recursive-include src/btk_pipeline/rules *
-recursive-include src/btk_pipeline/lib *
+recursive-include src/data/example *
+recursive-include src/data/schema *
+recursive-include src/data/bin *
+recursive-include src/pipeline *.smk
+recursive-include src/pipeline/rules *
+recursive-include src/pipeline/lib *
 recursive-include src/btk/lib *
