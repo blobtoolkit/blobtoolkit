@@ -288,6 +288,9 @@ def create_filtered_dataset(dataset_meta, indir, outdir, indices):
 def main(args):
     """Entrypoint for blobtools filter."""
     meta = fetch_metadata(args["DIRECTORY"], **args)
+    if not meta.list_fields():
+        print("ERROR: '%s' is not a valid BlobDir" % args["DIRECTORY"])
+        sys.exit(1)
     params = parse_params(args, meta)
     identifiers = fetch_field(args["DIRECTORY"], "identifiers", meta)
     indices = [index for index, value in enumerate(identifiers.values)]
