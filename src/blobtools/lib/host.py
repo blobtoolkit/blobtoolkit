@@ -137,7 +137,7 @@ def find_binary(tool):
         return default_binaries[tool]
     executable = binaries[tool]
     executable_path = os.path.join(
-        os.path.basename(script_dir), "data", "bin", executable
+        os.path.dirname(script_dir), "data", "bin", executable
     )
     if os.path.isfile(executable_path):
         return executable_path
