@@ -1,5 +1,6 @@
 const fs = require("fs");
 const config = require("../../src/config/main");
+const logError = require("../functions/logger").logError;
 const dataDirectory = config.filePath;
 const readYaml = require("../functions/io").readYaml;
 const readYamlSync = require("../functions/io").readYamlSync;
@@ -278,7 +279,8 @@ const loadIndex = async () => {
     index = newIndex;
     keys = newKeys;
     status = "OK";
-  } catch (err) {
+  } catch (message) {
+    logError({ message });
     status = "NOT OK";
   }
 };

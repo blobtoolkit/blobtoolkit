@@ -70,4 +70,6 @@ module.exports = {
   use_default: process.env.BTK_USE_DEFAULT_LINKS || false,
   disableHostCheck: String(process.env.BTK_DISABLE_HOST_CHECK) === "true",
   aboutUrl: process.env.BTK_ABOUT_URL || "http://blobtoolkit.genomehubs.org",
+  accessLog: process.env.BTK_ACCESS_LOG || "./logs/access.log",
+  errorLog: process.env.BTK_ERROR_LOG || "./logs/error.log",
 };
