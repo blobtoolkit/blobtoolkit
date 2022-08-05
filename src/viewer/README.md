@@ -1,4 +1,4 @@
-# BlobToolKit Viewer (v3.3.1)
+# BlobToolKit Viewer (v3.3.2)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1134794.svg)](https://doi.org/10.5281/zenodo.1134794)
 
