@@ -1,6 +1,9 @@
 const Promise = require("promise");
 const fs = require("fs");
+const fsPromises = fs.promises;
+const util = require("util");
 const zlib = require("zlib");
+const gunzip = util.promisify(zlib.gunzip);
 const yaml = require("js-yaml");
 const Path = require("path");
 const mkdirp = require("mkdirp");
@@ -65,7 +68,7 @@ const readYaml = async (path) => {
     exists = await fileExists(abs_path);
   }
   if (exists) {
-    let raw = fs.readFileSync(abs_path);
+    let raw = await fsPromises.readFile(abs_path);
     return yaml.load(raw);
     // return read.sync(abs_path);
   } else {
@@ -74,8 +77,9 @@ const readYaml = async (path) => {
     }
     exists = await fileExists(abs_path);
     if (exists) {
-      let raw = fs.readFileSync(abs_path);
-      return yaml.load(zlib.gunzipSync(raw));
+      let raw = await fsPromises.readFile(abs_path);
+      let data = await gunzip(raw);
+      return yaml.load(data);
     }
   }
   return undefined;

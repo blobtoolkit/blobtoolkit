@@ -1,4 +1,5 @@
 const fs = require("fs");
+const fsPromises = fs.promises;
 const config = require("../../src/config/main");
 const logError = require("../functions/logger").logError;
 const dataDirectory = config.filePath;
@@ -38,7 +39,7 @@ const parseMeta = (obj) => {
   return meta;
 };
 
-const readMeta = (dir, md) => {
+const readMeta = async (dir, md) => {
   md = md || [];
   versions = {};
   md.forEach((o, i) => {
@@ -47,16 +48,17 @@ const readMeta = (dir, md) => {
     }
     versions[o.prefix][o.revision] = i;
   });
-  let files = fs.readdirSync(dir);
-  files.forEach((file) => {
+  let files = await fsPromises.readdir(dir);
+  for (let file of files) {
     let path = dir + "/" + file;
-    if (fs.statSync(path).isDirectory()) {
-      readMeta(path, md);
+    let stat = await fsPromises.stat(path);
+    if (stat.isDirectory()) {
+      await readMeta(path, md);
     } else if (
       (file == "meta.json" || file == "meta.json.gz") &&
-      fs.statSync(path).isFile()
+      stat.isFile()
     ) {
-      let dsMeta = parseMeta(readYamlSync(path));
+      let dsMeta = parseMeta(await readYaml(path));
       dsMeta.id = dir.replace(/^.+\//, "");
       if (!dsMeta.hasOwnProperty("revision")) {
         let [prefix, revision] = dsMeta.id.split(".");
@@ -68,7 +70,7 @@ const readMeta = (dir, md) => {
           sumpath += ".gz";
         }
         try {
-          let summary = readYamlSync(sumpath);
+          let summary = await readYaml(sumpath);
           if (summary && summary.hasOwnProperty("summaryStats")) {
             dsMeta.summaryStats = summary.summaryStats;
           }
@@ -84,11 +86,11 @@ const readMeta = (dir, md) => {
         md[versions[dsMeta.prefix][version]].latest = latest;
       });
     }
-  });
+  }
   return md;
 };
 
-const listMeta = (dir, { md, meta }) => {
+const listMeta = async (dir, { md, meta }) => {
   md = md || meta.slice() || [];
   versions = {};
   md.forEach((o, i) => {
@@ -97,14 +99,15 @@ const listMeta = (dir, { md, meta }) => {
     }
     versions[o.prefix][o.revision] = i;
   });
-  let files = fs.readdirSync(dir);
-  files.forEach((file) => {
+  let files = await fsPromises.readdir(dir);
+  for (let file of files) {
     let path = dir + "/" + file;
-    if (fs.statSync(path).isDirectory()) {
-      listMeta(path, { md });
+    let stat = await fsPromises.stat(path);
+    if (stat.isDirectory()) {
+      await listMeta(path, { md });
     } else if (
       (file == "meta.json" || file == "meta.json.gz") &&
-      fs.statSync(path).isFile()
+      stat.isFile()
     ) {
       let id = dir.replace(/^.+\//, "");
       let [prefix, revision] = id.split(".");
@@ -132,7 +135,7 @@ const listMeta = (dir, { md, meta }) => {
         }
       });
     }
-  });
+  }
   return md;
 };
 
@@ -260,7 +263,7 @@ const loadIndex = async () => {
   // TODO: support cancelling this indexing if called again before finished
   // Load dataset IDs first to get an index ready quickly
   try {
-    let newMeta = listMeta(dataDirectory, { meta });
+    let newMeta = await listMeta(dataDirectory, { meta });
     let newIndex = generateIndex(newMeta);
     let newKeys = Object.keys(newIndex.values);
     meta = newMeta;
@@ -268,7 +271,7 @@ const loadIndex = async () => {
     keys = newKeys;
     // Load metadata into full index
     status = "INDEXING";
-    newMeta = readMeta(dataDirectory);
+    newMeta = await readMeta(dataDirectory);
     newIndex = generateIndex(newMeta);
     newKeys = Object.keys(newIndex.values);
     if (config.dataset_table) {
