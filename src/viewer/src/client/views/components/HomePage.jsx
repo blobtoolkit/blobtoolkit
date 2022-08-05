@@ -2,12 +2,11 @@ import FindDatasets from "./FindDatasets";
 import React from "react";
 import Search from "./Search";
 import { connect } from "react-redux";
+import { datasetTable } from "../reducers/api";
 import figure1 from "./img/figure1.jpg";
 import figure2 from "./img/figure2.jpg";
 import hexBlur from "./img/hex_blur.jpg";
 import styles from "./HomePage.scss";
-
-const dataset_table = DATASET_TABLE || false;
 
 export default class HomePage extends React.Component {
   constructor(props) {
@@ -28,8 +27,8 @@ export default class HomePage extends React.Component {
           <h1>BlobToolKit Viewer</h1>
           <p>Interactive visualisation of genomic datasets.</p>
         </div>
-        {dataset_table && <FindDatasets />}
-        {!dataset_table && (
+        {datasetTable && <FindDatasets />}
+        {!datasetTable && (
           <span className={styles.no_table}>
             Search datasets to begin (search 'all' to show all available
             datasets).

@@ -6,12 +6,18 @@ const BTK_API_URL =
   process.env.BTK_API_URL || `http://localhost:${BTK_API_PORT}/api/v1`;
 const BTK_GA_ID = process.env.BTK_GA_ID || "UA-000000-01";
 const BTK_GDPR_URL = process.env.BTK_GDPR_URL || undefined;
+const BTK_DATASET_TABLE = process.env.BTK_DATASET_TABLE || undefined;
+const BTK_TARGET_TREE = process.env.BTK_TARGET_TREE || undefined;
+const BTK_MESSAGE = process.env.BTK_MESSAGE || undefined;
 const app = express();
 
 const ENV = {
   BTK_API_URL,
   BTK_GA_ID,
   BTK_GDPR_URL,
+  BTK_DATASET_TABLE,
+  BTK_TARGET_TREE,
+  BTK_MESSAGE,
 };
 
 // set the view engine to ejs

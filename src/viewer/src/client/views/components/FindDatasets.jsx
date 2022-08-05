@@ -6,6 +6,7 @@ import {
   toggleHash,
   updatePathname,
 } from "../reducers/location";
+import { datasetTable, message } from "../reducers/api";
 import {
   fetchMeta,
   getAvailableDatasetIds,
@@ -25,9 +26,6 @@ import ToolTips from "./ToolTips";
 import { connect } from "react-redux";
 import styles from "./Layout.scss";
 
-const dataset_table = DATASET_TABLE || false;
-const message = MESSAGE || false;
-
 const DatasetFinder = ({
   searchTerm,
   selectedDataset,
@@ -37,7 +35,7 @@ const DatasetFinder = ({
   onDatasetMount,
   onDatasetClick,
 }) => {
-  let css = dataset_table ? styles.fill_parent : "";
+  let css = datasetTable ? styles.fill_parent : "";
   return (
     <div className={css}>
       <Search />
@@ -51,7 +49,7 @@ const DatasetFinder = ({
           {datasetIds.length + ' datasets match "' + searchTerm + '"'}:
         </span>
       ) : null}
-      {dataset_table && <DatasetTable onDatasetClick={onDatasetClick} />}
+      {datasetTable && <DatasetTable onDatasetClick={onDatasetClick} />}
       {message && (
         <span>
           <hr />
