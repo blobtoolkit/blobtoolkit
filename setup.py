@@ -191,7 +191,7 @@ setup(
         # Additional pipeline dependencies
         "defusedxml==0.7.1",
         "requests==2.28.1",
-        "snakemake==6.15.3",
+        "snakemake==7.14.0",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
