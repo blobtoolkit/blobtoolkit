@@ -273,7 +273,7 @@ export const datasetSummaries = createSelector(
           let [lineage, field] = key.split("-busco-");
           colInfo[key] = Object.assign({}, colInfo["busco"]);
           if (lineage) {
-            if (!lineage.endsWith("_odb9")) lineage += "_odb9";
+            // if (!lineage.endsWith("_odb9")) lineage += "_odb9";
             colInfo[key].title = lineage + " " + buscoFields[field];
           } else {
             colInfo[key].title = colInfo["busco"].title(
