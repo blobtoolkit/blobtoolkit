@@ -2,14 +2,10 @@ Aim: To create busco subsets with only a few busco genes per lineage for pipelin
 
 Create a list of the lineages for which you want to make subsets:
 ```
-echo 'carnivora_odb10
-laurasiatheria_odb10
-eutheria_odb10
-mammalia_odb10
-tetrapoda_odb10
-vertebrata_odb10
-metazoa_odb10
-eukaryota_odb10' > lineages.txt
+echo 'metazoa_odb10
+eukaryota_odb10
+bacteria_odb10
+archaea_odb10' > lineages.txt
 ```
 
 Now, for each lineage, copy a subset of files over, and a subset of genes for each lineage:
