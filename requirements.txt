@@ -4,7 +4,7 @@ geckodriver-autoinstaller==0.1.0
 psutil==5.9.0
 pysam==0.19.1
 pytest==6.2.5
-pytest_mock==3.7.0
+pytest_mock==3.9.0
 pyvirtualdisplay==3.0
 PyYAML==6.0
 selenium==4.3.0
