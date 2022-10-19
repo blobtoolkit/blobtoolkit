@@ -131,18 +131,23 @@ def find_busco_lineages(ancestors):
 
 
 def fetch_file(url, filename):
-    """fetch a remote file using aria2."""
+    """fetch a remote file using curl."""
     filepath = Path(filename)
     if filepath.is_file():
         LOGGER.info("File exists, not overwriting")
         return
     cmd = [
-        "aria2c",
-        "-q",
-        "-d",
-        filepath.parent,
+        "curl",
+        "-L",
+        "-s",
+        "--connect-timeout",
+        "30",
+        "--retry",
+        "5",
+        "--retry-delay",
+        "5",
         "-o",
-        filepath.name,
+        "%s/%s" % (filepath.parent, filepath.name),
         url,
     ]
     run(cmd)
