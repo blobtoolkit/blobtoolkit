@@ -66,6 +66,8 @@ To use a chromium-based browser (e.g. Google Chrome) in place of firefox, add `-
 blobtools view --view snail --host https://blobtoolkit.genomehubs.org --driver chromium mSciVul1_1
 ```
 
+See the [tutorial](https://blobtoolkit.genomehubs.org/blobtools2/blobtools2-tutorials/) for details.
+
 ## Docker images
 
 A set of Docker images are available from dockerhub:
