@@ -180,7 +180,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "chromedriver-binary-auto==0.1.1",
+        "chromedriver-binary-auto==0.2.1",
         "docopt>=0.6.2",
         "fastjsonschema==2.15.3",
         "geckodriver-autoinstaller==0.1.0",
