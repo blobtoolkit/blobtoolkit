@@ -162,7 +162,11 @@ setup(
     # packages=find_packages(where="src"),  # Required
     packages=find_namespace_packages(
         where="src",
-        exclude=["blobtools.bin", "blobtools.example", "blobtools.schema",],
+        exclude=[
+            "blobtools.bin",
+            "blobtools.example",
+            "blobtools.schema",
+        ],
     ),
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -191,7 +195,7 @@ setup(
         # Additional pipeline dependencies
         "defusedxml==0.7.1",
         "requests==2.28.1",
-        "snakemake==6.15.3",
+        "snakemake==7.16.1",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
@@ -214,7 +218,10 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": ["blobtools = blobtools:cli", "btk = btk:cli",],
+        "console_scripts": [
+            "blobtools = blobtools:cli",
+            "btk = btk:cli",
+        ],
         "blobtools.subcmd": [
             "add = blobtools.lib.add:cli",
             "create = blobtools.lib.add:cli",
