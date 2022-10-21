@@ -230,20 +230,21 @@ export const getFilteredBarsForFieldId = createFilteredBarSelectorForFieldId(
 );
 
 const createPlainCategoryListSelectorForFieldId = byIdSelectorCreator();
-export const getPlainCategoryListForFieldId = createPlainCategoryListSelectorForFieldId(
-  _getFieldIdAsMemoKey,
-  _getFieldIdAsMemoKey,
-  getBinsForFieldId,
-  getColorPalette,
-  getMainPlot,
-  (fieldId, bins = [], palette, plot) => {
-    bins.forEach((b, i) => {
-      b.color =
-        fieldId == plot.axes.cat ? palette.colors[i] : "rgb(215, 205, 204)";
-    });
-    return { bins, plot };
-  }
-);
+export const getPlainCategoryListForFieldId =
+  createPlainCategoryListSelectorForFieldId(
+    _getFieldIdAsMemoKey,
+    _getFieldIdAsMemoKey,
+    getBinsForFieldId,
+    getColorPalette,
+    getMainPlot,
+    (fieldId, bins = [], palette, plot) => {
+      bins.forEach((b, i) => {
+        b.color =
+          fieldId == plot.axes.cat ? palette.colors[i] : "rgb(215, 205, 204)";
+      });
+      return { bins, plot };
+    }
+  );
 
 const createCategoryListSelectorForFieldId = byIdSelectorCreator();
 

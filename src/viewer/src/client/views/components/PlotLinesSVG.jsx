@@ -306,7 +306,6 @@ class LinesSVG extends React.Component {
                 fill="none"
                 strokeOpacity={0.4}
                 strokeLinejoin="round"
-                fill="none"
                 d={boundary}
                 onPointerDown={(e) => this.handleClick(e, group.id)}
               />

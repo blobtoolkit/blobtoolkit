@@ -58,6 +58,7 @@ const sets = (set) => {
   tips.hexShape = { name: "plot hexagonal bins", settingsMenu: 1 };
   tips.circleShape = { name: "plot points as circles", settingsMenu: 1 };
   tips.lineShape = { name: "plot connected windows", settingsMenu: 1 };
+  tips.gridShape = { name: "plot grid", settingsMenu: 1 };
   tips.kiteShape = { name: "plot kite shapes", settingsMenu: 1 };
   tips.max = { name: "maximum z-value", settingsMenu: 1 };
   tips.min = { name: "minimum z-value", settingsMenu: 1 };

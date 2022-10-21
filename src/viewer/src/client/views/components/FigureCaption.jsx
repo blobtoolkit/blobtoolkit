@@ -117,6 +117,7 @@ class Caption extends Component {
         ) {
           caption += `. Circles are sized in proportion to ${record} ${z} `;
         } else if (this.props.plotShape == "lines") {
+        } else if (this.props.plotShape == "grid") {
         } else {
           caption += ` and binned at a resolution of ${this.props.binned.grid.res} divisions on each axis`;
           caption += `. Coloured ${shape}s within each bin are sized in proportion to the ${reducer} of individual ${record} ${z}s `;

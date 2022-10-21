@@ -85,6 +85,7 @@ import fontSizeIcon from "./svg/fontSize.svg";
 import { getAxisTitle } from "../reducers/plotData";
 import { getFields } from "../reducers/field";
 import { getMainPlotData } from "../reducers/plotData";
+import gridIcon from "./svg/gridShape.svg";
 import hexIcon from "./svg/hexShape.svg";
 import invertIcon from "./svg/invert.svg";
 import kiteIcon from "./svg/kiteShape.svg";
@@ -278,13 +279,20 @@ class DisplayMenu extends React.Component {
                 onIconClick={() => onSelectShape("lines")}
               />
             )}
+            {fields.gc_windows && records <= threshold && (
+              <SVGIcon
+                sprite={gridIcon}
+                active={shape == "grid"}
+                onIconClick={() => onSelectShape("grid")}
+              />
+            )}
             <SVGIcon
               sprite={kiteIcon}
               active={shape == "kite"}
               onIconClick={() => onSelectShape("kite")}
             />
           </MenuDisplaySimple>
-          {shape == "lines" && windowSizes && (
+          {(shape == "lines" || shape == "grid") && windowSizes && (
             <MenuDisplaySimple name="window size">
               {windowSizes.map((obj) => (
                 <TextIcon

@@ -35,6 +35,7 @@ import { datasetColumns } from "./datasetTable";
 import { getColorPalette } from "./color";
 import { getDatasetID } from "./location";
 import { getFilteredList } from "./filter";
+import { getIdentifiers } from "./identifiers";
 import { getQueryValue } from "./location";
 import store from "../store";
 
@@ -879,6 +880,262 @@ export const getLinesPlotData = createSelector(
     }
     let range = [min, max];
     return { coords, range, colors: palette.colors };
+  }
+);
+
+export const getPanelsPlotData = createSelector(
+  getWindowPlotData,
+  getFilteredList,
+  getFilteredDataForX,
+  getIdentifiers,
+  getTransformFunction,
+  getZScale,
+  getPlotResolution,
+  getPlotScale,
+  getWindowBinsForCat,
+  getColorPalette,
+  (
+    plotData,
+    list,
+    xData,
+    identifiers,
+    transform,
+    scale,
+    res,
+    plotScale,
+    bins,
+    palette
+  ) => {
+    if (!plotData) return {};
+    let plotSize = 1300;
+    if (
+      plotData.axes.x.values.length == 0 ||
+      plotData.axes.y.values.length == 0 ||
+      plotData.axes.z.values.length == 0 ||
+      plotData.axes.cat.values.length == 0
+    ) {
+      return { coords: [] };
+    }
+
+    let len = Math.max(
+      plotData.axes.x.values.length,
+      plotData.axes.y.values.length,
+      plotData.axes.z.values.length
+    );
+
+    let nCols = Math.floor(Math.sqrt(len));
+    let nRows = Math.ceil(len / nCols);
+    let colWidths = [];
+    let colPad = 30;
+    let rowPad = 30;
+    for (let i = 0; i < len; i += nRows) {
+      colWidths.push(Math.max(...xData.values.slice(i, i + nRows)));
+    }
+    let cellWidth =
+      (colWidths[0] / colWidths.reduce((a, b) => a + b)) *
+      (plotSize - colPad * (nCols - 1));
+    let cellHeight = (1 / nRows) * (plotSize - rowPad * (nRows - 1));
+    let xDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    for (let arr of plotData.axes.x.values) {
+      for (let val of arr) {
+        if (val > xDomain[1]) {
+          xDomain[1] = val;
+        }
+        if (val < xDomain[0]) {
+          xDomain[0] = val;
+        }
+      }
+    }
+    let yDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    for (let arr of plotData.axes.y.values) {
+      for (let val of arr) {
+        if (val > yDomain[1]) {
+          yDomain[1] = val;
+        }
+        if (val < yDomain[0]) {
+          yDomain[0] = val;
+        }
+      }
+    }
+    let coords = [];
+    let grid = [];
+    let scales = {};
+    let axes = ["x", "y", "z"];
+    let zScale = d3[scale]()
+      .domain(plotData.meta.z.range)
+      .range([2, (4 * plotSize) / nRows / res]);
+    axes.forEach((axis) => {
+      scales[axis] = plotData.meta[axis].xScale
+        ? plotData.meta[axis].xScale.copy()
+        : d3.scaleLinear().domain([0, 10]);
+      if (axis == "z") {
+        scales[axis] = d3.scaleSqrt().domain(scales[axis].domain());
+        scales[axis].type = "scaleSqrt";
+      } else {
+        if (plotData.meta[axis].xScale.hasOwnProperty("type")) {
+          scales[axis].type = plotData.meta[axis].xScale.type;
+        }
+      }
+      scales[axis].range([
+        0,
+        axis == "x" ? cellWidth : axis == "y" ? cellHeight : plotSize,
+      ]);
+      if (axis == "y") {
+        scales[axis].domain(yDomain);
+      }
+    });
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    let yClamp = Number.NEGATIVE_INFINITY;
+    if (plotData.meta.y.meta) {
+      let yClamp = plotData.meta.y.meta.clamp || Number.NEGATIVE_INFINITY;
+      let yMin = plotData.meta.y.meta.limit[0];
+      if (yClamp < yMin) {
+        yClamp = Number.NEGATIVE_INFINITY;
+      }
+    }
+    let xClamp = plotData.meta.x.meta.clamp || Number.NEGATIVE_INFINITY;
+    let xMin = plotData.meta.x.meta.limit[0];
+    if (xClamp < xMin) {
+      xClamp = Number.NEGATIVE_INFINITY;
+    }
+    let keys = {};
+    bins.forEach((bin, i) => {
+      bin.keys.forEach((key) => {
+        keys[key] = i;
+      });
+    });
+    axes = ["x", "y", "z", "cat"];
+    let offset = {};
+    let j = 0;
+    let row = 0;
+    for (let i = 0; i < len; i++) {
+      if (i == 0) {
+        offset = { x: 0, y: (cellHeight + rowPad) * (nRows - 1) };
+        row = 0;
+      } else if (i % nRows == 0) {
+        j = i / nRows;
+        offset.x += (cellWidth * colWidths[j - 1]) / colWidths[0];
+        offset.x += colPad;
+        offset.y = (cellHeight + rowPad) * (nRows - 1);
+        row = 0;
+      } else {
+        offset.y -= cellHeight + rowPad;
+        row++;
+      }
+      let xs = [];
+      let ys = [];
+      let zs = [];
+      let rs = [];
+      let cats = [];
+      let xsd = [];
+      let ysd = [];
+      let wins = Math.max(
+        plotData.axes.x.values[i].length,
+        plotData.axes.y.values[i].length,
+        plotData.axes.z.values[i].length
+        // plotData.axes.cat.values[i].length
+      );
+      let zSize = -1;
+      for (let j = 0; j < wins; j++) {
+        let values = {};
+        let sd = {};
+        let valid = true;
+        axes.forEach((axis) => {
+          if (
+            plotData.axes[axis].values[i].length == wins ||
+            (axis == "cat" && plotData.axes[axis].values[i].length == wins + 1)
+          ) {
+            values[axis] = plotData.axes[axis].values[i][j];
+            if (plotData.axes[axis].sd) {
+              sd[axis] = plotData.axes[axis].sd[i][j];
+            }
+          } else {
+            values[axis] = plotData.axes[axis].values[i][0];
+            if (plotData.axes[axis].sd) {
+              sd[axis] = plotData.axes[axis].sd[i][0];
+            }
+          }
+          if (isNaN(values[axis]) || values[axis] === undefined) {
+            valid = false;
+          }
+        });
+        if (!valid) {
+          continue;
+        }
+        // ensure last bin is not too small to plot
+        // if (values.z >= zSize) {
+        //   zSize = values.z;
+        // } else {
+        //   if (values.z < zSize * 0.75) {
+        //     break;
+        //   }
+        // }
+        values.y = values.y < yClamp ? scales.y(yMin) : scales.y(values.y);
+        values.x = values.x < xClamp ? scales.x(xMin) : scales.x(values.x);
+        values.cat = keys[values.cat];
+        if (transform) [values.x, values.y] = transform([values.x, values.y]);
+        xs.push(values.x + offset.x);
+        ys.push(plotSize - values.y - offset.y);
+        if (sd.x) {
+          sd.x = scales.x(scales.x.domain()[0] + sd.x);
+          xsd.push(sd.x);
+        }
+        if (sd.y) {
+          sd.y =
+            scales.y(scales.y.domain()[0] + sd.y) -
+            scales.y(scales.y.domain()[0]);
+          ysd.push(sd.y);
+        }
+        zs.push(values.z);
+        rs.push(zScale(values.z) * plotScale);
+        cats.push(values.cat);
+        max = Math.max(max, values.z);
+        min = Math.min(min, values.z);
+      }
+      if (xsd.length == 0) {
+        xsd = undefined;
+      }
+      if (ysd.length == 0) {
+        ysd = undefined;
+      }
+      coords.push({
+        id: list[i],
+        index: i,
+        x: xs,
+        y: ys,
+        z: zs,
+        r: rs,
+        cats: cats,
+        cat: keys[plotData.axes.mainCat.values[i]],
+        xsd,
+        ysd,
+      });
+      grid.push({
+        i,
+        col: j,
+        row,
+        x: offset.x,
+        y: plotSize - offset.y,
+        width: (cellWidth * colWidths[j]) / colWidths[0],
+        height: cellHeight,
+        label: identifiers[list[i]],
+        xDomain,
+        yDomain,
+        colWidth: colWidths[j],
+      });
+    }
+    let range = [min, max];
+    return {
+      coords,
+      range,
+      colors: palette.colors,
+      scales,
+      plotSize,
+      grid,
+      nCols,
+      nRows,
+    };
   }
 );
 // const weightedMeanSd = (values, weights, sumWeight, log) => {
