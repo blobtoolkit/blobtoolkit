@@ -178,7 +178,7 @@ class Snail extends React.Component {
 
   render() {
     if (!this.props.circular) return null;
-    let format = d3format(".2s");
+    let format = d3format(".3s");
     let pctFormat = d3format(".1%");
     let commaFormat = d3format(",");
     let side = 1050;
