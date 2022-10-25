@@ -33,7 +33,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { polygonHull as d3PolygonHull } from "d3-polygon";
 import { fetchRawData } from "../reducers/field";
-import { getPanelsPlotData } from "../reducers/plotData";
+import { getGridPlotData } from "../reducers/plotData";
 import { plotShapes } from "../reducers/plotStyles";
 
 const smoothLineX = d3Line()
@@ -66,9 +66,10 @@ export default class PlotGridSVG extends React.Component {
       catAxis: getCatAxis(state),
       zScale: getZScale(state),
       plotScale: getPlotScale(state),
+      plotStyle: "circle",
       windowSize: getWindowSize(state),
       errorBars: getErrorBars(state),
-      data: getPanelsPlotData(state),
+      data: getGridPlotData(state),
       showSelection: getSelectionDisplay(state),
       selectedRecords: getSelectedRecords(state),
     });
@@ -147,6 +148,8 @@ class LinesSVG extends React.Component {
     let scales = this.props.data.scales;
 
     let colors = this.props.data.colors;
+    let meta = this.props.data.meta;
+    let plotStyle = this.props.plotStyle;
     let paths = [];
     let boundaries = [];
     let selection = [];
@@ -196,34 +199,69 @@ class LinesSVG extends React.Component {
           //     />
           //   );
           // }
-          if (fg) {
-            selCircles.push(
-              <circle
-                key={`fg-${group.id}_${j}`}
-                cx={x}
-                cy={group.y[j]}
-                r={Math.max(group.r[j], 4)}
-                fill={color}
-                stroke={strokeColor}
-                strokeWidth={"1px"}
-                opacity={opacity}
-                // onPointerDown={(e) => this.handleClick(e, group.id)}
-              />
-            );
+          if (plotStyle == "circle") {
+            if (fg) {
+              selCircles.push(
+                <circle
+                  key={`fg-${group.id}_${j}`}
+                  cx={x}
+                  cy={group.y[j]}
+                  r={Math.max(group.r[j], 4)}
+                  fill={color}
+                  stroke={strokeColor}
+                  strokeWidth={"1px"}
+                  opacity={opacity}
+                  // onPointerDown={(e) => this.handleClick(e, group.id)}
+                />
+              );
+            } else {
+              groupCircles.push(
+                <circle
+                  key={`${group.id}_${j}`}
+                  cx={x}
+                  cy={group.y[j]}
+                  r={Math.max(group.r[j], 4)}
+                  fill={color}
+                  stroke={strokeColor}
+                  strokeWidth={"1px"}
+                  opacity={opacity}
+                  // onPointerDown={(e) => this.handleClick(e, group.id)}
+                />
+              );
+            }
+          } else {
+            if (fg) {
+              selCircles.push(
+                <rect
+                  key={`${group.id}_${j}`}
+                  x={x - grid[i].barWidth / 2}
+                  y={group.y[j]}
+                  width={grid[i].barWidth}
+                  height={grid[i].y - group.y[j]}
+                  fill={color}
+                  stroke={strokeColor}
+                  strokeWidth={`${Math.min(1, grid[i].barWidth / 10)}px`}
+                  // opacity={opacity}
+                  // onPointerDown={(e) => this.handleClick(e, group.id)}
+                />
+              );
+            } else {
+              groupCircles.push(
+                <rect
+                  key={`${group.id}_${j}`}
+                  x={x - grid[i].barWidth / 2}
+                  y={group.y[j]}
+                  width={grid[i].barWidth}
+                  height={grid[i].y - group.y[j]}
+                  fill={color}
+                  stroke={strokeColor}
+                  strokeWidth={`${Math.min(1, grid[i].barWidth / 10)}px`}
+                  // opacity={opacity}
+                  // onPointerDown={(e) => this.handleClick(e, group.id)}
+                />
+              );
+            }
           }
-          groupCircles.push(
-            <circle
-              key={`${group.id}_${j}`}
-              cx={x}
-              cy={group.y[j]}
-              r={Math.max(group.r[j], 4)}
-              fill={color}
-              stroke={strokeColor}
-              strokeWidth={"1px"}
-              opacity={opacity}
-              // onPointerDown={(e) => this.handleClick(e, group.id)}
-            />
-          );
         });
         groupCircles = groupCircles.concat(selCircles);
 
@@ -385,6 +423,7 @@ class LinesSVG extends React.Component {
               selected={selectedById[group.id]}
               handleClick={(e) => this.handleClick(e, group.id)}
               highlightColor={highlightColor}
+              meta={meta}
             />
           );
         }

@@ -883,7 +883,7 @@ export const getLinesPlotData = createSelector(
   }
 );
 
-export const getPanelsPlotData = createSelector(
+export const getGridPlotData = createSelector(
   getWindowPlotData,
   getFilteredList,
   getFilteredDataForX,
@@ -928,23 +928,39 @@ export const getPanelsPlotData = createSelector(
     let colWidths = [];
     let colPad = 30;
     let rowPad = 30;
-    for (let i = 0; i < len; i += nRows) {
-      colWidths.push(Math.max(...xData.values.slice(i, i + nRows)));
+    let xField = plotData.meta.x.meta.id;
+    let yField = plotData.meta.y.meta.id;
+    if (xField == "position" || xField == "proportion") {
+      for (let i = 0; i < len; i += nRows) {
+        colWidths.push(Math.max(...xData.values.slice(i, i + nRows)));
+      }
     }
-    let cellWidth =
-      (colWidths[0] / colWidths.reduce((a, b) => a + b)) *
-      (plotSize - colPad * (nCols - 1));
-    let cellHeight = (1 / nRows) * (plotSize - rowPad * (nRows - 1));
     let xDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    let i = 0;
+    let maxX = Number.NEGATIVE_INFINITY;
     for (let arr of plotData.axes.x.values) {
       for (let val of arr) {
-        if (val > xDomain[1]) {
-          xDomain[1] = val;
-        }
         if (val < xDomain[0]) {
           xDomain[0] = val;
         }
+        if (val > xDomain[1]) {
+          xDomain[1] = val;
+        }
+        if (val > maxX) {
+          maxX = val;
+        }
       }
+      if (xField != "position" && xField != "proportion") {
+        i++;
+        if (i == nRows) {
+          colWidths.push(maxX);
+          i = 0;
+          maxX = Number.NEGATIVE_INFINITY;
+        }
+      }
+    }
+    if (colWidths.length < nCols) {
+      colWidths.push(maxX);
     }
     let yDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
     for (let arr of plotData.axes.y.values) {
@@ -957,6 +973,11 @@ export const getPanelsPlotData = createSelector(
         }
       }
     }
+    let maxWidth = Math.max(...colWidths);
+    let cellWidth =
+      (maxWidth / colWidths.reduce((a, b) => a + b)) *
+      (plotSize - colPad * (nCols - 1));
+    let cellHeight = (1 / nRows) * (plotSize - rowPad * (nRows - 1));
     let coords = [];
     let grid = [];
     let scales = {};
@@ -981,7 +1002,16 @@ export const getPanelsPlotData = createSelector(
         axis == "x" ? cellWidth : axis == "y" ? cellHeight : plotSize,
       ]);
       if (axis == "y") {
+        if (yField == "position" || yField == "proportion") {
+          yDomain = scales[axis].domain();
+        }
         scales[axis].domain(yDomain);
+      }
+      if (axis == "x") {
+        if (xField == "position" || xField == "proportion") {
+          xDomain = scales[axis].domain();
+        }
+        scales[axis].domain(xDomain);
       }
     });
     let min = Number.POSITIVE_INFINITY;
@@ -1015,7 +1045,7 @@ export const getPanelsPlotData = createSelector(
         row = 0;
       } else if (i % nRows == 0) {
         j = i / nRows;
-        offset.x += (cellWidth * colWidths[j - 1]) / colWidths[0];
+        offset.x += (cellWidth * colWidths[j - 1]) / maxWidth;
         offset.x += colPad;
         offset.y = (cellHeight + rowPad) * (nRows - 1);
         row = 0;
@@ -1111,18 +1141,20 @@ export const getPanelsPlotData = createSelector(
         xsd,
         ysd,
       });
+      let width = (cellWidth * colWidths[j]) / maxWidth;
       grid.push({
         i,
         col: j,
         row,
         x: offset.x,
         y: plotSize - offset.y,
-        width: (cellWidth * colWidths[j]) / colWidths[0],
+        width,
         height: cellHeight,
         label: identifiers[list[i]],
         xDomain,
         yDomain,
         colWidth: colWidths[j],
+        barWidth: 2 * (xs[0] - offset.x),
       });
     }
     let range = [min, max];
@@ -1132,6 +1164,7 @@ export const getPanelsPlotData = createSelector(
       colors: palette.colors,
       scales,
       plotSize,
+      meta: plotData.meta,
       grid,
       nCols,
       nRows,

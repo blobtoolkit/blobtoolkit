@@ -61,31 +61,31 @@ const PlotOutline = ({
   handleClick,
   highlightColor,
   showSelection,
+  meta,
 }) => {
   let fontSize = plotText.axisTick.fontSize;
   let f = (d) => {
     if (d < 1 && d > 0.0001) {
       // && String(d).match(/^[0\.1]+$/)) {
-      return d;
+      return String(d).replace(/\.0+$/, "");
     }
-    // if (isPowerOfTen(d)) {
-    return d3Format(".2s")(d);
-    // }
+    if (isPowerOfTen(d)) {
+      return d3Format(".2s")(d);
+    }
     return "";
   };
   let g = (d) => {
-    if (d < 1 && d > 0.0001 && String(d).match(/^[0\.1]+$/)) {
-      return d;
+    if (d < 1 && d > 0.0001) {
+      return String(d).replace(/\.0+$/, "");
     }
-    return d3Format(".0s")(d);
+    return d3Format(".2s")(d).replace(/\.0+$/, "");
   };
   let xScale = scales.x.copy();
-  let fx = f;
-  // if (data.meta.x.meta.scale != "scaleLog") {
-  // fx = (d) => d;
-  // } else if (xRange[0] * 100 > xRange[1]) {
-  // fx = g;
-  // }
+  let fx = g;
+  let xRange = xScale.domain();
+  if (meta.x.meta.scale == "scaleLog" && xRange[0] * 100 <= xRange[1]) {
+    fx = f;
+  }
   xScale.range([0, width]);
   xScale.domain([xScale.domain()[0], colWidth]);
   let xBreak, xBreakAxis;
@@ -125,12 +125,12 @@ const PlotOutline = ({
   //   xScale.domain([data.meta.x.meta.clamp, xScale.domain()[1]]);
   // }
   let yScale = scales.y.copy();
-  let fy = f;
-  // if (data.meta.y.meta.scale != "scaleLog") {
-  // fy = (d) => d;
-  // } else if (yRange[0] * 100 > yRange[1]) {
-  // fy = g;
-  // }
+  let fy = g;
+
+  let yRange = yScale.domain();
+  if (meta.y.meta.scale == "scaleLog" && yRange[0] * 100 <= yRange[1]) {
+    fy = f;
+  }
   yScale.range([height, 0]);
   let yBreak, yBreakAxis;
   // if (
@@ -171,8 +171,8 @@ const PlotOutline = ({
   //   yScale.domain([data.meta.y.meta.clamp, yScale.domain()[1]]);
   // }
 
-  let xTicks = nCols == 1 ? 10 : nCols == 2 ? 5 : 4;
-  let yTicks = nRows == 1 ? 10 : nRows == 2 ? 5 : 4;
+  let xTicks = nCols == 1 ? 10 : nCols == 2 ? 5 : 3;
+  let yTicks = nRows == 1 ? 10 : nRows == 2 ? 5 : 3;
 
   return (
     <g transform={`translate(${x},${y - height})`}>
