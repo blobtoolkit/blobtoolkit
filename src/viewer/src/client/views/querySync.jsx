@@ -139,10 +139,20 @@ const mapDispatchToQuery = {
     payload: (k, v) => v,
     default: 1,
   },
+  plotStyle: {
+    type: "SET_PLOT_STYLE",
+    payload: (k, v) => v,
+    default: "histogram",
+  },
   plotGraphics: {
     type: "SET_PLOT_GRAPHICS",
     payload: (k, v) => v,
     default: "auto",
+  },
+  gridScale: {
+    type: "SET_GRID_SCALE",
+    payload: (k, v) => v,
+    default: "uniform",
   },
   svgThreshold: {
     type: "SET_SVG_THRESHOLD",

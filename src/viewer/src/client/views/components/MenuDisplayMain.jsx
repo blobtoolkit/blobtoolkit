@@ -9,6 +9,7 @@ import {
   choosePlotResolution,
   choosePlotScale,
   choosePlotShape,
+  choosePlotStyle,
   choosePngResolution,
   chooseSVGThreshold,
   chooseScaleTo,
@@ -28,6 +29,7 @@ import {
   getPlotResolution,
   getPlotScale,
   getPlotShape,
+  getPlotStyle,
   getPngResolution,
   getSVGThreshold,
   getScaleTo,
@@ -76,6 +78,7 @@ import ToolTips from "./ToolTips";
 import adjustIcon from "./svg/adjust.svg";
 import centerIcon from "./svg/center.svg";
 import circleIcon from "./svg/circleShape.svg";
+import circleStyleIcon from "./svg/circleStyle.svg";
 import { connect } from "react-redux";
 import countIcon from "./svg/count.svg";
 import { format as d3Format } from "d3-format";
@@ -87,14 +90,17 @@ import { getFields } from "../reducers/field";
 import { getMainPlotData } from "../reducers/plotData";
 import gridIcon from "./svg/gridShape.svg";
 import hexIcon from "./svg/hexShape.svg";
+import histogramStyleIcon from "./svg/histogramStyle.svg";
 import invertIcon from "./svg/invert.svg";
 import kiteIcon from "./svg/kiteShape.svg";
 import lineIcon from "./svg/lineShape.svg";
+import lineStyleIcon from "./svg/lineStyle.svg";
 import linearIcon from "./svg/linear.svg";
 import logIcon from "./svg/log.svg";
 import maxIcon from "./svg/max.svg";
 import meanIcon from "./svg/mean.svg";
 import minIcon from "./svg/min.svg";
+import mixedStyleIcon from "./svg/mixedStyle.svg";
 import { queryToStore } from "../querySync";
 import scaleIcon from "./svg/scale.svg";
 import sqrtIcon from "./svg/sqrt.svg";
@@ -145,6 +151,8 @@ class DisplayMenu extends React.Component {
       fields,
       plotScale,
       onChangePlotScale,
+      plotStyle,
+      onChangePlotStyle,
       onSelectView,
       onToggleStatic,
       pngResolution,
@@ -304,6 +312,30 @@ class DisplayMenu extends React.Component {
               ))}
             </MenuDisplaySimple>
           )}
+          {shape == "grid" && (
+            <MenuDisplaySimple name="plot style">
+              <SVGIcon
+                sprite={circleStyleIcon}
+                active={plotStyle == "circle"}
+                onIconClick={() => onChangePlotStyle("circle")}
+              />
+              <SVGIcon
+                sprite={lineStyleIcon}
+                active={plotStyle == "line"}
+                onIconClick={() => onChangePlotStyle("line")}
+              />
+              {/* <SVGIcon
+                sprite={mixedStyleIcon}
+                active={plotStyle == "mixed"}
+                onIconClick={() => onChangePlotStyle("mixed")}
+              /> */}
+              <SVGIcon
+                sprite={histogramStyleIcon}
+                active={plotStyle == "histogram"}
+                onIconClick={() => onChangePlotStyle("histogram")}
+              />
+            </MenuDisplaySimple>
+          )}
           {shape == "lines" && errorBarOptions && (
             <MenuDisplaySimple name="error bars">
               {errorBarOptions.map((obj) => (
@@ -317,23 +349,25 @@ class DisplayMenu extends React.Component {
             </MenuDisplaySimple>
           )}
           {shape == "kite" && <MenuDisplayKite />}
-          <MenuDisplaySimple name={"resolution [ " + resolution + " ]"}>
-            <div className={styles.full_height}>
-              <span className={styles.middle}>50</span>
-              <input
-                onChange={(e) => onChangeResolution(e.target.value)}
-                type="range"
-                value={resolution}
-                min="5"
-                max="50"
-                step="1"
-                className={styles.flip_horiz + " " + styles.middle}
-                data-tip
-                data-for="size-slider"
-              />
-              <span className={styles.middle}>5</span>
-            </div>
-          </MenuDisplaySimple>
+          {shape != "grid" && (
+            <MenuDisplaySimple name={"resolution [ " + resolution + " ]"}>
+              <div className={styles.full_height}>
+                <span className={styles.middle}>50</span>
+                <input
+                  onChange={(e) => onChangeResolution(e.target.value)}
+                  type="range"
+                  value={resolution}
+                  min="5"
+                  max="50"
+                  step="1"
+                  className={styles.flip_horiz + " " + styles.middle}
+                  data-tip
+                  data-for="size-slider"
+                />
+                <span className={styles.middle}>5</span>
+              </div>
+            </MenuDisplaySimple>
+          )}
           <MenuDisplaySimple name="reducer function">
             <SVGIcon
               sprite={sumIcon}
@@ -785,6 +819,7 @@ class MenuDisplayMain extends React.Component {
         onSelectReducer: (reducer) => dispatch(chooseZReducer(reducer)),
         onSelectScale: (scale) => dispatch(chooseZScale(scale)),
         onChangePlotScale: (plotScale) => dispatch(choosePlotScale(plotScale)),
+        onChangePlotStyle: (plotStyle) => dispatch(choosePlotStyle(plotStyle)),
         onSelectView: (view) => dispatch(chooseView(view)),
         onToggleStatic: (view, datasetId, isStatic) =>
           dispatch(toggleStatic(view, datasetId, isStatic)),
@@ -830,6 +865,7 @@ class MenuDisplayMain extends React.Component {
         meta: getSelectedDatasetMeta(state),
         fields: getFields(state),
         shape: getPlotShape(state),
+        plotStyle: getPlotStyle(state),
         resolution: getPlotResolution(state),
         graphics: getPlotGraphics(state),
         threshold: getSVGThreshold(state),

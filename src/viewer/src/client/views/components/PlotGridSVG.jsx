@@ -24,6 +24,7 @@ import { getCatAxis, getXAxis, getYAxis, getZAxis } from "../reducers/plot";
 import {
   getErrorBars,
   getPlotScale,
+  getPlotStyle,
   getWindowSize,
   getZScale,
 } from "../reducers/plotParameters";
@@ -66,7 +67,7 @@ export default class PlotGridSVG extends React.Component {
       catAxis: getCatAxis(state),
       zScale: getZScale(state),
       plotScale: getPlotScale(state),
-      plotStyle: "circle",
+      plotStyle: getPlotStyle(state),
       windowSize: getWindowSize(state),
       errorBars: getErrorBars(state),
       data: getGridPlotData(state),
@@ -199,7 +200,39 @@ class LinesSVG extends React.Component {
           //     />
           //   );
           // }
-          if (plotStyle == "circle") {
+          if (plotStyle == "histogram") {
+            if (fg) {
+              selCircles.push(
+                <rect
+                  key={`${group.id}_${j}`}
+                  x={x - grid[i].barWidth / 2}
+                  y={group.y[j]}
+                  width={grid[i].barWidth}
+                  height={grid[i].y - group.y[j]}
+                  fill={color}
+                  stroke={strokeColor}
+                  strokeWidth={`${Math.min(1, grid[i].barWidth / 10)}px`}
+                  // opacity={opacity}
+                  // onPointerDown={(e) => this.handleClick(e, group.id)}
+                />
+              );
+            } else {
+              groupCircles.push(
+                <rect
+                  key={`${group.id}_${j}`}
+                  x={x - grid[i].barWidth / 2}
+                  y={group.y[j]}
+                  width={grid[i].barWidth}
+                  height={grid[i].y - group.y[j]}
+                  fill={color}
+                  stroke={strokeColor}
+                  strokeWidth={`${Math.min(1, grid[i].barWidth / 10)}px`}
+                  // opacity={opacity}
+                  // onPointerDown={(e) => this.handleClick(e, group.id)}
+                />
+              );
+            }
+          } else {
             if (fg) {
               selCircles.push(
                 <circle
@@ -225,38 +258,6 @@ class LinesSVG extends React.Component {
                   stroke={strokeColor}
                   strokeWidth={"1px"}
                   opacity={opacity}
-                  // onPointerDown={(e) => this.handleClick(e, group.id)}
-                />
-              );
-            }
-          } else {
-            if (fg) {
-              selCircles.push(
-                <rect
-                  key={`${group.id}_${j}`}
-                  x={x - grid[i].barWidth / 2}
-                  y={group.y[j]}
-                  width={grid[i].barWidth}
-                  height={grid[i].y - group.y[j]}
-                  fill={color}
-                  stroke={strokeColor}
-                  strokeWidth={`${Math.min(1, grid[i].barWidth / 10)}px`}
-                  // opacity={opacity}
-                  // onPointerDown={(e) => this.handleClick(e, group.id)}
-                />
-              );
-            } else {
-              groupCircles.push(
-                <rect
-                  key={`${group.id}_${j}`}
-                  x={x - grid[i].barWidth / 2}
-                  y={group.y[j]}
-                  width={grid[i].barWidth}
-                  height={grid[i].y - group.y[j]}
-                  fill={color}
-                  stroke={strokeColor}
-                  strokeWidth={`${Math.min(1, grid[i].barWidth / 10)}px`}
-                  // opacity={opacity}
                   // onPointerDown={(e) => this.handleClick(e, group.id)}
                 />
               );
@@ -395,17 +396,20 @@ class LinesSVG extends React.Component {
           //   }
           // }
         }
-        // groupPaths.push(
-        //   <path
-        //     key={group.id}
-        //     style={{ strokeWidth: selectedById[group.id] ? "4px" : "2px" }}
-        //     stroke={colors[group.cat]}
-        //     strokeLinejoin="round"
-        //     fill="none"
-        //     d={mainPath}
-        //     onPointerDown={(e) => this.handleClick(e, group.id)}
-        //   />
-        // );
+        if (plotStyle == "line") {
+          groupPaths.push(
+            <path
+              key={group.id}
+              style={{ strokeWidth: selectedById[group.id] ? "4px" : "2px" }}
+              stroke={colors[group.cat]}
+              strokeLinejoin="round"
+              fill="none"
+              d={mainPath}
+              onPointerDown={(e) => this.handleClick(e, group.id)}
+            />
+          );
+        }
+
         if (selectedById[group.id]) {
           selection.push(...groupPaths, ...groupCircles);
         } else {
