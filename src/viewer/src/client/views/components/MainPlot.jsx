@@ -311,7 +311,17 @@ class PlotBox extends React.Component {
     yPlot = <PlotSideBinsSVG axis="y" />;
     // }
     let legend;
-    if (this.props.largeFonts) {
+    if (plotShape == "grid") {
+      legend = (
+        <g
+          transform={`translate(0,-320),scale(${
+            this.props.largeFonts ? 1.1 : 1
+          })`}
+        >
+          <PlotLegend />
+        </g>
+      );
+    } else if (this.props.largeFonts) {
       legend = (
         <g transform="translate(975,-290),scale(1.1)">
           <PlotLegend />
@@ -337,7 +347,7 @@ class PlotBox extends React.Component {
       plotContainer = <PlotLinesSVG />;
     } else if (plotShape == "grid") {
       plotContainer = <PlotGridSVG />;
-      legend = undefined;
+      // legend = undefined;
       xPlot = undefined;
       yPlot = undefined;
     } else if (plotShape == "square") {

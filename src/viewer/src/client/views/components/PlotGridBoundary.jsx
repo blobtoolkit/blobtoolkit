@@ -191,7 +191,7 @@ const PlotOutline = ({
         height={height}
         onPointerDown={handleClick}
       />
-      <g transform={`translate(0,${10})`}>
+      <g transform={`translate(0,${10})`} pointerEvents={"none"}>
         <text
           x={width / 2}
           textAnchor={"middle"}

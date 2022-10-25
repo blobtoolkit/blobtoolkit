@@ -49,6 +49,56 @@ export default class PlotLegend extends React.Component {
   }
 }
 
+export const charWidth = (char, options = { factor: 0.7 }) => {
+  const { factor } = options;
+  const widths = {
+    dot: 2,
+    number: 5,
+    a: 5,
+    g: 7,
+    i: 4,
+    j: 4.5,
+    m: 8,
+    M: 10,
+  };
+  const chars = {};
+  [".", ",", ";", ":", "|", "!", "\\", "/", " "].forEach((char) => {
+    chars[char] = widths.dot;
+  });
+  [...Array(10).keys()].forEach((char) => {
+    chars[char] = widths.number;
+  });
+  ["g"].forEach((char) => {
+    chars[char] = widths.g;
+  });
+  ["i", "l", 1].forEach((char) => {
+    chars[char] = widths.i;
+  });
+  ["j", "t", "-"].forEach((char) => {
+    chars[char] = widths.j;
+  });
+  ["m", "w"].forEach((char) => {
+    chars[char] = widths.m;
+  });
+  ["M", "W"].forEach((char) => {
+    chars[char] = widths.M;
+  });
+  let width = widths.a;
+  if (chars[char]) {
+    width = chars[char];
+  } else if (chars[char.toLowerCase()]) {
+    width = widths.m;
+  }
+  return (width / widths.a) * factor;
+};
+
+const stringLength = (str, options) => {
+  let length = `${isNaN(str) ? (str ? str : "") : str}`
+    .split("")
+    .reduce((a, b) => a + charWidth(b, options), 0);
+  return length;
+};
+
 const Legend = ({
   values,
   zAxis,
@@ -63,6 +113,7 @@ const Legend = ({
   showTotal,
   largeFonts,
   plotText,
+  compactLegend,
 }) => {
   let items = [];
   let legendKey;
@@ -79,6 +130,7 @@ const Legend = ({
     let w = 19;
     let h = 19;
     let gap = 5;
+    let offsetY = gap;
     let title_x = w + gap;
     let title_y = offset - gap;
     if (largeFonts) {
@@ -119,6 +171,54 @@ const Legend = ({
     let numbers = [];
     let count = values.counts.all > 0;
     // numbers.push(commaFormat(values.counts.all))
+    if (shape == "grid") {
+      offset = 0;
+      let fontSize = plotText.legend.fontSize.replace("px", "") * 1.2;
+      let length = Math.max(...bins.map((b) => stringLength(b.id) * fontSize));
+      bins.forEach((bin, i) => {
+        let title = bin.id;
+        let color = palette.colors[i];
+        // let length =
+        //   stringLength(title) * plotText.legend.fontSize.replace("px", "");
+        if (offset + length > 1300) {
+          offset = 0;
+          offsetY += h + gap;
+        }
+        items.push(
+          <g
+            key={title}
+            transform={"translate(" + offset + "," + offsetY + ")"}
+          >
+            <text
+              style={Object.assign({}, plotText.legend, {
+                textAnchor: "start",
+                fontSize: `${fontSize}px`,
+                alignmentBaseline: "middle",
+                dominantBaseline: "middle",
+              })}
+              // fontSize={fontSize * 1.2}
+              // alignmentBaseline={"middle"}
+              // dominantBaseline={"middle"}
+              transform={"translate(" + (w + gap) + "," + h / 2 + ")"}
+            >
+              {title}
+            </text>
+
+            <rect
+              x={0}
+              y={0}
+              width={w}
+              height={h}
+              style={{ fill: color, stroke: "black" }}
+            />
+          </g>
+        );
+        offset += length + w + gap;
+      });
+      return (
+        <g transform={`translate(0,${offsetY == gap ? h / 2 : 0})`}>{items}</g>
+      );
+    }
     numbers.push(format(values.counts.all));
     if (reducer != "count") {
       numbers.push(format(values.reduced.all));

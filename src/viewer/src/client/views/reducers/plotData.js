@@ -18,6 +18,7 @@ import {
 } from "./preview";
 import {
   getErrorBars,
+  getLargeFonts,
   getPlotResolution,
   getPlotScale,
   getTransformFunction,
@@ -892,6 +893,7 @@ export const getGridPlotData = createSelector(
   getZScale,
   getPlotResolution,
   getPlotScale,
+  getLargeFonts,
   getWindowBinsForCat,
   getColorPalette,
   (
@@ -903,11 +905,14 @@ export const getGridPlotData = createSelector(
     scale,
     res,
     plotScale,
+    largeFonts,
     bins,
     palette
   ) => {
     if (!plotData) return {};
     let plotSize = 1300;
+    let legendSpace = largeFonts ? 50 : 35;
+    let plotHeight = plotSize - legendSpace;
     if (
       plotData.axes.x.values.length == 0 ||
       plotData.axes.y.values.length == 0 ||
@@ -977,7 +982,7 @@ export const getGridPlotData = createSelector(
     let cellWidth =
       (maxWidth / colWidths.reduce((a, b) => a + b)) *
       (plotSize - colPad * (nCols - 1));
-    let cellHeight = (1 / nRows) * (plotSize - rowPad * (nRows - 1));
+    let cellHeight = (1 / nRows) * (plotHeight - rowPad * (nRows - 1));
     let coords = [];
     let grid = [];
     let scales = {};
@@ -1041,13 +1046,13 @@ export const getGridPlotData = createSelector(
     let row = 0;
     for (let i = 0; i < len; i++) {
       if (i == 0) {
-        offset = { x: 0, y: (cellHeight + rowPad) * (nRows - 1) };
+        offset = { x: 0, y: (cellHeight + rowPad) * (nRows - 1) - legendSpace };
         row = 0;
       } else if (i % nRows == 0) {
         j = i / nRows;
         offset.x += (cellWidth * colWidths[j - 1]) / maxWidth;
         offset.x += colPad;
-        offset.y = (cellHeight + rowPad) * (nRows - 1);
+        offset.y = (cellHeight + rowPad) * (nRows - 1) - legendSpace;
         row = 0;
       } else {
         offset.y -= cellHeight + rowPad;
@@ -1106,7 +1111,7 @@ export const getGridPlotData = createSelector(
         values.cat = keys[values.cat];
         if (transform) [values.x, values.y] = transform([values.x, values.y]);
         xs.push(values.x + offset.x);
-        ys.push(plotSize - values.y - offset.y);
+        ys.push(plotHeight - values.y - offset.y);
         if (sd.x) {
           sd.x = scales.x(scales.x.domain()[0] + sd.x);
           xsd.push(sd.x);
@@ -1147,7 +1152,7 @@ export const getGridPlotData = createSelector(
         col: j,
         row,
         x: offset.x,
-        y: plotSize - offset.y,
+        y: plotHeight - offset.y,
         width,
         height: cellHeight,
         label: identifiers[list[i]],
