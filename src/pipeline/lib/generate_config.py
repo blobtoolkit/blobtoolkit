@@ -22,14 +22,19 @@ Options:
                          [default: PACBIO_SMRT,ILLUMINA_XTEN,ILLUMINA,OXFORD_NANOPORE,OTHER]
 """
 
+import gzip
 import os
 import re
 import sys
+from glob import glob
 from operator import itemgetter
 from pathlib import Path
+from shutil import rmtree
+from shutil import which
 from subprocess import PIPE
 from subprocess import Popen
 from subprocess import run
+from zipfile import ZipFile
 
 import requests
 import ujson
@@ -153,6 +158,38 @@ def fetch_file(url, filename):
     run(cmd)
 
 
+def fetch_ncbi_datasets_assembly(url, filename, accession):
+    """Fetch a remote assembly using NCBI datasets."""
+    filepath = Path(filename)
+    if filepath.is_file():
+        LOGGER.info("File exists, not overwriting")
+        return
+    dataset_zip = "%s/%s_dataset.zip" % (filepath.parents[0], accession)
+    download_dehydrated = [
+        "datasets",
+        "download",
+        "genome",
+        "accession",
+        accession,
+        "--dehydrated",
+        "--filename",
+        dataset_zip,
+    ]
+    run(download_dehydrated)
+    with ZipFile(dataset_zip, "r") as zh:
+        zh.extractall(filepath.parents[0])
+    rehydrate = ["datasets", "rehydrate", "--directory", filepath.parents[0]]
+    run(rehydrate)
+    assembly_dir = "%s/ncbi_dataset/data/%s/" % (filepath.parents[0], accession)
+    LOGGER.info("Writing compressed file to %s" % filename)
+    with open(glob("%s/*_genomic.fna" % assembly_dir)[0], "rb") as ifh:
+        with gzip.open(filename, "wb") as ofh:
+            ofh.writelines(ifh)
+    os.remove(dataset_zip)
+    os.remove("%s/README.md" % filepath.parents[0])
+    rmtree("%s/ncbi_dataset" % filepath.parents[0])
+
+
 def fetch_assembly_url(accession, api_key=None):
     """
     Fetch an assembly url using edirect.
@@ -185,10 +222,14 @@ def fetch_assembly_url(accession, api_key=None):
     return None
 
 
-def fetch_assembly_fasta(url, filename):
+def fetch_assembly_fasta(url, filename, accession):
     """Save assembly fasta file to local disk."""
-    LOGGER.info("Fetching assembly FASTA to %s" % filename)
-    fetch_file(url, filename)
+    if which("datasets") is not None:
+        LOGGER.info("Fetching assembly FASTA to %s using NCBI datasets" % filename)
+        fetch_ncbi_datasets_assembly(url, filename, accession)
+    else:
+        LOGGER.info("Fetching assembly FASTA to %s using curl" % filename)
+        fetch_file(url, filename)
 
 
 def parse_assembly_report(filename, cat_filename, syn_filename):
@@ -560,7 +601,7 @@ def main():
     if opts["--download"]:
         os.makedirs(buscodir, exist_ok=True)
         os.makedirs("%s/assembly" % outdir, exist_ok=True)
-        fetch_assembly_fasta(assembly_url, assembly_file)
+        fetch_assembly_fasta(assembly_url, assembly_file, accession)
         report_url = assembly_url.replace("_genomic.fna.gz", "_assembly_report.txt")
         fetch_assembly_report(report_url, assembly_report, cat_filename, syn_filename)
     taxon_meta = fetch_goat_data(meta["taxon"]["taxid"])
