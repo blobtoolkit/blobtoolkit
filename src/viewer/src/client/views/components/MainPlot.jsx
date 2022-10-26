@@ -6,6 +6,7 @@ import {
   getPlotGraphics,
   getPlotShape,
   getSVGThreshold,
+  getWindowSize,
 } from "../reducers/plotParameters";
 import {
   getHexGridScale,
@@ -117,6 +118,18 @@ export default class MainPlot extends React.Component {
             nohitThreshold: getNohitThreshold(state),
             range: getScatterPlotData(state).range,
             largeFonts: getLargeFonts(state),
+          };
+        } else if (plotShape == "grid") {
+          return {
+            datasetId: getDatasetID(state),
+            plotShape: getPlotShape(state),
+            plotGraphics: getPlotGraphics(state),
+            records: getRecordCount(state),
+            staticThreshold: getStaticThreshold(state),
+            nohitThreshold: getNohitThreshold(state),
+            range: getScatterPlotData(state).range,
+            largeFonts: getLargeFonts(state),
+            windowSize: getWindowSize(state),
           };
         }
         return {
@@ -441,6 +454,7 @@ class PlotBox extends React.Component {
         </div>
       );
     } else if (plotShape == "grid") {
+      console.log(this.props);
       return (
         <div className={styles.outer}>
           <div className={styles.fill_parent}>

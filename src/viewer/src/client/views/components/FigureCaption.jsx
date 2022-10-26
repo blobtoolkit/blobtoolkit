@@ -10,6 +10,7 @@ import {
 
 import TransformEquation from "./TransformEquation";
 import { connect } from "react-redux";
+import { format as d3Format } from "d3-format";
 import { getReferenceValues } from "../reducers/reference";
 import styles from "./Caption.scss";
 
@@ -19,6 +20,8 @@ const scales = {
   scaleLog: "logarithmic",
 };
 
+const fmt = d3Format(".3s");
+
 const labels = {
   gc: "GC proportion",
   length: "length",
@@ -26,6 +29,9 @@ const labels = {
   cov: "coverage",
   cindex: "c-index",
   score: "bitscore",
+  masked: "masked proportion",
+  position: "position",
+  Proportion: "proportional position",
 };
 
 class Caption extends Component {
@@ -47,7 +53,7 @@ class Caption extends Component {
     let parts = str.split("_");
     let label;
     if (parts.length == 1) {
-      label = labels[str];
+      label = labels[str] || str;
     } else {
       if (parts[parts.length - 1] == "cov") {
         let type = "base";
@@ -68,6 +74,20 @@ class Caption extends Component {
 
   scaleStr(str) {
     return scales[str];
+  }
+
+  windowStr(window) {
+    if (window < 1) {
+      return `Windows of ${window * 100}% sequence length`;
+    }
+    window = fmt(window);
+    let match = window.match(/(\.0+[^\d])$/);
+    if (match) {
+      window = window.replace(match[1], match[1].charAt(match[1].length - 1));
+    } else {
+      window = window.replace(/\.0+$/, "");
+    }
+    return `${window}b windows`;
   }
 
   render() {
@@ -98,10 +118,12 @@ class Caption extends Component {
       let scale = scales[this.props.scale];
       let range;
       let reducer = this.props.reducer.id;
-      if (this.props.plotShape == "circle" && this.props.range) {
+      if (shape == "circle" && this.props.range) {
         range = this.props.range.map((x) => Number(x).toLocaleString());
-      } else if (this.props.plotShape == "kite") {
+      } else if (shape == "kite") {
         plot = `Kite-shaped blob`;
+      } else if (shape == "line" || shape == "grid") {
+        plot = `Distribution`;
       } else if (this.props.zScale) {
         range = this.props.zScale
           .domain()
@@ -109,7 +131,13 @@ class Caption extends Component {
         plot = `${this.capitalise(shape)}-binned blob`;
       }
       title = `${plot} plot of ${yaxis} against ${xaxis} for ${record}s in assembly ${this.props.datasetName}. `;
-      caption = `${this.capitalise(record)}s are coloured by ${cat}`;
+      if (this.props.windowSize) {
+        caption = `${this.windowStr(
+          this.props.windowSize
+        )} are coloured by ${cat}`;
+      } else {
+        caption = `${this.capitalise(record)}s are coloured by ${cat}`;
+      }
       if (this.props.plotShape != "kite") {
         if (
           this.props.plotShape == "circle" ||
@@ -120,18 +148,20 @@ class Caption extends Component {
         } else if (this.props.plotShape == "grid") {
         } else {
           caption += ` and binned at a resolution of ${this.props.binned.grid.res} divisions on each axis`;
-          caption += `. Coloured ${shape}s within each bin are sized in proportion to the ${reducer} of individual ${record} ${z}s `;
+          caption += `. Coloured ${shape}s within each bin are sized in proportion to the ${reducer} of individual ${record} ${z}s`;
         }
         if (range) {
-          caption += `on a ${scale} scale,
-          ranging from ${range[0]} to ${range[1]}. `;
+          caption += ` on a ${scale} scale,
+          ranging from ${range[0]} to ${range[1]}`;
         }
       } else {
-        caption += `. Kite shapes summarise the core distribution of ${record}s. `;
-        caption += `Horizontal and vertical lines represent a range spanning 2 standard deviations about the weighted mean value for each axis. `;
-        caption += `The lines intersect at a point representing the weighted median value. `;
+        caption += `. Kite shapes summarise the core distribution of ${record}s`;
+        caption += `. Horizontal and vertical lines represent a range spanning 2 standard deviations about the weighted mean value for each axis`;
+        caption += `. The lines intersect at a point representing the weighted median value`;
       }
-      histograms = ` Histograms show the distribution of ${record} ${z} ${reducer} along each axis. `;
+      if (shape != "grid") {
+        histograms = `. Histograms show the distribution of ${record} ${z} ${reducer} along each axis`;
+      }
       if (this.props.params.factor != 0 || this.props.params.intercept != 0) {
         equation = (
           <span>
@@ -141,13 +171,11 @@ class Caption extends Component {
         );
       }
     } else if (this.props.view == "cumulative") {
-      title = `Cumulative ${record} ${z} for assembly ${this.props.datasetName}. `;
-      caption = `The grey line shows cumulative length for all ${record}s. `;
-      caption += `Coloured lines show cumulative lengths of ${record}s assigned to each ${cat} using the ${taxrule} taxrule`;
+      title = `Cumulative ${record} ${z} for assembly ${this.props.datasetName}.`;
+      caption = `. The grey line shows cumulative length for all ${record}s`;
+      caption += `. Coloured lines show cumulative lengths of ${record}s assigned to each ${cat} using the ${taxrule} taxrule`;
       if (this.props.curveOrigin != 0) {
-        caption += ` and are stacked by cumulative value on the ${this.props.curveOrigin}-axis to show the proportion of each ${cat} in the overall assembly. `;
-      } else {
-        caption += ". ";
+        caption += ` and are stacked by cumulative value on the ${this.props.curveOrigin}-axis to show the proportion of each ${cat} in the overall assembly`;
       }
       let refs = Object.keys(this.props.refs.byId).map((x) =>
         x.replace(/--.+/, "")
@@ -155,11 +183,10 @@ class Caption extends Component {
       if (refs.length > 0) {
         refs.sort((a, b) => a - b);
         if (refs.length == 1) {
-          caption += `The dashed line shows the cumulative curve for assembly ${refs[0]}. `;
+          caption += `. The dashed line shows the cumulative curve for assembly ${refs[0]}. `;
         } else {
-          caption += "Dashed lines show cumulative curves for assemblies ";
+          caption += " .Dashed lines show cumulative curves for assemblies ";
           caption += refs.slice(0, -1).join(", ") + " and " + refs.slice(-1);
-          caption += ". ";
         }
       }
     } else if (this.props.view == "snail") {
@@ -172,31 +199,31 @@ class Caption extends Component {
       let radius = this.props.circular.scale.radius;
       let span = this.props.circular.scale.circumference;
       title = `Snail plot summary of assembly statistics for assembly ${this.props.datasetName}. `;
-      caption = `The main plot is divided into 1,000 size-ordered bins around the circumference with each bin representing 0.1% of the ${span.toLocaleString()} bp assembly. `;
-      caption += `The distribution of ${record} lengths is shown in dark grey with `;
-      caption += `the plot radius scaled to the longest ${record} present in the assembly (${radius.toLocaleString()} bp`;
+      caption = `The main plot is divided into 1,000 size-ordered bins around the circumference with each bin representing 0.1% of the ${span.toLocaleString()} bp assembly`;
+      caption += `. The distribution of ${record} lengths is shown in dark grey with`;
+      caption += ` the plot radius scaled to the longest ${record} present in the assembly (${radius.toLocaleString()} bp`;
       if (longest && longest == radius) {
         caption += `, shown in red). `;
       } else if (longest) {
-        caption += `). The red segment shows the longest scaffold in the filtered assembly (${longest.toLocaleString()} bp). `;
+        caption += `). The red segment shows the longest scaffold in the filtered assembly (${longest.toLocaleString()} bp)`;
       } else {
-        caption += `). `;
+        caption += `)`;
       }
-      caption += `Orange and pale-orange arcs show the N50 and N90 ${record} lengths (${n50.toLocaleString()} and ${n90.toLocaleString()} bp), respectively. `;
-      caption += `The pale grey spiral shows the cumulative ${record} count on a log scale with white scale lines showing successive orders of magnitude. `;
-      caption += `The blue`;
+      caption += `. Orange and pale-orange arcs show the N50 and N90 ${record} lengths (${n50.toLocaleString()} and ${n90.toLocaleString()} bp), respectively`;
+      caption += `. The pale grey spiral shows the cumulative ${record} count on a log scale with white scale lines showing successive orders of magnitude`;
+      caption += `. The blue`;
       if (this.props.data.composition.n > 0.1) {
         caption += `, pale-blue and white `;
       } else {
         caption += ` and pale-blue `;
       }
-      caption += ` area around the outside of the plot shows the distribution of GC, AT and N percentages in the same bins as the inner plot. `;
+      caption += ` area around the outside of the plot shows the distribution of GC, AT and N percentages in the same bins as the inner plot`;
       if (this.props.buscoMeta) {
-        caption += `A summary of complete, fragmented, duplicated and missing BUSCO genes in the ${this.props.buscoMeta.meta.set} set is shown in the top right. `;
+        caption += `. A summary of complete, fragmented, duplicated and missing BUSCO genes in the ${this.props.buscoMeta.meta.set} set is shown in the top right`;
       }
     }
     if (this.props.filters.length > 0) {
-      caption += `The assembly has been filtered to exclude${
+      caption += `. The assembly has been filtered to exclude${
         this.props.filters.length > 1 ? ":" : ""
       } ${record}s with `;
       let filters = this.props.filters.map((o) => {
@@ -231,21 +258,21 @@ class Caption extends Component {
       if (filters.length > 1) {
         caption += `${filters.slice(0, -1).join("; ")}; or ${filters.slice(
           -1
-        )}. `;
+        )}`;
       } else {
-        caption += `${filters.join("; or ")}. `;
+        caption += `${filters.join("; or ")}`;
       }
     }
 
     if (this.props.selection.length > 0) {
-      caption += `A selection-based filter containing ${this.props.selection.length} ${record}s has been applied to the assembly. `;
+      caption += `. A selection-based filter containing ${this.props.selection.length} ${record}s has been applied to the assembly`;
     }
 
     if (
       (this.props.view == "cumulative" || this.props.view == "snail") &&
       this.props.scaleTo == "filtered"
     ) {
-      caption += `Plot axes are scaled to the filtered assembly. `;
+      caption += `. Plot axes are scaled to the filtered assembly`;
     }
 
     let more = (

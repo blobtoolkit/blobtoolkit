@@ -401,7 +401,7 @@ class LinesSVG extends React.Component {
           groupPaths.push(
             <path
               key={group.id}
-              style={{ strokeWidth: selectedById[group.id] ? "4px" : "2px" }}
+              strokeWidth={"4px"}
               stroke={colors[group.cat]}
               strokeLinejoin="round"
               fill="none"
