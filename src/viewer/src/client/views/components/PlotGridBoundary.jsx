@@ -191,12 +191,12 @@ const PlotOutline = ({
         height={height}
         onPointerDown={handleClick}
       />
-      <g transform={`translate(0,${10})`} pointerEvents={"none"}>
+      <g transform={`translate(0,0)`} pointerEvents={"none"}>
         <text
           x={width / 2}
           textAnchor={"middle"}
-          dominantBaseline={"hanging"}
-          alignmentBaseline={"hanging"}
+          dominantBaseline={"middle"}
+          alignmentBaseline={"middle"}
           fontSize={fontSize}
         >
           {label}

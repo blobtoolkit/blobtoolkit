@@ -103,6 +103,7 @@ const Legend = ({
   values,
   zAxis,
   bins,
+  visibleCats,
   palette,
   other,
   reducer,
@@ -170,50 +171,65 @@ const Legend = ({
     let color = "#999";
     let numbers = [];
     let count = values.counts.all > 0;
+    let legendRows = 0;
     // numbers.push(commaFormat(values.counts.all))
     if (shape == "grid") {
       offset = 0;
+      let visibleBins = bins.filter((b) =>
+        visibleCats ? visibleCats.has(b.id) : true
+      );
       let fontSize = plotText.legend.fontSize.replace("px", "") * 1.2;
-      let length = Math.max(...bins.map((b) => stringLength(b.id) * fontSize));
+      let length = Math.max(
+        ...visibleBins.map(
+          (b) => stringLength(b.id, { factor: 0.6 }) * fontSize
+        )
+      );
+      legendRows = Math.ceil(((length + w + gap) * bins.length) / 1200);
+      if (legendRows > 3) {
+        fontSize /= 1.2;
+      }
       bins.forEach((bin, i) => {
         let title = bin.id;
-        let color = palette.colors[i];
-        // let length =
-        //   stringLength(title) * plotText.legend.fontSize.replace("px", "");
-        if (offset + length > 1300) {
-          offset = 0;
-          offsetY += h + gap;
-        }
-        items.push(
-          <g
-            key={title}
-            transform={"translate(" + offset + "," + offsetY + ")"}
-          >
-            <text
-              style={Object.assign({}, plotText.legend, {
-                textAnchor: "start",
-                fontSize: `${fontSize}px`,
-                alignmentBaseline: "middle",
-                dominantBaseline: "middle",
-              })}
-              // fontSize={fontSize * 1.2}
-              // alignmentBaseline={"middle"}
-              // dominantBaseline={"middle"}
-              transform={"translate(" + (w + gap) + "," + h / 2 + ")"}
+        if (visibleCats.has(title)) {
+          let color = palette.colors[i];
+          if (legendRows > 2) {
+            length = stringLength(title, { factor: 0.65 }) * fontSize;
+          }
+          if (offset + length > 1200) {
+            offset = 0;
+            offsetY += h + gap;
+          }
+          items.push(
+            <g
+              key={title}
+              transform={"translate(" + offset + "," + offsetY + ")"}
             >
-              {title}
-            </text>
+              <text
+                style={Object.assign({}, plotText.legend, {
+                  textAnchor: "start",
+                  fontSize: `${fontSize}px`,
+                  alignmentBaseline: "middle",
+                  dominantBaseline: "middle",
+                })}
+                // fontSize={fontSize * 1.2}
+                // alignmentBaseline={"middle"}
+                // dominantBaseline={"middle"}
+                transform={"translate(" + (w + gap) + "," + h / 2 + ")"}
+              >
+                {title}
+              </text>
 
-            <rect
-              x={0}
-              y={0}
-              width={w}
-              height={h}
-              style={{ fill: color, stroke: "black" }}
-            />
-          </g>
-        );
-        offset += length + w + gap;
+              <rect
+                x={0}
+                y={0}
+                width={w}
+                height={h}
+                style={{ fill: color, stroke: "black" }}
+              />
+            </g>
+          );
+          offset += length + w + gap;
+        }
       });
       return (
         <g transform={`translate(0,${offsetY == gap ? h / 2 : 0})`}>{items}</g>

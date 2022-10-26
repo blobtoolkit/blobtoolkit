@@ -311,28 +311,20 @@ class PlotBox extends React.Component {
     yPlot = <PlotSideBinsSVG axis="y" />;
     // }
     let legend;
-    if (plotShape == "grid") {
-      legend = (
-        <g
-          transform={`translate(0,-320),scale(${
-            this.props.largeFonts ? 1.1 : 1
-          })`}
-        >
-          <PlotLegend />
-        </g>
-      );
-    } else if (this.props.largeFonts) {
-      legend = (
-        <g transform="translate(975,-290),scale(1.1)">
-          <PlotLegend />
-        </g>
-      );
-    } else {
-      legend = (
-        <g transform="translate(1010,-290)">
-          <PlotLegend />
-        </g>
-      );
+    if (plotShape != "grid") {
+      if (this.props.largeFonts) {
+        legend = (
+          <g transform="translate(975,-290),scale(1.1)">
+            <PlotLegend />
+          </g>
+        );
+      } else {
+        legend = (
+          <g transform="translate(1010,-290)">
+            <PlotLegend />
+          </g>
+        );
+      }
     }
     let lasso;
     if (plotShape == "circle") {

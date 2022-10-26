@@ -30,6 +30,7 @@ import {
 } from "../reducers/plotParameters";
 
 import PlotGridBoundary from "./PlotGridBoundary";
+import PlotLegend from "./PlotLegend";
 import React from "react";
 import { connect } from "react-redux";
 import { polygonHull as d3PolygonHull } from "d3-polygon";
@@ -455,11 +456,25 @@ class LinesSVG extends React.Component {
       //   paths.push( kite )
       // }
     });
+    let visibleCats = this.props.data.visibleCats;
+    if (plotStyle == "line") {
+      this.props.data.visibleFullCats.forEach((cat) => {
+        visibleCats.add(cat);
+      });
+    }
+    let legend = (
+      <g
+        transform={`translate(0,-20),scale(${this.props.largeFonts ? 1.1 : 1})`}
+      >
+        <PlotLegend visibleCats={visibleCats} />
+      </g>
+    );
     return (
       <g
         transform="translate(0, 0)"
         style={{ cursor: "pointer", pointerEvents: "auto" }}
       >
+        {legend}
         {boundaries}
         <g pointerEvents={"none"}>
           {paths}

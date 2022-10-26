@@ -38,6 +38,7 @@ import { getDatasetID } from "./location";
 import { getFilteredList } from "./filter";
 import { getIdentifiers } from "./identifiers";
 import { getQueryValue } from "./location";
+import { set } from "react-ga";
 import store from "../store";
 
 const getAxis = (state, axis) => axis;
@@ -896,6 +897,7 @@ export const getGridPlotData = createSelector(
   getLargeFonts,
   getWindowBinsForCat,
   getColorPalette,
+  getMainPlotData,
   (
     plotData,
     list,
@@ -907,7 +909,8 @@ export const getGridPlotData = createSelector(
     plotScale,
     largeFonts,
     bins,
-    palette
+    palette,
+    mainData
   ) => {
     if (!plotData) return {};
     let plotSize = 1300;
@@ -1044,7 +1047,11 @@ export const getGridPlotData = createSelector(
     let offset = {};
     let j = 0;
     let row = 0;
+    let visibleCats = new Set();
+    let visibleFullCats = new Set();
     for (let i = 0; i < len; i++) {
+      // console.log(plotData.axes.cat.values);
+      visibleFullCats.add(bins[keys[mainData.axes.cat.values[i]]].id);
       if (i == 0) {
         offset = { x: 0, y: (cellHeight + rowPad) * (nRows - 1) - legendSpace };
         row = 0;
@@ -1109,6 +1116,9 @@ export const getGridPlotData = createSelector(
         values.y = values.y < yClamp ? scales.y(yMin) : scales.y(values.y);
         values.x = values.x < xClamp ? scales.x(xMin) : scales.x(values.x);
         values.cat = keys[values.cat];
+        if (values.cat >= 0) {
+          visibleCats.add(bins[values.cat].id);
+        }
         if (transform) [values.x, values.y] = transform([values.x, values.y]);
         xs.push(values.x + offset.x);
         ys.push(plotHeight - values.y - offset.y);
@@ -1173,6 +1183,8 @@ export const getGridPlotData = createSelector(
       grid,
       nCols,
       nRows,
+      visibleCats,
+      visibleFullCats,
     };
   }
 );
