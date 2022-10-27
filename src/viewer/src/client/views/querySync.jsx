@@ -142,7 +142,7 @@ const mapDispatchToQuery = {
   plotStyle: {
     type: "SET_PLOT_STYLE",
     payload: (k, v) => v,
-    default: "histogram",
+    default: "circle",
   },
   plotGraphics: {
     type: "SET_PLOT_GRAPHICS",
