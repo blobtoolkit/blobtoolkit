@@ -7,7 +7,7 @@ Usage:
   btk pipeline generate-config <ACCESSION> [--coverage 30] [--download]
     [--out /path/to/output/directory] [--db /path/to/database/directory]
     [--db-suffix STRING] [--reads STRING...] [--read-runs INT] [--api-key STRING]
-    [--platforms STRING]
+    [--platforms STRING] [--protocol STRING]
 
 Options:
   --coverage=INT         Maximum coverage for read mapping [default: 30]
@@ -20,6 +20,7 @@ Options:
   --api-key STRING       NCBI api key for use with edirect
   --platforms STRING     priority order for sequencing platforms
                          [default: PACBIO_SMRT,ILLUMINA_XTEN,ILLUMINA,OXFORD_NANOPORE,OTHER]
+  --protocol STRING      Download files using ftp or http [default: ftp]
 """
 
 import gzip
@@ -135,12 +136,14 @@ def find_busco_lineages(ancestors):
     return lineages
 
 
-def fetch_file(url, filename):
+def fetch_file(url, filename, protocol="ftp"):
     """fetch a remote file using curl."""
     filepath = Path(filename)
     if filepath.is_file():
         LOGGER.info("File exists, not overwriting")
         return
+    if protocol == "http":
+        url = url.replace("ftp:", "http:")
     cmd = [
         "curl",
         "-L",
@@ -222,14 +225,14 @@ def fetch_assembly_url(accession, api_key=None):
     return None
 
 
-def fetch_assembly_fasta(url, filename, accession):
+def fetch_assembly_fasta(url, filename, accession, protocol):
     """Save assembly fasta file to local disk."""
     if which("datasets") is not None:
         LOGGER.info("Fetching assembly FASTA to %s using NCBI datasets" % filename)
         fetch_ncbi_datasets_assembly(url, filename, accession)
     else:
         LOGGER.info("Fetching assembly FASTA to %s using curl" % filename)
-        fetch_file(url, filename)
+        fetch_file(url, filename, protocol)
 
 
 def parse_assembly_report(filename, cat_filename, syn_filename):
@@ -281,10 +284,10 @@ def parse_assembly_report(filename, cat_filename, syn_filename):
     tofile.write_file(syn_filename, synonyms)
 
 
-def fetch_assembly_report(url, filename, cat_filename, syn_filename):
+def fetch_assembly_report(url, filename, cat_filename, syn_filename, protocol):
     """Save assembly report file to local disk."""
     LOGGER.info("Fetching assembly report to %s" % filename)
-    fetch_file(url, filename)
+    fetch_file(url, filename, protocol)
     parse_assembly_report(filename, cat_filename, syn_filename)
 
 
@@ -493,14 +496,14 @@ def base_count(x):
         return 0
 
 
-def fetch_read_files(meta):
+def fetch_read_files(meta, protocol):
     """Fetch sra reads."""
     files = meta["file"].split(";")
     for index, url in enumerate(meta["fastq_ftp"].split(";")):
         url = "ftp://%s" % url
         read_file = files[index]
         LOGGER.info("Fetching read file %s", read_file)
-        fetch_file(url, read_file)
+        fetch_file(url, read_file, protocol)
 
 
 def add_taxon_to_meta(meta, taxon_meta):
@@ -572,6 +575,7 @@ def main():
     accession = opts["<ACCESSION>"]
     outdir = opts["--out"]
     dbdir = opts["--db"]
+    protocol = opts["--protocol"]
     buscodir = "%s/busco" % dbdir
     uniprotdir = "%s/uniprot" % dbdir
     ntdir = "%s/nt" % dbdir
@@ -601,9 +605,11 @@ def main():
     if opts["--download"]:
         os.makedirs(buscodir, exist_ok=True)
         os.makedirs("%s/assembly" % outdir, exist_ok=True)
-        fetch_assembly_fasta(assembly_url, assembly_file, accession)
+        fetch_assembly_fasta(assembly_url, assembly_file, accession, protocol)
         report_url = assembly_url.replace("_genomic.fna.gz", "_assembly_report.txt")
-        fetch_assembly_report(report_url, assembly_report, cat_filename, syn_filename)
+        fetch_assembly_report(
+            report_url, assembly_report, cat_filename, syn_filename, protocol
+        )
     taxon_meta = fetch_goat_data(meta["taxon"]["taxid"])
     add_taxon_to_meta(meta, taxon_meta)
     set_btk_version(meta)
@@ -636,7 +642,7 @@ def main():
         if opts["--download"]:
             os.makedirs(readdir, exist_ok=True)
             for library in sra:
-                fetch_read_files(library)
+                fetch_read_files(library, protocol)
     meta["similarity"]["blastn"].update({"path": ntdir})
     meta["similarity"]["diamond_blastx"].update({"path": uniprotdir})
     meta["similarity"]["diamond_blastp"].update({"path": uniprotdir})
