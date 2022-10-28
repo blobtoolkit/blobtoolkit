@@ -36,7 +36,6 @@ import { connect } from "react-redux";
 import { polygonHull as d3PolygonHull } from "d3-polygon";
 import { fetchRawData } from "../reducers/field";
 import { getGridPlotData } from "../reducers/plotData";
-import { plotShapes } from "../reducers/plotStyles";
 
 const smoothLineX = d3Line()
   .x((d) => d[0])

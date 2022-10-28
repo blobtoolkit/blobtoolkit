@@ -24,15 +24,18 @@ import { getCatAxis, getXAxis, getYAxis, getZAxis } from "../reducers/plot";
 import {
   getErrorBars,
   getPlotScale,
+  getPlotStyle,
   getWindowSize,
   getZScale,
 } from "../reducers/plotParameters";
 
+import PlotGridBoundary from "./PlotGridBoundary";
+import PlotLegend from "./PlotLegend";
 import React from "react";
 import { connect } from "react-redux";
 import { polygonHull as d3PolygonHull } from "d3-polygon";
 import { fetchRawData } from "../reducers/field";
-import { getLinesPlotData } from "../reducers/plotData";
+import { getGridPlotData } from "../reducers/plotData";
 import { plotShapes } from "../reducers/plotStyles";
 
 const smoothLineX = d3Line()
@@ -65,9 +68,10 @@ export default class PlotLinesSVG extends React.Component {
       catAxis: getCatAxis(state),
       zScale: getZScale(state),
       plotScale: getPlotScale(state),
+      plotStyle: getPlotStyle(state),
       windowSize: getWindowSize(state),
       errorBars: getErrorBars(state),
-      data: getLinesPlotData(state),
+      data: getGridPlotData(state),
       showSelection: getSelectionDisplay(state),
       selectedRecords: getSelectedRecords(state),
     });
@@ -143,6 +147,11 @@ class LinesSVG extends React.Component {
       return null;
     }
     let colors = this.props.data.colors;
+    let scales = this.props.data.scales;
+    let meta = this.props.data.meta;
+    let plotStyle = this.props.plotStyle;
+    let plotSize = this.props.data.plotSize;
+    let legendSpace = this.props.data.legendSpace;
     let paths = [];
     let selection = [];
     let selectedById = {};
@@ -158,15 +167,15 @@ class LinesSVG extends React.Component {
         group.x.forEach((x, j) => {
           points.push([x, group.y[j]]);
           let color;
-          let opacity;
+          let opacity = 1;
           let sel;
           if (isNaN(group.cats[j])) {
             color = "white";
-            opacity = 0.3;
-            sel = false;
+            // opacity = 0.3;
+            sel = true;
           } else {
             color = colors[group.cats[j]] || colors[9];
-            opacity = 0.6;
+            // opacity = 0.6;
             sel = true;
           }
           if (sel && selectedById[group.id]) {
@@ -208,7 +217,6 @@ class LinesSVG extends React.Component {
 
         let groupPaths = [];
         let mainPath = cardinalLine(points);
-
         if (selectedById[group.id]) {
           if (
             (this.props.errorBars && group.ysd && !group.xsd) ||
@@ -311,8 +319,9 @@ class LinesSVG extends React.Component {
               />
             );
           }
-
-          {
+        }
+        if (plotStyle == "line") {
+          if (selectedById[group.id]) {
             if (this.props.showSelection) {
               groupPaths.push(
                 <path
@@ -329,7 +338,7 @@ class LinesSVG extends React.Component {
               groupPaths.push(
                 <path
                   key={`${group.id}_sel`}
-                  style={{ strokeWidth: "8px" }}
+                  style={{ strokeWidth: "3px" }}
                   stroke={"rgb(89, 101, 111)"}
                   strokeLinejoin="round"
                   fill="none"
@@ -339,24 +348,25 @@ class LinesSVG extends React.Component {
               );
             }
           }
+          groupPaths.push(
+            <path
+              key={group.id}
+              style={{ strokeWidth: selectedById[group.id] ? "3px" : "3px" }}
+              stroke={colors[group.cat]}
+              strokeLinejoin="round"
+              fill="none"
+              d={mainPath}
+              onPointerDown={(e) => this.handleClick(e, group.id)}
+            />
+          );
         }
-        groupPaths.push(
-          <path
-            key={group.id}
-            style={{ strokeWidth: selectedById[group.id] ? "4px" : "2px" }}
-            stroke={colors[group.cat]}
-            strokeLinejoin="round"
-            fill="none"
-            d={mainPath}
-            onPointerDown={(e) => this.handleClick(e, group.id)}
-          />
-        );
         if (selectedById[group.id]) {
           selection.push(...groupPaths, ...groupCircles);
         } else {
           paths.push(...groupPaths, ...groupCircles);
         }
       }
+
       //   let kite = <g key={i}
       //                 style={{strokeWidth:"1px"}}
       //                 transform={`rotate(${coords[i].angle},${coords[i].y[0][0]},${coords[i].x[0][1]})`}
@@ -380,11 +390,39 @@ class LinesSVG extends React.Component {
       //   paths.push( kite )
       // }
     });
+    let visibleCats = this.props.data.visibleCats;
+    if (plotStyle == "line") {
+      this.props.data.visibleFullCats.forEach((cat) => {
+        visibleCats.add(cat);
+      });
+    }
+    let legend = (
+      <g
+        transform={`translate(0,-20),scale(${this.props.largeFonts ? 1.1 : 1})`}
+      >
+        <PlotLegend visibleCats={visibleCats} />
+      </g>
+    );
+    let axes = (
+      <PlotGridBoundary
+        key={`boundary`}
+        width={plotSize}
+        height={plotSize - legendSpace}
+        colWidth={scales.x.domain()[1]}
+        y={plotSize}
+        scales={scales}
+        handleClick={(e) => {}}
+        highlightColor={"none"}
+        meta={meta}
+      />
+    );
     return (
       <g
         transform="translate(0, 0)"
         style={{ cursor: "pointer", pointerEvents: "auto" }}
       >
+        {axes}
+        {legend}
         {paths}
         {selection}
       </g>

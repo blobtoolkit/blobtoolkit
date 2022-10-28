@@ -108,18 +108,7 @@ export default class MainPlot extends React.Component {
             nohitThreshold: getNohitThreshold(state),
             largeFonts: getLargeFonts(state),
           };
-        } else if (plotShape == "lines") {
-          return {
-            datasetId: getDatasetID(state),
-            plotShape: getPlotShape(state),
-            plotGraphics: getPlotGraphics(state),
-            records: getRecordCount(state),
-            staticThreshold: getStaticThreshold(state),
-            nohitThreshold: getNohitThreshold(state),
-            range: getScatterPlotData(state).range,
-            largeFonts: getLargeFonts(state),
-          };
-        } else if (plotShape == "grid") {
+        } else if (plotShape == "grid" || plotShape == "lines") {
           return {
             datasetId: getDatasetID(state),
             plotShape: getPlotShape(state),
@@ -324,7 +313,7 @@ class PlotBox extends React.Component {
     yPlot = <PlotSideBinsSVG axis="y" />;
     // }
     let legend;
-    if (plotShape != "grid") {
+    if (plotShape != "grid" && plotShape != "lines") {
       if (this.props.largeFonts) {
         legend = (
           <g transform="translate(975,-290),scale(1.1)">
@@ -350,9 +339,10 @@ class PlotBox extends React.Component {
       plotContainer = <PlotKitesSVG />;
     } else if (plotShape == "lines") {
       plotContainer = <PlotLinesSVG />;
+      xPlot = undefined;
+      yPlot = undefined;
     } else if (plotShape == "grid") {
       plotContainer = <PlotGridSVG />;
-      // legend = undefined;
       xPlot = undefined;
       yPlot = undefined;
     } else if (plotShape == "square") {
@@ -417,7 +407,7 @@ class PlotBox extends React.Component {
             )}
         </div>
       );
-    } else if (plotShape == "kite" || plotShape == "lines") {
+    } else if (plotShape == "kite") {
       return (
         <div className={styles.outer}>
           <div className={styles.fill_parent}>
@@ -453,7 +443,7 @@ class PlotBox extends React.Component {
           <FigureCaption {...this.props} />
         </div>
       );
-    } else if (plotShape == "grid") {
+    } else if (plotShape == "grid" || plotShape == "lines") {
       return (
         <div className={styles.outer}>
           <div className={styles.fill_parent}>

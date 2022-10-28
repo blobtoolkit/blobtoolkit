@@ -39,21 +39,21 @@ const isPowerOfTen = (d) => {
 };
 
 const PlotOutline = ({
-  i,
-  col,
-  row,
-  x,
+  i = 0,
+  col = 0,
+  row = 0,
+  x = 0,
   y,
   width,
   height,
-  label,
+  label = "",
   colWidth,
   xDomain,
   yDomain,
   scales,
-  nRows,
-  nCols,
-  len,
+  nRows = 1,
+  nCols = 1,
+  len = 1,
   plotText,
   plotPaths,
   fill = "white",
@@ -63,6 +63,9 @@ const PlotOutline = ({
   showSelection,
   meta,
 }) => {
+  if (!y) {
+    y = height;
+  }
   let fontSize = plotText.axisTick.fontSize;
   let f = (d) => {
     if (d < 1 && d > 0.0001) {
@@ -173,7 +176,31 @@ const PlotOutline = ({
 
   let xTicks = nCols == 1 ? 10 : nCols == 2 ? 5 : 3;
   let yTicks = nRows == 1 ? 10 : nRows == 2 ? 5 : 3;
+  let yProps = axisPropsFromTickScale(yScale, yTicks);
+  if (yProps.values.length > 10) {
+    let yMin = yProps.values[0];
+    let yMax = yProps.values[yProps.values.length - 1];
+    yProps.values = yProps.values.filter((v) => isPowerOfTen(v));
+    if (yProps.values[0] > yMin) {
+      yProps.values = [yMin, ...yProps.values];
+    }
+    if (yProps.values[yProps.values.length - 1] < yMax) {
+      yProps.values = [...yProps.values, yMax];
+    }
+  }
 
+  let xProps = axisPropsFromTickScale(xScale, xTicks);
+  if (xProps.values.length > 10) {
+    let xMin = xProps.values[0];
+    let xMax = xProps.values[xProps.values.length - 1];
+    xProps.values = xProps.values.filter((v) => isPowerOfTen(v));
+    if (xProps.values[0] > xMin) {
+      xProps.values = [xMin, ...xProps.values];
+    }
+    if (xProps.values[xProps.values.length - 1] < xMax) {
+      xProps.values = [...xProps.values, xMax];
+    }
+  }
   return (
     <g transform={`translate(${x},${y - height})`}>
       <rect
@@ -194,6 +221,7 @@ const PlotOutline = ({
       <g transform={`translate(0,0)`} pointerEvents={"none"}>
         <text
           x={width / 2}
+          y={2}
           textAnchor={"middle"}
           dominantBaseline={"hanging"}
           alignmentBaseline={"hanging"}
@@ -212,16 +240,11 @@ const PlotOutline = ({
       /> */}
       {(col == 0 && (
         <Axis
-          {...axisPropsFromTickScale(yScale, yTicks)}
+          {...yProps}
           style={{ orient: LEFT, tickFontSize: fontSize }}
           format={fy}
         />
-      )) || (
-        <Axis
-          {...axisPropsFromTickScale(yScale, yTicks)}
-          style={{ orient: LEFT, tickFontSize: 0 }}
-        />
-      )}
+      )) || <Axis {...yProps} style={{ orient: LEFT, tickFontSize: 0 }} />}
       {/* <g transform={`translate(${width})`}>
         <Axis
           {...axisPropsFromTickScale(yScale, yTicks)}
@@ -231,17 +254,14 @@ const PlotOutline = ({
       {((row == nRows - 1 || i == len - 1) && (
         <g transform={`translate(0,${height})`}>
           <Axis
-            {...axisPropsFromTickScale(xScale, xTicks)}
+            {...xProps}
             style={{ orient: BOTTOM, tickFontSize: fontSize }}
             format={fx}
           />
         </g>
       )) || (
         <g transform={`translate(0,${height})`}>
-          <Axis
-            {...axisPropsFromTickScale(xScale, xTicks)}
-            style={{ orient: BOTTOM, tickFontSize: 0 }}
-          />
+          <Axis {...xProps} style={{ orient: BOTTOM, tickFontSize: 0 }} />
         </g>
       )}
     </g>

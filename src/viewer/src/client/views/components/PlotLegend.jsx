@@ -173,7 +173,7 @@ const Legend = ({
     let count = values.counts.all > 0;
     let legendRows = 0;
     // numbers.push(commaFormat(values.counts.all))
-    if (shape == "grid") {
+    if (shape == "grid" || shape == "lines") {
       offset = 0;
       let visibleBins = bins.filter((b) =>
         visibleCats ? visibleCats.has(b.id) : true

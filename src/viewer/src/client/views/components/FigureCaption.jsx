@@ -159,7 +159,7 @@ class Caption extends Component {
         caption += `. Horizontal and vertical lines represent a range spanning 2 standard deviations about the weighted mean value for each axis`;
         caption += `. The lines intersect at a point representing the weighted median value`;
       }
-      if (shape != "grid") {
+      if (shape != "grid" && shape != "lines") {
         histograms = `. Histograms show the distribution of ${record} ${z} ${reducer} along each axis`;
       }
       if (this.props.params.factor != 0 || this.props.params.intercept != 0) {

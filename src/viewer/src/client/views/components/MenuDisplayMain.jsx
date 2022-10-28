@@ -312,7 +312,7 @@ class DisplayMenu extends React.Component {
               ))}
             </MenuDisplaySimple>
           )}
-          {shape == "grid" && (
+          {(shape == "lines" || shape == "grid") && (
             <MenuDisplaySimple name="plot style">
               <SVGIcon
                 sprite={circleStyleIcon}
@@ -329,11 +329,13 @@ class DisplayMenu extends React.Component {
                 active={plotStyle == "mixed"}
                 onIconClick={() => onChangePlotStyle("mixed")}
               /> */}
-              <SVGIcon
-                sprite={histogramStyleIcon}
-                active={plotStyle == "histogram"}
-                onIconClick={() => onChangePlotStyle("histogram")}
-              />
+              {shape == "grid" && (
+                <SVGIcon
+                  sprite={histogramStyleIcon}
+                  active={plotStyle == "histogram"}
+                  onIconClick={() => onChangePlotStyle("histogram")}
+                />
+              )}
             </MenuDisplaySimple>
           )}
           {shape == "lines" && errorBarOptions && (

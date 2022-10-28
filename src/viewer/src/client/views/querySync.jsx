@@ -101,12 +101,12 @@ const mapDispatchToQuery = {
   largeFonts: {
     type: "SET_LARGE_FONTS",
     payload: (k, v) => v,
-    default: "false",
+    default: "true",
   },
   errorBars: {
     type: "SET_ERROR_BARS",
     payload: (k, v) => v,
-    default: "sd",
+    default: "0",
   },
   windowSize: {
     type: "SET_WINDOW_SIZE",

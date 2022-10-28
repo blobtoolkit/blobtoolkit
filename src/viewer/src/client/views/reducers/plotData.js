@@ -21,6 +21,7 @@ import {
   getLargeFonts,
   getPlotResolution,
   getPlotScale,
+  getPlotShape,
   getTransformFunction,
   getTransformFunctionParams,
   getWindowSize,
@@ -899,6 +900,7 @@ export const getGridPlotData = createSelector(
   getWindowBinsForCat,
   getColorPalette,
   getMainPlotData,
+  getPlotShape,
   (
     plotData,
     list,
@@ -911,7 +913,8 @@ export const getGridPlotData = createSelector(
     largeFonts,
     bins,
     palette,
-    mainData
+    mainData,
+    plotShape
   ) => {
     if (!plotData) return {};
     let plotSize = 1300;
@@ -947,6 +950,7 @@ export const getGridPlotData = createSelector(
     let xDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
     let i = 0;
     let maxX = Number.NEGATIVE_INFINITY;
+    let xMinNoZero = Number.POSITIVE_INFINITY;
     for (let arr of plotData.axes.x.values) {
       for (let val of arr) {
         if (val < xDomain[0]) {
@@ -954,6 +958,9 @@ export const getGridPlotData = createSelector(
         }
         if (val > xDomain[1]) {
           xDomain[1] = val;
+        }
+        if (val > 0 && val < xMinNoZero) {
+          xMinNoZero = val;
         }
         if (val > maxX) {
           maxX = val;
@@ -971,13 +978,20 @@ export const getGridPlotData = createSelector(
     if (colWidths.length < nCols) {
       colWidths.push(maxX);
     }
+    let setXClamp = false;
     if (plotData.meta.x.meta.scale == "scaleLog") {
+      if (xDomain[0] == 0) {
+        xDomain[0] = Math.pow(10, Math.floor(Math.log10(xMinNoZero)));
+        setXClamp = true;
+      }
       let tmpScale = scaleLog()
         .domain(xDomain)
         .range([0, Math.max(...colWidths)]);
+      tmpScale.clamp(setXClamp);
       colWidths = colWidths.map((val) => tmpScale(val));
     }
     let yDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    let yMinNoZero = Number.POSITIVE_INFINITY;
     for (let arr of plotData.axes.y.values) {
       for (let val of arr) {
         if (val > yDomain[1]) {
@@ -985,6 +999,9 @@ export const getGridPlotData = createSelector(
         }
         if (val < yDomain[0]) {
           yDomain[0] = val;
+        }
+        if (val > 0 && val < yMinNoZero) {
+          yMinNoZero = val;
         }
       }
     }
@@ -1012,13 +1029,25 @@ export const getGridPlotData = createSelector(
           scales[axis].type = plotData.meta[axis].xScale.type;
         }
       }
-      scales[axis].range([
-        0,
-        axis == "x" ? cellWidth : axis == "y" ? cellHeight : plotSize,
-      ]);
+      if (plotShape == "grid") {
+        scales[axis].range([
+          0,
+          axis == "x" ? cellWidth : axis == "y" ? cellHeight : plotSize,
+        ]);
+      } else {
+        scales[axis].range([
+          0,
+          axis == "x" ? plotSize : axis == "y" ? plotHeight : plotSize,
+        ]);
+      }
+
       if (axis == "y") {
         if (yField == "position" || yField == "proportion") {
           yDomain = scales[axis].domain();
+        }
+        if (plotData.meta.y.meta.scale == "scaleLog" && yDomain[0] == 0) {
+          yDomain[0] = Math.pow(10, Math.floor(Math.log10(yMinNoZero)));
+          scales[axis].clamp(true);
         }
         scales[axis].domain(yDomain);
       }
@@ -1026,6 +1055,7 @@ export const getGridPlotData = createSelector(
         if (xField == "position" || xField == "proportion") {
           xDomain = scales[axis].domain();
         }
+        scales[axis].clamp(setXClamp);
         scales[axis].domain(xDomain);
       }
     });
@@ -1051,26 +1081,30 @@ export const getGridPlotData = createSelector(
       });
     });
     axes = ["x", "y", "z", "cat"];
-    let offset = {};
+    let offset = { x: 0, y: -legendSpace };
     let j = 0;
     let row = 0;
     let visibleCats = new Set();
     let visibleFullCats = new Set();
     for (let i = 0; i < len; i++) {
-      // console.log(plotData.axes.cat.values);
       visibleFullCats.add(bins[keys[mainData.axes.cat.values[i]]].id);
-      if (i == 0) {
-        offset = { x: 0, y: (cellHeight + rowPad) * (nRows - 1) - legendSpace };
-        row = 0;
-      } else if (i % nRows == 0) {
-        j = i / nRows;
-        offset.x += (cellWidth * colWidths[j - 1]) / maxWidth;
-        offset.x += colPad;
-        offset.y = (cellHeight + rowPad) * (nRows - 1) - legendSpace;
-        row = 0;
-      } else {
-        offset.y -= cellHeight + rowPad;
-        row++;
+      if (plotShape == "grid") {
+        if (i == 0) {
+          offset = {
+            x: 0,
+            y: (cellHeight + rowPad) * (nRows - 1) - legendSpace,
+          };
+          row = 0;
+        } else if (i % nRows == 0) {
+          j = i / nRows;
+          offset.x += (cellWidth * colWidths[j - 1]) / maxWidth;
+          offset.x += colPad;
+          offset.y = (cellHeight + rowPad) * (nRows - 1) - legendSpace;
+          row = 0;
+        } else {
+          offset.y -= cellHeight + rowPad;
+          row++;
+        }
       }
       let xs = [];
       let ys = [];
@@ -1192,6 +1226,7 @@ export const getGridPlotData = createSelector(
       nRows,
       visibleCats,
       visibleFullCats,
+      legendSpace,
     };
   }
 );
