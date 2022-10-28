@@ -38,6 +38,7 @@ import { getDatasetID } from "./location";
 import { getFilteredList } from "./filter";
 import { getIdentifiers } from "./identifiers";
 import { getQueryValue } from "./location";
+import { scaleLog } from "d3-scale";
 import { set } from "react-ga";
 import store from "../store";
 
@@ -969,6 +970,12 @@ export const getGridPlotData = createSelector(
     }
     if (colWidths.length < nCols) {
       colWidths.push(maxX);
+    }
+    if (plotData.meta.x.meta.scale == "scaleLog") {
+      let tmpScale = scaleLog()
+        .domain(xDomain)
+        .range([0, Math.max(...colWidths)]);
+      colWidths = colWidths.map((val) => tmpScale(val));
     }
     let yDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
     for (let arr of plotData.axes.y.values) {

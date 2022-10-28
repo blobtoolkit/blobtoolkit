@@ -195,8 +195,8 @@ const PlotOutline = ({
         <text
           x={width / 2}
           textAnchor={"middle"}
-          dominantBaseline={"middle"}
-          alignmentBaseline={"middle"}
+          dominantBaseline={"hanging"}
+          alignmentBaseline={"hanging"}
           fontSize={fontSize}
         >
           {label}

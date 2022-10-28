@@ -454,7 +454,6 @@ class PlotBox extends React.Component {
         </div>
       );
     } else if (plotShape == "grid") {
-      console.log(this.props);
       return (
         <div className={styles.outer}>
           <div className={styles.fill_parent}>
