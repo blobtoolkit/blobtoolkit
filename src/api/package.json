@@ -6,8 +6,12 @@
   "bin": "src/app.js",
   "main": "index.js",
   "scripts": {
-    "api": "NODE_ENV=production node src/app.js",
-    "start": "nodemon src/app.js"
+    "api": "NODE_ENV=production node src/server.js",
+    "start": "nodemon src/server.js",
+    "test": "jest"
+  },
+  "jest": {
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|_spec_))\\.jsx?$"
   },
   "author": "Richard Challis",
   "license": "MIT",
@@ -18,7 +22,6 @@
     "express": "^4.17.2",
     "express-cors": "0.0.3",
     "promise": "^8.1.0",
-    "supertest": "^4.0.2",
     "swagger-jsdoc": "^3.7.0",
     "swagger-ui-express": "^4.3.0",
     "testdouble": "^3.16.4",
@@ -29,10 +32,12 @@
   "devDependencies": {
     "compression": "^1.7.4",
     "dotenv": "^8.6.0",
+    "jest": "^29.2.2",
     "js-yaml": "^4.1.0",
     "mkdirp": "^1.0.4",
     "nodemon": "^2.0.15",
-    "should": "^13.2.3"
+    "should": "^13.2.3",
+    "supertest": "^6.3.1"
   },
   "optionalDependencies": {
     "fsevents": "^2.3.2"

@@ -4,7 +4,7 @@ module.exports = function (app, db) {
    * /api/v1/status:
    *   get:
    *     tags:
-   *       - Health
+   *       - Status
    *     description: Returns API status and dataset count
    *     produces:
    *       - application/json
@@ -13,7 +13,7 @@ module.exports = function (app, db) {
    *         description: Check the API is running
    */
   app.get("/api/v1/status", async (req, res) => {
-    res.setHeader("content-type", "text/plain");
+    res.setHeader("content-type", "application/json");
     const searchRoutes = require("./search_routes");
     let count = searchRoutes.total();
     let status = searchRoutes.status();
