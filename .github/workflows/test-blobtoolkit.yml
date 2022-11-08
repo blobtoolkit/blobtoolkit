@@ -71,7 +71,7 @@ jobs:
           rm -r dist/artifact
           blobtools -v
       - run: |
-          (blobtools view --local --ports 44000-44099 _ &)
+          blobtools host --port 44001 -- api-port 44000 _
           sleep 15
           netstat -lt
       - name: Install dependencies
