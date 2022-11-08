@@ -71,7 +71,7 @@ jobs:
           rm -r dist/artifact
           blobtools -v
       - run: |
-          (blobtools view --local &)
+          (blobtools view --local _ &)
           sleep 5
           netstat -lt
       - name: Install dependencies
