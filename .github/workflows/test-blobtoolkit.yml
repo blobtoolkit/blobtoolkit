@@ -71,8 +71,8 @@ jobs:
           rm -r dist/artifact
           blobtools -v
       - run: |
-          (blobtools view --local _ &)
-          sleep 5
+          (blobtools view --local --ports 44000-44099 _ &)
+          sleep 15
           netstat -lt
       - name: Install dependencies
         run: sudo apt-get install -y chromium-browser chromium-chromedriver firefox xvfb
