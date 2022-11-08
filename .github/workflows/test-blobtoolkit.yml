@@ -70,8 +70,12 @@ jobs:
           pip install dist/artifact/*linux*.whl
           rm -r dist/artifact
           blobtools -v
+      - run: |
+          (blobtools view --local &)
+          sleep 5
+          netstat -lt
       - name: Install dependencies
-        run: sudo apt-get install -y chromium-browser firefox xvfb
+        run: sudo apt-get install -y chromium-browser chromium-chromedriver firefox xvfb
       - run: netstat -lt
       - name: Generate static plot
         run: |
