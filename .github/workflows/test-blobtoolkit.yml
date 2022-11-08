@@ -72,6 +72,7 @@ jobs:
           blobtools -v
       - name: Install dependencies
         run: sudo apt-get install -y chromium-browser firefox xvfb
+      - run: netstat -lt
       - name: Generate static plot
         run: |
           blobtools view \
