@@ -71,11 +71,12 @@ jobs:
           rm -r dist/artifact
           blobtools -v
       - name: Install dependencies
-        run: sudo apt-get install -y firefox xvfb
+        run: sudo apt-get install -y chromium-browser firefox xvfb
       - name: Generate static plot
         run: |
           blobtools view \
               --host http://localhost \
+              --driver chromium \
               --timeout 60 \
               --ports 8000-8099 \
               --view blob \
