@@ -1,23 +1,8 @@
 name: test-blobtoolkit
 on: [push]
 jobs:
-  update-btk:
-    runs-on: ubuntu-latest
-    container:
-      image: genomehubs/blobtoolkit-blobtools:latest
-      ports:
-        - 8000
-        - 8001
-      volumes:
-        - /home/runner/work/blobtoolkit/blobtoolkit:/blobtoolkit/conf
-    steps:
-      - run: yes | pip uninstall blobtoolkit
-      - run: yes | pip install blobtoolkit
-
   package-ui:
     runs-on: ubuntu-latest
-    needs:
-      - update-btk
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -31,8 +16,6 @@ jobs:
 
   package-api:
     runs-on: ubuntu-latest
-    needs:
-      - update-btk
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -73,9 +56,17 @@ jobs:
 
   test-commands:
     runs-on: ubuntu-latest
+    container:
+      image: genomehubs/blobtoolkit-blobtools:latest
+      ports:
+        - 8000
+        - 8001
+      volumes:
+        - /home/runner/work/blobtoolkit/blobtoolkit:/blobtoolkit/conf
     needs:
       - package-blobtoolkit-linux
     steps:
+      - run: yes | pip uninstall --no-cache-dir blobtoolkit
       - uses: actions/checkout@v2
       - name: Collect artifacts
         uses: actions/download-artifact@v2
@@ -83,27 +74,21 @@ jobs:
           path: ./dist
       - name: Pip install blobtoolkit
         run: |
-          python3 -m pip install --upgrade pip
+          cd /blobtoolkit/conf
           pip install dist/artifact/*linux*.whl
           rm -r dist/artifact
           blobtools -v
-      - run: |
-          (blobtools host --port 8001 --api-port 8000 _ &)
-          sleep 30
-          netstat -lt
-      - name: Install dependencies
-        run: sudo apt-get install -y chromium-browser chromium-chromedriver firefox xvfb
-      - run: |
-          netstat -lt
-          which Chrome || \
-          which chrome && alias Chrome=$(which chrome)
-          which chromium && alias Chrome=$(which chromium) || echo no chromium
-          which chromedriver || echo no chromedriver
+      # - run: |
+      #     (blobtools host --port 8001 --api-port 8000 _ &)
+      #     sleep 30
+      #     netstat -lt
+      # - name: Install dependencies
+      #   run: sudo apt-get install -y chromium-browser chromium-chromedriver firefox xvfb
       - name: Generate static plot
         run: |
+          cd /blobtoolkit/conf
           blobtools view \
               --host http://localhost \
-              --driver chromium \
               --timeout 60 \
               --ports 8000-8099 \
               --view blob \
@@ -113,6 +98,7 @@ jobs:
               _
       - name: Test plot exists
         run: |
+          cd /blobtoolkit/conf
           test -s "FXWY01.blob.circle.png" && exit 0 || exit 1
       - uses: actions/upload-artifact@v2
         with:
