@@ -1,12 +1,6 @@
 name: test-blobtoolkit
 on: [push]
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: ls
-      - run: pwd
-
   update-btk:
     runs-on: ubuntu-latest
     container:
@@ -15,10 +9,10 @@ jobs:
         - 8000
         - 8001
       volumes:
-        - data:/volume_mount
+        - /home/runner/work/blobtoolkit/blobtoolkit:/blobtoolkit/conf
     steps:
-      - run: pip uninstall blobtoolkit
-      - run: pip install blobtoolkit
+      - run: yes | pip uninstall blobtoolkit
+      - run: yes | pip install blobtoolkit
 
   package-ui:
     runs-on: ubuntu-latest
