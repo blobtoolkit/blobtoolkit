@@ -157,7 +157,11 @@ def start_api(port, api_port, hostname, directory):
     if hostname != "localhost":
         origins += " http://%s:%d http://%s" % (hostname, int(port), hostname)
     if directory == "_":
-        env = dict(os.environ, BTK_API_PORT=api_port, BTK_ORIGINS=origins,)
+        env = dict(
+            os.environ,
+            BTK_API_PORT=api_port,
+            BTK_ORIGINS=origins,
+        )
     else:
         env = dict(
             os.environ,
@@ -166,7 +170,11 @@ def start_api(port, api_port, hostname, directory):
             BTK_ORIGINS=origins,
         )
     process = Popen(
-        shlex.split(cmd), stdout=PIPE, stderr=PIPE, encoding="ascii", env=env,
+        shlex.split(cmd),
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="ascii",
+        env=env,
     )
     return process
 
@@ -208,20 +216,25 @@ def main(args):
         directory = path.absolute()
     test_port(args["--api-port"], "BlobtoolKit API")
     test_port(args["--port"], "BlobtoolKit viewer")
-    api = start_api(args["--port"], args["--api-port"], args["--hostname"], directory,)
+    api = start_api(
+        args["--port"],
+        args["--api-port"],
+        args["--hostname"],
+        directory,
+    )
     PIDS.append(api.pid)
     print(
         "Starting BlobToolKit API on port %d (pid: %d)"
         % (int(args["--api-port"]), api.pid)
     )
-    time.sleep(2)
+    time.sleep(4)
     viewer = start_viewer(args["--port"], args["--api-port"], args["--hostname"])
     PIDS.append(viewer.pid)
     print(
         "Starting BlobToolKit viewer on port %d (pid: %d)"
         % (int(args["--port"]), viewer.pid)
     )
-    time.sleep(2)
+    time.sleep(4)
     ready = False
     url = "http://%s:%d" % (args["--hostname"], int(args["--port"]))
     while True:
