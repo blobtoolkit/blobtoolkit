@@ -78,8 +78,9 @@ jobs:
         run: sudo apt-get install -y chromium-browser chromium-chromedriver firefox xvfb
       - run: |
           netstat -lt
-          which chrome || echo no chrome
-          which chromium || echo no chromium
+          which Chrome || \
+          which chrome && alias Chrome=$(which chrome)
+          which chromium && alias Chrome=$(which chromium) || echo no chromium
           which chromedriver || echo no chromedriver
       - name: Generate static plot
         run: |
