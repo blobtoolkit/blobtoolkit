@@ -7,22 +7,23 @@ Usage:
   btk pipeline generate-config <ACCESSION> [--coverage 30] [--download]
     [--out /path/to/output/directory] [--db /path/to/database/directory]
     [--db-suffix STRING] [--reads STRING...] [--read-runs INT] [--api-key STRING]
-    [--platforms STRING] [--datasets] [--protocol STRING] [--retry-times INT]
+    [--platforms STRING] [--datasets] [--protocol STRING] 
+    [--download-client STRING] [--retry-times INT]
 
 Options:
-  --coverage=INT         Maximum coverage for read mapping [default: 30]
-  --download             Flag to download remote files [default: False]
-  --out PATH             Path to output directory [default: .]
-  --db PATH              Path to database directory [default: .]
-  --db-suffix STRING     Database version suffix (e.g. 2021_06)
-  --reads STRING         Read accession to include.
-  --read-runs INT        Maximum number of read runs [default: 3]
-  --api-key STRING       NCBI api key for use with edirect
-  --platforms STRING     priority order for sequencing platforms
-                         [default: PACBIO_SMRT,ILLUMINA_XTEN,ILLUMINA,OXFORD_NANOPORE,OTHER]
-  --protocol STRING      Download files using ftp(s) or http(s) [default: ftp]
-  --download-client      Client to use for downloads (curl|datasets) [default: curl]
-  --retry-times INT      Number of times to retry a failed download [default: 0]
+  --coverage=INT            Maximum coverage for read mapping [default: 30]
+  --download                Flag to download remote files [default: False]
+  --out PATH                Path to output directory [default: .]
+  --db PATH                 Path to database directory [default: .]
+  --db-suffix STRING        Database version suffix (e.g. 2021_06)
+  --reads STRING            Read accession to include.
+  --read-runs INT           Maximum number of read runs [default: 3]
+  --api-key STRING          NCBI api key for use with edirect
+  --platforms STRING        priority order for sequencing platforms
+                            [default: PACBIO_SMRT,ILLUMINA_XTEN,ILLUMINA,OXFORD_NANOPORE,OTHER]
+  --protocol STRING         Download files using ftp(s) or http(s) [default: ftp]
+  --download-client STRING  Client to use for downloads (aria2c|curl|datasets) [default: curl]
+  --retry-times INT         Number of times to retry a failed download [default: 0]
 """
 
 # pyright: reportMissingModuleSource=false
@@ -139,7 +140,7 @@ def find_busco_lineages(ancestors):
     return lineages
 
 
-def fetch_file(url, filename, protocol="ftp", retry_times=0):
+def fetch_file_curl(url, filename, protocol="ftp", retry_times=0):
     """fetch a remote file using curl."""
     filepath = Path(filename)
     if filepath.is_file():
@@ -152,7 +153,8 @@ def fetch_file(url, filename, protocol="ftp", retry_times=0):
     while iteration <= retry_times:
         cmd = ["curl", "-L", "-s", "--connect-timeout", "30"]
         if iteration:
-            cmd.append("-C")
+            LOGGER.info("Connection interrupted, resuming download")
+            cmd.extend(["-C", "-"])
         cmd.extend(
             [
                 "-o",
@@ -170,7 +172,33 @@ def fetch_file(url, filename, protocol="ftp", retry_times=0):
         sys.exit(1)
 
 
-def fetch_ncbi_datasets_assembly(url, filename, accession, retry_times):
+def fetch_file_aria(url, filename, protocol="ftp", retry_times=0, binary="aria2c"):
+    """fetch a remote file using aria2."""
+    filepath = Path(filename)
+    if filepath.is_file():
+        LOGGER.info("File exists, not overwriting")
+        return
+    if protocol:
+        url = url.replace("ftp:", f"{protocol}:").replace("ftps:", f"{protocol}:")
+    iteration = 0
+    complete = False
+    while iteration <= retry_times:
+        cmd = [binary, "-q", "-d", filepath.parent]
+        if iteration:
+            LOGGER.info("Connection interrupted, resuming download")
+            cmd.append("-c")
+        cmd.extend(["-o", filepath.name, url])
+        proc = run(cmd)
+        if proc.returncode == 0:
+            complete = True
+            break
+        iteration += 1
+    if not complete:
+        LOGGER.error(f"Unable to fetch {filename}")
+        sys.exit(1)
+
+
+def fetch_ncbi_datasets_assembly(filename, accession, retry_times):
     """Fetch a remote assembly using NCBI datasets."""
     filepath = Path(filename)
     if filepath.is_file():
@@ -253,10 +281,14 @@ def fetch_assembly_fasta(
     """Save assembly fasta file to local disk."""
     if download_client == "datasets" and which(download_client) is not None:
         LOGGER.info(f"Fetching assembly FASTA to {filename} using NCBI datasets")
-        fetch_ncbi_datasets_assembly(url, filename, accession, retry_times)
+        fetch_ncbi_datasets_assembly(filename, accession, retry_times)
+
+    elif download_client.startswith("aria") and which(download_client) is not None:
+        LOGGER.info(f"Fetching assembly FASTA to {filename} using {download_client}")
+        fetch_file_aria(url, filename, protocol, retry_times, download_client)
     else:
         LOGGER.info(f"Fetching assembly FASTA to {filename} using curl")
-        fetch_file(url, filename, protocol, retry_times)
+        fetch_file_curl(url, filename, protocol, retry_times)
 
 
 def write_cat_file(data, filename):
@@ -302,7 +334,7 @@ def fetch_assembly_report(
 ):
     """Save assembly report file to local disk."""
     LOGGER.info(f"Fetching assembly report to {filename}")
-    fetch_file(url, filename, protocol, retry_times)
+    fetch_file_curl(url, filename, protocol, retry_times)
     parse_assembly_report(filename, cat_filename, syn_filename)
 
 
@@ -509,7 +541,7 @@ def fetch_read_files(meta, protocol, retry_times):
         url = f"ftp://{url}"
         read_file = files[index]
         LOGGER.info("Fetching read file %s", read_file)
-        fetch_file(url, read_file, protocol, retry_times)
+        fetch_file_curl(url, read_file, protocol, retry_times)
 
 
 def add_taxon_to_meta(meta, taxon_meta):
@@ -565,7 +597,7 @@ def set_btk_version(meta):
     meta["version"] = current + 1
 
 
-def process_reads(opts, outdir, protocol, download_client, retry_times, meta, sra):
+def process_reads(opts, outdir, protocol, retry_times, meta, sra):
     if opts["--coverage"]:
         meta["reads"].update({"coverage": {"max": int(opts["--coverage"])}})
     readdir = f"{outdir}/reads"
@@ -573,7 +605,7 @@ def process_reads(opts, outdir, protocol, download_client, retry_times, meta, sr
     if opts["--download"]:
         os.makedirs(readdir, exist_ok=True)
         for library in sra:
-            fetch_read_files(library, protocol, retry_times, download_client)
+            fetch_read_files(library, protocol, retry_times)
 
 
 def process_busco(opts, buscodir, meta, taxon_meta):
@@ -625,7 +657,6 @@ def download_assembly(
         syn_filename,
         protocol,
         retry_times,
-        download_client,
     )
 
 
@@ -635,7 +666,7 @@ def set_defaults(opts):
     dbdir = opts["--db"]
     protocol = opts["--protocol"]
     download_client = opts["--download-client"]
-    retry_times = opts["--retry-times"]
+    retry_times = int(opts["--retry-times"])
     buscodir = f"{dbdir}/busco"
     uniprotdir = f"{dbdir}/uniprot"
     ntdir = f"{dbdir}/nt"
@@ -715,7 +746,7 @@ def main():
     if sra := assembly_reads(
         read_accessions, int(opts["--read-runs"]), opts["--platforms"]
     ):
-        process_reads(opts, outdir, protocol, download_client, retry_times, meta, sra)
+        process_reads(opts, outdir, protocol, retry_times, meta, sra)
     meta["similarity"]["blastn"]["path"] = ntdir
     meta["similarity"]["diamond_blastx"]["path"] = uniprotdir
     meta["similarity"]["diamond_blastp"]["path"] = uniprotdir
