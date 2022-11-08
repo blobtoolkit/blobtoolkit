@@ -204,7 +204,9 @@ def firefox_driver(args):
     display.start()
 
     driver = webdriver.Firefox(
-        options=options, firefox_profile=profile, service_log_path=args["--driver-log"],
+        options=options,
+        firefox_profile=profile,
+        service_log_path=args["--driver-log"],
     )
     time.sleep(2)
     return driver, display
@@ -213,18 +215,21 @@ def firefox_driver(args):
 def chromium_driver(args):
     """Start chromium browser."""
     os.environ["WDM_LOG_LEVEL"] = "0"
-    try:
-        LOGGER.info("Chrome and chromedriver must be available for blobtools view")
-        LOGGER.info("Attempting to install the appropriate chromedriver version")
-        from webdriver_manager.chrome import ChromeDriverManager
+    if (which("chrome") is None and which("chromium") is None) or which(
+        "chromedriver"
+    ) is None:
+        try:
+            LOGGER.info("Chrome and chromedriver must be available for blobtools view")
+            LOGGER.info("Attempting to install the appropriate chromedriver version")
+            from webdriver_manager.chrome import ChromeDriverManager
 
-        service_object = Service(ChromeDriverManager().install())
-        LOGGER.info("Successfully installed chromedriver")
-    except Exception:
-        LOGGER.error(
-            "Unable to install automatically. Check Chrome is available or try `blobtools view --driver firefox` to use firefox browser."
-        )
-        sys.exit(1)
+            service_object = Service(ChromeDriverManager().install())
+            LOGGER.info("Successfully installed chromedriver")
+        except Exception:
+            LOGGER.error(
+                "Unable to install automatically. Check Chrome is available or try `blobtools view --driver firefox` to use firefox browser."
+            )
+            sys.exit(1)
     outdir = os.path.abspath(args["--out"])
     os.makedirs(Path(outdir), exist_ok=True)
 
