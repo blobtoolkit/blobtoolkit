@@ -63,6 +63,7 @@ jobs:
         - 8001
       volumes:
         - /home/runner/work/blobtoolkit/blobtoolkit:/blobtoolkit/conf
+      options: --user root
     needs:
       - package-blobtoolkit-linux
     steps:
@@ -71,7 +72,7 @@ jobs:
       - name: Collect artifacts
         uses: actions/download-artifact@v2
         with:
-          path: ./dist
+          path: /blobtoolkit/conf/dist
       - name: Pip install blobtoolkit
         run: |
           cd /blobtoolkit/conf
