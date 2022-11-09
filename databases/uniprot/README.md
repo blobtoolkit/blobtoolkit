@@ -5,7 +5,7 @@ Based on Uniprot reference proteomes downloaded June 2021. Commands below were r
 Install dependencies
 
 ```
-conda install -c bioconda seqtk
+conda install -c conda-forge -c bioconda diamond seqtk
 ```
 
 Fetch sequence names from public BTK results
@@ -32,7 +32,9 @@ cat *.ids | sort -u > all.ids
 
 seqtk subseq ../reference_proteomes.fasta.gz all.ids | gzip -c > all.fasta.gz
 
-grep -Ff <(cut -d"|" -f 2 all.ids) ../reference_proteomes.taxid_map > all.taxid_map
+printf "accession\taccession.version\ttaxid\tgi\n" > all.taxid_map
+
+grep -Ff <(cut -d"|" -f 2 all.ids) ../reference_proteomes.taxid_map >> all.taxid_map
 
 diamond makedb -p 4 --in all.fasta.gz --taxonmap all.taxid_map --taxonnodes ../../taxdump_2021_06/nodes.dmp -d all.dmnd
 ```
@@ -43,7 +45,8 @@ Generate files for each assembly
 for IDS in *s.ids; do
   DB=${IDS%*.ids}
   seqtk subseq all.fasta.gz $IDS | gzip -c > $DB.fasta.gz
-  grep -Ff <(cut -d"|" -f 2 $IDS) all.taxid_map > $DB.taxid_map
+  printf "accession\taccession.version\ttaxid\tgi\n" > $DB.taxid_map
+  grep -Ff <(cut -d"|" -f 2 $IDS) all.taxid_map >> $DB.taxid_map
   diamond makedb -p 4 --in $DB.fasta.gz --taxonmap $DB.taxid_map --taxonnodes ../../taxdump_2021_06/nodes.dmp -d $DB.dmnd
 done
 ```
