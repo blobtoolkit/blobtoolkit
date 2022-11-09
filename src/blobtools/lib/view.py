@@ -27,6 +27,8 @@ Options:
       --timeout INT           Time to wait for page load in seconds. Default (0) is no timeout. [Default: 0]
       --view STRING           Plot type (blob|cumulative|snail). [Default: blob]
 """
+
+import contextlib
 import os
 import shlex
 import signal
@@ -68,9 +70,9 @@ def file_ready(file_path, timeout, callback):
         os.chown(parent, os.stat(parent).st_uid, os.stat(parent).st_gid)
         time.sleep(1)
     if os.path.isfile(file_path):
-        print(" - found %s" % file_path)
+        print(f" - found {file_path}")
         return True
-    callback("%s is not a file" % file_path)
+    callback(f"{file_path} is not a file")
     return False
 
 
@@ -80,39 +82,23 @@ def test_loc(args):
     dataset = Path(args["DIRECTORY"]).name
     level = "dataset"
     if len(info) >= 2 and info[1] != "//localhost":
-        loc = "%s/%s/%s/dataset/%s" % (
-            args["--host"],
-            args["--prefix"],
-            dataset,
-            dataset,
-        )
+        loc = f'{args["--host"]}/{args["--prefix"]}/{dataset}/dataset/{dataset}'
         return loc, None, None, None, level
     if len(info) == 1 and info[0] != "localhost":
         # need to add test for http vs https
-        loc = "http://%s/%s/%s/dataset/%s" % (
-            args["--host"],
-            args["--prefix"],
-            dataset,
-            dataset,
-        )
+        loc = f'http://{args["--host"]}/{args["--prefix"]}/{dataset}/dataset/{dataset}'
         return loc, None, None, None, level
     if len(info) == 3:
         port = info[2]
-        for i in range(0, 10):
-            available = test_port(port, "test")
-            if available:
+        for i in range(10):
+            if available := test_port(port, "test"):
                 if i == 9:
-                    print("ERROR: No service running on port %s" % port)
-                    print("       Unable to connect to %s" % args["--host"])
+                    print(f"ERROR: No service running on port {port}")
+                    print(f'       Unable to connect to {args["--host"]}')
                     sys.exit(1)
                 time.sleep(1)
             else:
-                loc = "%s/%s/%s/dataset/%s" % (
-                    args["--host"],
-                    args["--prefix"],
-                    dataset,
-                    dataset,
-                )
+                loc = f'{args["--host"]}/{args["--prefix"]}/{dataset}/dataset/{dataset}'
                 return loc, None, None, None, level
     if args["DIRECTORY"] == "_":
         parent = "_"
@@ -126,8 +112,8 @@ def test_loc(args):
             sys.exit(1)
         dataset = Path(args["DIRECTORY"]).name
         if (
-            Path("%s/meta.json" % args["DIRECTORY"]).is_file()
-            or Path("%s/meta.json.gz" % args["DIRECTORY"]).is_file()
+            Path(f'{args["DIRECTORY"]}/meta.json').is_file()
+            or Path(f'{args["DIRECTORY"]}/meta.json.gz').is_file()
         ):
             parent = Path(args["DIRECTORY"]).resolve().absolute().parent
         else:
@@ -148,12 +134,9 @@ def test_loc(args):
     cmd = "blobtools host --port %d --api-port %d %s" % (port, api_port, parent)
     process = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE, encoding="ascii")
     loc = "%s:%d/%s" % (args["--host"], port, args["--prefix"])
-    if level == "dataset":
-        loc += "/%s/dataset/%s" % (dataset, dataset)
-    else:
-        loc += "/all"
+    loc += f"/{dataset}/dataset/{dataset}" if level == "dataset" else "/all"
     print("Initializing viewer")
-    for i in range(0, 10):
+    for _ in range(10):
         poll = process.poll()
         if poll is None:
             if test_port(port, "test"):
@@ -163,7 +146,7 @@ def test_loc(args):
             print(process.stdout.read(), file=sys.stderr)
             print(process.stderr.read(), file=sys.stderr)
             print("ERROR: Viewer quit unexpectedly", file=sys.stderr)
-            print("Unable to run: %s" % cmd, file=sys.stderr)
+            print(f"Unable to run: {cmd}", file=sys.stderr)
             sys.exit(1)
     return loc, process, port, api_port, level
 
@@ -204,7 +187,9 @@ def firefox_driver(args):
     display.start()
 
     driver = webdriver.Firefox(
-        options=options, firefox_profile=profile, service_log_path=args["--driver-log"],
+        options=options,
+        firefox_profile=profile,
+        service_log_path=args["--driver-log"],
     )
     time.sleep(2)
     return driver, display
@@ -231,9 +216,11 @@ def chromium_driver(args):
     options = webdriver.ChromeOptions()
     if not args["--interactive"]:
         options.add_argument("headless")
-    prefs = {}
-    prefs["profile.default_content_settings.popups"] = 0
-    prefs["download.default_directory"] = outdir
+    prefs = {
+        "profile.default_content_settings.popups": 0,
+        "download.default_directory": outdir,
+    }
+
     options.add_experimental_option("prefs", prefs)
     display = Display(visible=0, size=(800, 600))
     display.start()
@@ -247,10 +234,16 @@ def chromium_driver(args):
     return driver, display
 
 
+def stop_driver(driver, display, viewer):
+    driver.quit()
+    display.stop()
+    if viewer is not None:
+        viewer.send_signal(signal.SIGINT)
+
+
 def static_view(args, loc, viewer):
     """Generate static images."""
-    qstr = "staticThreshold=Infinity"
-    qstr += "&nohitThreshold=Infinity"
+    qstr = "staticThreshold=Infinity" + "&nohitThreshold=Infinity"
     qstr += "&plotGraphics=svg"
     file_stem = Path(args["DIRECTORY"]).name
     if file_stem == "_":
@@ -259,7 +252,7 @@ def static_view(args, loc, viewer):
         qstr += "&svgThreshold=Infinity"
     shape = "circle"
     for param in args["--param"]:
-        qstr += "&%s" % str(param)
+        qstr += f"&{str(param)}"
         key, value = param.split("=")
         if key == "plotShape":
             shape = value
@@ -299,15 +292,15 @@ def static_view(args, loc, viewer):
             )
             sys.exit(1)
     else:
-        handle_error("%s is not a valid driver" % args["--driver"])
+        handle_error(f'{args["--driver"]} is not a valid driver')
 
     try:
         view = args["--view"][0]
         if args["--preview"]:
             qstr += "#Filters"
-        url = "%s/%s?%s" % (loc, view, qstr)
-        print("Loading %s" % url)
-        for i in range(0, 10):
+        url = f"{loc}/{view}?{qstr}"
+        print(f"Loading {url}")
+        for i in range(10):
             try:
                 driver.get(url)
             except Exception as err:
@@ -320,24 +313,24 @@ def static_view(args, loc, viewer):
         for next_view in args["--view"]:
             if next_view != view:
                 view = next_view
-                url = "%s/%s?%s" % (loc, view, qstr)
-                print("Navigating to %s" % url)
+                url = f"{loc}/{view}?{qstr}"
+                print(f"Navigating to {url}")
                 try:
                     driver.get(url)
                 except Exception as err:
                     handle_error(err)
             for fmt in args["--format"]:
-                file = "%s.%s" % (file_stem, view)
+                file = f"{file_stem}.{view}"
                 if view == "blob":
-                    file += ".%s" % shape
+                    file += f".{shape}"
                 elif view == "busco":
-                    view = "all_%s" % view
+                    view = f"all_{view}"
                     if fmt not in ("csv", "json"):
                         fmt = "json"
-                file += ".%s" % fmt
-                print("Fetching %s" % file)
-                el_id = "%s_save_%s" % (view, fmt)
-                print(" - waiting for element %s" % el_id)
+                file += f".{fmt}"
+                print(f"Fetching {file}")
+                el_id = f"{view}_save_{fmt}"
+                print(f" - waiting for element {el_id}")
                 unstable = True
                 start_time = time.time()
                 while unstable:
@@ -350,7 +343,7 @@ def static_view(args, loc, viewer):
                         )
                         element.click()
                         unstable = False
-                        file_name = "%s/%s" % (outdir, file)
+                        file_name = f"{outdir}/{file}"
                         print(" - waiting for file '%s'" % file_name)
                         file_ready(file_name, timeout, handle_error)
                     except Exception as err:
@@ -358,16 +351,16 @@ def static_view(args, loc, viewer):
                         time.sleep(1)
 
         for preview in args["--preview"]:
-            print("Creating %s preview" % preview)
+            print(f"Creating {preview} preview")
             for fmt in args["--format"]:
-                el_id = "%s_preview_save_%s" % (preview, fmt)
-                file = "%s.%s.preview.%s" % (Path(args["DIRECTORY"]).name, preview, fmt)
+                el_id = f"{preview}_preview_save_{fmt}"
+                file = f'{Path(args["DIRECTORY"]).name}.{preview}.preview.{fmt}'
                 try:
                     element = WebDriverWait(driver, timeout).until(
                         EC.visibility_of_element_located((By.ID, el_id))
                     )
                     element.click()
-                    file_name = "%s/%s" % (outdir, file)
+                    file_name = f"{outdir}/{file}"
                     print("waiting for file '%s'" % file_name)
                     file_ready(file_name, timeout, handle_error)
                 except Exception as err:
@@ -393,20 +386,18 @@ def interactive_view(args, loc, viewer, level):
     elif args["--driver"] == "chromium":
         """View dataset in Chromium browser."""
         driver, display = chromium_driver(args)
-    qstr = ""
-    for param in args["--param"]:
-        qstr += "&%s" % str(param)
+    qstr = "".join(f"&{str(param)}" for param in args["--param"])
     try:
         view = args["--view"][0]
         if args["--preview"]:
             qstr += "#Filters"
         if level == "dataset":
-            url = "%s/%s" % (loc, view)
+            url = f"{loc}/{view}"
             if qstr:
-                url += "?%s" % qstr
+                url += f"?{qstr}"
         else:
-            url = loc if loc.endswith("all") else "%s/all" % loc
-        print("Loading %s" % url)
+            url = loc if loc.endswith("all") else f"{loc}/all"
+        print(f"Loading {url}")
         try:
             driver.get(url)
         except Exception as err:
@@ -415,35 +406,27 @@ def interactive_view(args, loc, viewer, level):
         while poll is None:
             time.sleep(5)
             poll = viewer.poll()
-        driver.quit()
-        display.stop()
-        if viewer is not None:
-            viewer.send_signal(signal.SIGINT)
+        stop_driver(driver, display, viewer)
     except Exception as err:
         print(err)
-        driver.quit()
-        display.stop()
-        if viewer is not None:
-            viewer.send_signal(signal.SIGINT)
+        stop_driver(driver, display, viewer)
     return True
 
 
 def remote_view(args, loc, viewer, port, api_port, level, remote):
     """View dataset remotely."""
-    qstr = ""
-    for param in args["--param"]:
-        qstr += "&%s" % str(param)
+    qstr = "".join(f"&{str(param)}" for param in args["--param"])
     try:
         view = args["--view"][0]
         if args["--preview"]:
             qstr += "#Filters"
         if level == "dataset":
-            url = "%s/%s" % (loc, view)
+            url = f"{loc}/{view}"
             if qstr:
-                url += "?%s" % qstr
-            print("View dataset at %s" % url)
+                url += f"?{qstr}"
+            print(f"View dataset at {url}")
         else:
-            print("View datasets at %s" % loc)
+            print(f"View datasets at {loc}")
         if remote:
             print("For remote access use:")
             print(
@@ -463,7 +446,7 @@ def remote_view(args, loc, viewer, port, api_port, level, remote):
 def main(args):
     """Entrypoint for blobtools view."""
     loc, viewer, port, api_port, level = test_loc(args)
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         if args["--interactive"]:
             interactive_view(args, loc, viewer, level)
         elif args["--remote"]:
@@ -472,8 +455,6 @@ def main(args):
             remote_view(args, loc, viewer, port, api_port, level, False)
         else:
             static_view(args, loc, viewer)
-    except KeyboardInterrupt:
-        pass
     time.sleep(1)
     if viewer is not None:
         viewer.send_signal(signal.SIGINT)
