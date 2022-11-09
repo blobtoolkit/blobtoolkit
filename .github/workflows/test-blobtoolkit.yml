@@ -4,26 +4,26 @@ jobs:
   package-ui:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: "16"
       - run: npm install -g pkg
       - run: ./package-ui.sh
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: ./dist/*
 
   package-api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: "16"
       - run: npm install -g pkg
       - run: ./package-api.sh
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: ./dist/*
 
@@ -33,7 +33,7 @@ jobs:
       - package-ui
       - package-api
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Collect artifacts
         uses: actions/download-artifact@v2
         with:
@@ -50,7 +50,7 @@ jobs:
           chmod 755 src/data/bin/*
           ./pip_install_latest.sh manylinux2014_x86_64
           blobtools -v
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: ./dist/*
 
@@ -59,7 +59,7 @@ jobs:
     needs:
       - package-blobtoolkit-linux
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Collect artifacts
         uses: actions/download-artifact@v2
         with:
@@ -86,7 +86,7 @@ jobs:
       - name: Test plot exists
         run: |
           test -s "FXWY01.blob.circle.png" && exit 0 || exit 1
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: tests
           path: FXWY01.blob.circle.png
