@@ -73,7 +73,7 @@ app.use(
       allowUnknownQueryParameters: true,
       removeAdditional: "failing",
     },
-    validateResponses: true,
+    validateResponses: false,
     operationHandlers: path.join(__dirname),
   })
 );

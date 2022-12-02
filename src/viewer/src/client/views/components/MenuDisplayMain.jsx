@@ -86,6 +86,7 @@ import { format as d3format } from "d3-format";
 import fontSizeIcon from "./svg/fontSize.svg";
 //import styles from './Plot.scss'
 import { getAxisTitle } from "../reducers/plotData";
+import { getCatAxis } from "../reducers/plot";
 import { getFields } from "../reducers/field";
 import { getMainPlotData } from "../reducers/plotData";
 import gridIcon from "./svg/gridShape.svg";
@@ -180,6 +181,8 @@ class DisplayMenu extends React.Component {
       onChangeErrorBars,
       windowSize,
       onChangeWindowSize,
+      category,
+      onChangeCategory,
     } = this.props;
     let context;
     view = view || "blob";
@@ -767,6 +770,14 @@ class DisplayMenu extends React.Component {
             }}
           />
         </MenuDisplaySimple>
+        <MenuDisplaySimple name="category index">
+          <NumericInput
+            initialValue={category}
+            onChange={(value) => {
+              onChangeCategory(value);
+            }}
+          />
+        </MenuDisplaySimple>
         <MenuDisplaySimple name="use larger fonts">
           <SVGIcon
             sprite={fontSizeIcon}
@@ -818,6 +829,10 @@ class MenuDisplayMain extends React.Component {
         onChangeNohitThreshold: (threshold) =>
           dispatch(chooseNohitThreshold(threshold)),
         onChangeCircleLimit: (limit) => dispatch(chooseCircleLimit(limit)),
+        onChangeCategory: (value) => {
+          let values = { catField: value };
+          dispatch(queryToStore({ values }));
+        },
         onSelectReducer: (reducer) => dispatch(chooseZReducer(reducer)),
         onSelectScale: (scale) => dispatch(chooseZScale(scale)),
         onChangePlotScale: (plotScale) => dispatch(choosePlotScale(plotScale)),
@@ -897,6 +912,7 @@ class MenuDisplayMain extends React.Component {
         largeFonts: getLargeFonts(state),
         errorBars: getErrorBars(state),
         windowSize: getWindowSize(state),
+        category: getCatAxis(state),
       };
     };
   }

@@ -332,6 +332,7 @@ export const getBinnedDataByCategoryByAxis = createSelector(
       });
     }
     let grid = binnedData.grid;
+    console.log(data);
     return { data, grid };
   }
 );
@@ -375,7 +376,7 @@ export const getBinnedLinesByCategoryForAxis = createSelector(
     let xs = {};
     let bins = {};
     binnedData.data.forEach((d) => {
-      if (d.axis == axis) {
+      if (d.axis == axis && paths[d.index]) {
         bins[d.index] = bins[d.index] || 0;
         zs[d.index] = zs[d.index] ? zs[d.index] : 300;
         let x0 = d.bin * binnedData.grid.width + 50;
