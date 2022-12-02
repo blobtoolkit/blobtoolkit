@@ -28,12 +28,7 @@ paths:
       description: Returns the dataset specified by dataset_id
       operationId: getDatasetById
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/datasetIdParam"
       responses:
         200:
           description: A dataset object
@@ -49,18 +44,8 @@ paths:
       description: Returns the dataset parameter specified by dataset_id and key
       operationId: getDatasetByIdKey
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
-        - name: key
-          in: path
-          description: Search index reload key
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/keyParam"
       responses:
         200:
           description: A dataset parameter
@@ -78,24 +63,9 @@ paths:
         subkey
       operationId: getDatasetByIdKeySubkey
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
-        - name: key
-          in: path
-          description: Search index reload key
-          required: true
-          schema:
-            type: string
-        - name: subkey
-          in: path
-          description: Key object subkey (e.g. accession)
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/keyParam"
+        - $ref: "#/components/parameters/subkeyParam"
       responses:
         200:
           description: A dataset parameter
@@ -116,18 +86,8 @@ paths:
       description: Returns all values for a field
       operationId: getFieldById
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
-        - name: field_id
-          in: path
-          description: Unique identifier of the requested field (e.g. gc)
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/fieldIdParam"
       responses:
         200:
           description: An object containing an array of variable values
@@ -143,25 +103,9 @@ paths:
       description: Returns specific values for a field
       operationId: getFieldByIdIndex
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
-        - name: field_id
-          in: path
-          description: Unique identifier of the requested field (e.g. gc)
-          required: true
-          schema:
-            type: string
-        - name: index
-          in: path
-          description: index of the requested record(s) (e.g. 72 or 11,56,99-101)
-          required: true
-          schema:
-            pattern: '\d+[,-\\d]*'
-            type: string
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/fieldIdParam"
+        - $ref: "#/components/parameters/indexParam"
       responses:
         200:
           description: An object containing an array of variable values
@@ -194,12 +138,7 @@ paths:
       description: Returns all identifiers for a dataset
       operationId: getIdentifiers
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/datasetIdParam"
       responses:
         200:
           description: An object containing an array of variable values
@@ -215,12 +154,7 @@ paths:
       description: Returns an image of a dataset view
       operationId: getImage
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/datasetIdParam"
       responses:
         200:
           description: OK
@@ -240,37 +174,10 @@ paths:
       description: Returns an image of a dataset view
       operationId: getImageView
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
-        - name: view
-          in: path
-          description: view type
-          required: true
-          schema:
-            type: string
-            enum:
-              - blob
-              - cumulative
-              - kite
-              - snail
-        - name: format
-          in: query
-          description: image format
-          schema:
-            type: string
-            default: png
-            enum:
-              - png
-              - svg
-        - name: width
-          in: query
-          description: png image width
-          schema:
-            type: integer
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/viewParam"
+        - $ref: "#/components/parameters/formatParam"
+        - $ref: "#/components/parameters/widthParam"
       responses:
         200:
           description: OK
@@ -290,38 +197,10 @@ paths:
       description: Returns an image of a blob view plot type
       operationId: getImageType
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
-        - name: type
-          in: path
-          description: blob view plot type
-          required: true
-          schema:
-            type: string
-            enum:
-              - circle
-              - hex
-              - kite
-              - none
-              - square
-        - name: format
-          in: query
-          description: image format
-          schema:
-            type: string
-            default: png
-            enum:
-              - png
-              - svg
-        - name: width
-          in: query
-          description: png image width
-          schema:
-            type: integer
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/typeParam"
+        - $ref: "#/components/parameters/formatParam"
+        - $ref: "#/components/parameters/widthParam"
       responses:
         200:
           description: OK
@@ -369,12 +248,7 @@ paths:
       description: Returns an array of available search terms
       operationId: getAutocompleteByTerm
       parameters:
-        - name: term
-          in: path
-          description: search term (e.g. Nematoda)
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/termParam"
       responses:
         200:
           description: A tree object
@@ -392,12 +266,7 @@ paths:
       description: Returns an array of datasets matching a search term
       operationId: getSearchByTerm
       parameters:
-        - name: term
-          in: path
-          description: search term (e.g. Nematoda)
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/termParam"
       responses:
         200:
           description: An array of Datasets
@@ -415,12 +284,7 @@ paths:
       description: Reload the search index
       operationId: getSearchReload
       parameters:
-        - name: key
-          in: path
-          description: Search index reload key
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/reloadKeyParam"
       responses:
         200:
           description: Request status
@@ -436,12 +300,7 @@ paths:
       description: Returns processed summary data for a dataset
       operationId: getSummaryById
       parameters:
-        - name: dataset_id
-          in: path
-          description: Unique identifier of the requested dataset (e.g. ACVV01)
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/datasetIdParam"
       responses:
         200:
           description: An object containing summary data
@@ -544,7 +403,7 @@ components:
             - scaleLog
             - scaleSqrt
         linked_field:
-          pattern: ^[A-Za-z0-9_.-]+$
+          pattern: "^[A-Za-z0-9_.-]+$"
           type: string
           description: (optional) field ID to which the current field is linked
         children:
@@ -614,46 +473,77 @@ components:
           items:
             type: string
   parameters:
-    dataset_id:
+    datasetIdParam:
       name: dataset_id
       in: path
       description: Unique identifier of the requested dataset (e.g. ACVV01)
+      examples:
+        CAJEUD01.1:
+          value: CAJEUD01.1
+          summary: Pipistrellus pipistrellus (mPipPip1) assembly dataset
       required: true
       schema:
         type: string
-    key:
-      name: key
-      in: path
-      description: Search index reload key
-      required: true
-      schema:
-        type: string
-    subkey:
+    subkeyParam:
       name: subkey
       in: path
       description: Key object subkey (e.g. accession)
+      examples:
+        software_versions:
+          value: software_versions
+          summary: Dataset metadata software versions
       required: true
       schema:
         type: string
-    field_id:
+    fieldIdParam:
       name: field_id
       in: path
       description: Unique identifier of the requested field (e.g. gc)
+      examples:
+        gc:
+          value: gc
+          summary: GC content
+        buscogenes_phylum:
+          value: buscogenes_phylum
+          summary: Putative phylum assignments based on the buscogenes taxrule
       required: true
       schema:
         type: string
-    index:
+    indexParam:
       name: index
       in: path
-      description: index of the requested record(s) (e.g. 72 or 11,56,99-101)
+      description: index of the requested record(s)
+      examples:
+        single:
+          value: "5"
+          summary: single value
+        list:
+          value: "5,7,10"
+          summary: list of values
+        range:
+          value: "12-14"
+          summary: range of values
+        mixed:
+          value: "5,7,10,12-14"
+          summary: mixed list and range
       required: true
       schema:
-        pattern: ^\d+[,-\d]*
+        pattern: '\d+[,\d-]*'
         type: string
-    view:
+    viewParam:
       name: view
       in: path
       description: view type
+      examples:
+        blob:
+          value: blob
+          summary: blob plot view
+        cumulative:
+          value: cumulative
+          summary: cumulative plot view
+        snail:
+          value: snail
+          summary: snail plot view
       required: true
       schema:
         type: string
@@ -662,10 +552,20 @@ components:
           - cumulative
           - kite
           - snail
-    type:
+    typeParam:
       name: type
       in: path
       description: blob view plot type
+      examples:
+        circle:
+          value: circle
+          summary: plot contigs as circles
+        hex:
+          value: hex
+          summary: hex binned plot
+        square:
+          value: square
+          summary: square binned plot
       required: true
       schema:
         type: string
@@ -675,26 +575,59 @@ components:
           - kite
           - none
           - square
-    format:
+    formatParam:
       name: format
       in: query
       description: image format
+      examples:
+        png:
+          value: png
+          summary: PNG format
+        svg:
+          value: svg
+          summary: SVG format
       schema:
         type: string
         default: png
         enum:
           - png
           - svg
-    width:
+    widthParam:
       name: width
       in: query
+      deprecated: true
       description: png image width
       schema:
         type: integer
-    term:
+    termParam:
       name: term
       in: path
-      description: search term (e.g. Nematoda)
+      description: search term
+      examples:
+        nematoda:
+          value: Nematoda
+          summary: search for all Nematoda datasets
+        accession:
+          value: GCA_903992545.1
+          summary: search by GCA accession
+      required: true
+      schema:
+        type: string
+    keyParam:
+      name: key
+      in: path
+      description: Dataset metadata key
+      examples:
+        settings:
+          value: settings
+          summary: Dataset metadata settings
+      required: true
+      schema:
+        type: string
+    reloadKeyParam:
+      name: key
+      in: path
+      description: Search index reload key
       required: true
       schema:
         type: string
