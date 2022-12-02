@@ -1,6 +1,6 @@
 const config = require("./config/main");
 const app = require("./server");
-const searchRoutes = require("./routes/search_routes");
+const search = require("./routes/search");
 
 if (config.https) {
   const https = require("https");
@@ -13,12 +13,12 @@ if (config.https) {
     .createServer(options, app)
     .listen(config.api_port, async function () {
       console.log("blobtoolkit-api started on https port: " + config.api_port);
-      await searchRoutes.loadIndex();
+      await search.loadIndex();
     });
 } else {
   app.listen(config.api_port, async function () {
     console.log("blobtoolkit-api started on http port: " + config.api_port);
-    await searchRoutes.loadIndex();
+    await search.loadIndex();
   });
 }
 module.exports = app;

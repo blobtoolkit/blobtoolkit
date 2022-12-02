@@ -70,44 +70,103 @@ const getRawDataForZ = createSelector(
 
 export const getRawDataForCat = createSelector(
   (state) => getRawDataForFieldId(state, getCatAxis(state)),
-  (data) => data
-);
-
-const getFilteredDataForX = createSelector(
-  (state) => getFilteredDataForFieldId(state, getXAxis(state)),
-  (data) => {
+  getCatAxis,
+  getRawDataForX,
+  (data, catAxis, xData) => {
+    if (xData && catAxis && !data && !isNaN(catAxis)) {
+      let catName = "all";
+      let catData = {
+        values: xData.values.map(() => 0),
+        keys: [catName],
+      };
+      return catData;
+    }
     return data;
   }
 );
 
-const getFilteredDataForY = createSelector(
-  (state) => getFilteredDataForFieldId(state, getYAxis(state)),
+const getRawDataForGC = createSelector(
+  (state) => getRawDataForFieldId(state, "gc"),
   (data) => data
 );
 
-const getFilteredDataForZ = createSelector(
-  (state) => getFilteredDataForFieldId(state, getZAxis(state)),
+const getRawDataForLength = createSelector(
+  (state) => getRawDataForFieldId(state, "length"),
   (data) => data
+);
+
+const getRawDataForNCount = createSelector(
+  (state) => getRawDataForFieldId(state, "ncount"),
+  (data) => data
+);
+
+const filterFieldData = (list = [], rawData) => {
+  if (!rawData) return undefined;
+  let values = [];
+  if (rawData.values) {
+    let raw = rawData.values;
+    let len = list.length;
+    for (var i = 0; i < len; i++) {
+      values.push(raw[list[i]]);
+    }
+  }
+  return { values, keys: rawData.keys };
+};
+
+export const getFilteredDataForX = createSelector(
+  getFilteredList,
+  getRawDataForX,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
+);
+
+export const getFilteredDataForY = createSelector(
+  getFilteredList,
+  getRawDataForY,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
+);
+
+export const getFilteredDataForZ = createSelector(
+  getFilteredList,
+  getRawDataForZ,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getFilteredDataForCat = createSelector(
-  (state) => getFilteredDataForFieldId(state, getCatAxis(state)),
-  (data) => data
+  getFilteredList,
+  getRawDataForCat,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getFilteredDataForGC = createSelector(
-  (state) => getFilteredDataForFieldId(state, "gc"),
-  (data) => data
+  getFilteredList,
+  getRawDataForGC,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getFilteredDataForLength = createSelector(
-  (state) => getFilteredDataForFieldId(state, "length"),
-  (data) => data
+  getFilteredList,
+  getRawDataForLength,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getFilteredDataForNCount = createSelector(
-  (state) => getFilteredDataForFieldId(state, "ncount"),
-  (data) => data
+  getFilteredList,
+  getRawDataForNCount,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getDetailsForX = createSelector(

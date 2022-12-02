@@ -6,8 +6,8 @@
   "bin": "src/app.js",
   "main": "index.js",
   "scripts": {
-    "api": "NODE_ENV=production node src/server.js",
-    "start": "nodemon src/server.js",
+    "api": "NODE_ENV=production node src/app.js",
+    "start": "nodemon src/app.js",
     "test": "jest"
   },
   "jest": {
@@ -18,12 +18,15 @@
   "dependencies": {
     "app-root-path": "^3.0.0",
     "body-parser": "^1.19.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
     "d3": "^5.16.0",
     "express": "^4.17.2",
     "express-cors": "0.0.3",
+    "express-openapi-validator": "^5.0.0",
     "promise": "^8.1.0",
     "swagger-jsdoc": "^3.7.0",
-    "swagger-ui-express": "^4.3.0",
+    "swagger-ui-express": "^4.6.0",
     "testdouble": "^3.16.4",
     "winston": "^3.8.1",
     "winston-daily-rotate-file": "^4.7.1",

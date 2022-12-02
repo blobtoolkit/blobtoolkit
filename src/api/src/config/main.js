@@ -43,6 +43,8 @@ module.exports = {
   version: process.env.BTK_VERSION || "v3.0.0",
   // hostname
   hostname: BTK_HOST,
+  // title
+  title: process.env.BTK_TITLE || "BlobToolKit",
   // API URL
   apiUrl:
     process.env.BTK_API_URL ||

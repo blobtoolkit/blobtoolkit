@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Collect artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           path: ./dist
       - name: Install dependencies
@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Collect artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           path: ./dist
       - name: Pip install blobtoolkit
