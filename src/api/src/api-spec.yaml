@@ -430,9 +430,6 @@ components:
         keys:
           type: array
           description: an array of key-value pairs
-          items:
-            type: object
-            properties: {}
     Tree:
       type: object
       properties:
