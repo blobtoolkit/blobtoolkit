@@ -6,7 +6,19 @@ import { createSelector } from "reselect";
 import { getSearchTerm } from "./location";
 import store from "../store";
 
-const showTargetTree = TARGET_TREE || false;
+export const getTargetFlag = () => {
+  if (
+    window &&
+    window.process &&
+    window.process.ENV &&
+    window.process.ENV.BTK_TARGET_TREE
+  ) {
+    return window.process.ENV.BTK_TARGET_TREE ? true : false;
+  }
+  return TARGET_TREE;
+};
+
+const showTargetTree = getTargetFlag();
 
 const requestDatasetTree = createAction("REQUEST_DATASET_TREE");
 const receiveDatasetTree = createAction(

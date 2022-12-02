@@ -33,6 +33,7 @@ import StaticPlot from "./StaticPlot";
 import TablePlot from "./TablePlot";
 import TreeMapPlot from "./TreeMapPlot";
 import { connect } from "react-redux";
+import { datasetTable } from "../reducers/api";
 import { getBinsForCat } from "../reducers/field";
 import { getFields } from "../reducers/field";
 import { getPlotShape } from "../reducers/plotParameters";
@@ -40,8 +41,6 @@ import { getWindowBinsForCat } from "../reducers/plotData";
 import qs from "qs";
 import { queryToStore } from "../querySync";
 import styles from "./Layout.scss";
-
-const dataset_table = DATASET_TABLE || false;
 
 class PlotsLayoutComponent extends React.Component {
   constructor(props) {
@@ -132,7 +131,7 @@ class PlotsLayoutComponent extends React.Component {
     );
     if (
       !this.props.datasetId ||
-      (dataset_table && this.props.activeTab == "Datasets")
+      (datasetTable && this.props.activeTab == "Datasets")
     ) {
       return <HomePage toggleHash={this.props.toggleHash} />;
     }

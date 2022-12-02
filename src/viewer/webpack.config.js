@@ -89,7 +89,7 @@ const config = {
       GDPR_URL: JSON.stringify(main.gdpr_url),
       DATASET_TABLE: main.dataset_table ? true : false,
       TARGET_TREE: main.target_tree ? true : false,
-      MESSAGE: JSON.stringify(main.message),
+      MESSAGE: main.message ? JSON.stringify(main.message) : false,
     }),
     new HtmlWebpackPlugin({
       hash: true,

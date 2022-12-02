@@ -18,8 +18,10 @@ import {
 } from "./preview";
 import {
   getErrorBars,
+  getLargeFonts,
   getPlotResolution,
   getPlotScale,
+  getPlotShape,
   getTransformFunction,
   getTransformFunctionParams,
   getWindowSize,
@@ -35,7 +37,10 @@ import { datasetColumns } from "./datasetTable";
 import { getColorPalette } from "./color";
 import { getDatasetID } from "./location";
 import { getFilteredList } from "./filter";
+import { getIdentifiers } from "./identifiers";
 import { getQueryValue } from "./location";
+import { scaleLog } from "d3-scale";
+import { set } from "react-ga";
 import store from "../store";
 
 const getAxis = (state, axis) => axis;
@@ -65,44 +70,103 @@ const getRawDataForZ = createSelector(
 
 export const getRawDataForCat = createSelector(
   (state) => getRawDataForFieldId(state, getCatAxis(state)),
-  (data) => data
-);
-
-const getFilteredDataForX = createSelector(
-  (state) => getFilteredDataForFieldId(state, getXAxis(state)),
-  (data) => {
+  getCatAxis,
+  getRawDataForX,
+  (data, catAxis, xData) => {
+    if (xData && catAxis && !data && !isNaN(catAxis)) {
+      let catName = "all";
+      let catData = {
+        values: xData.values.map(() => 0),
+        keys: [catName],
+      };
+      return catData;
+    }
     return data;
   }
 );
 
-const getFilteredDataForY = createSelector(
-  (state) => getFilteredDataForFieldId(state, getYAxis(state)),
+const getRawDataForGC = createSelector(
+  (state) => getRawDataForFieldId(state, "gc"),
   (data) => data
 );
 
-const getFilteredDataForZ = createSelector(
-  (state) => getFilteredDataForFieldId(state, getZAxis(state)),
+const getRawDataForLength = createSelector(
+  (state) => getRawDataForFieldId(state, "length"),
   (data) => data
+);
+
+const getRawDataForNCount = createSelector(
+  (state) => getRawDataForFieldId(state, "ncount"),
+  (data) => data
+);
+
+const filterFieldData = (list = [], rawData) => {
+  if (!rawData) return undefined;
+  let values = [];
+  if (rawData.values) {
+    let raw = rawData.values;
+    let len = list.length;
+    for (var i = 0; i < len; i++) {
+      values.push(raw[list[i]]);
+    }
+  }
+  return { values, keys: rawData.keys };
+};
+
+export const getFilteredDataForX = createSelector(
+  getFilteredList,
+  getRawDataForX,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
+);
+
+export const getFilteredDataForY = createSelector(
+  getFilteredList,
+  getRawDataForY,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
+);
+
+export const getFilteredDataForZ = createSelector(
+  getFilteredList,
+  getRawDataForZ,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getFilteredDataForCat = createSelector(
-  (state) => getFilteredDataForFieldId(state, getCatAxis(state)),
-  (data) => data
+  getFilteredList,
+  getRawDataForCat,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getFilteredDataForGC = createSelector(
-  (state) => getFilteredDataForFieldId(state, "gc"),
-  (data) => data
+  getFilteredList,
+  getRawDataForGC,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getFilteredDataForLength = createSelector(
-  (state) => getFilteredDataForFieldId(state, "length"),
-  (data) => data
+  getFilteredList,
+  getRawDataForLength,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getFilteredDataForNCount = createSelector(
-  (state) => getFilteredDataForFieldId(state, "ncount"),
-  (data) => data
+  getFilteredList,
+  getRawDataForNCount,
+  (list, rawData) => {
+    return filterFieldData(list, rawData);
+  }
 );
 
 export const getDetailsForX = createSelector(
@@ -879,6 +943,350 @@ export const getLinesPlotData = createSelector(
     }
     let range = [min, max];
     return { coords, range, colors: palette.colors };
+  }
+);
+
+export const getGridPlotData = createSelector(
+  getWindowPlotData,
+  getFilteredList,
+  getFilteredDataForX,
+  getIdentifiers,
+  getTransformFunction,
+  getZScale,
+  getPlotResolution,
+  getPlotScale,
+  getLargeFonts,
+  getWindowBinsForCat,
+  getColorPalette,
+  getMainPlotData,
+  getPlotShape,
+  (
+    plotData,
+    list,
+    xData,
+    identifiers,
+    transform,
+    scale,
+    res,
+    plotScale,
+    largeFonts,
+    bins,
+    palette,
+    mainData,
+    plotShape
+  ) => {
+    if (!plotData) return {};
+    let plotSize = 1300;
+    let legendSpace = largeFonts ? 50 : 35;
+    let plotHeight = plotSize - legendSpace;
+    if (
+      plotData.axes.x.values.length == 0 ||
+      plotData.axes.y.values.length == 0 ||
+      plotData.axes.z.values.length == 0 ||
+      plotData.axes.cat.values.length == 0
+    ) {
+      return { coords: [] };
+    }
+
+    let len = Math.max(
+      plotData.axes.x.values.length,
+      plotData.axes.y.values.length,
+      plotData.axes.z.values.length
+    );
+
+    let nCols = Math.floor(Math.sqrt(len));
+    let nRows = Math.ceil(len / nCols);
+    let colWidths = [];
+    let colPad = 30;
+    let rowPad = 30;
+    let xField = plotData.meta.x.meta.id;
+    let yField = plotData.meta.y.meta.id;
+    if (xField == "position" || xField == "proportion") {
+      for (let i = 0; i < len; i += nRows) {
+        colWidths.push(Math.max(...xData.values.slice(i, i + nRows)));
+      }
+    }
+    let xDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    let i = 0;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let xMinNoZero = Number.POSITIVE_INFINITY;
+    for (let arr of plotData.axes.x.values) {
+      for (let val of arr) {
+        if (val < xDomain[0]) {
+          xDomain[0] = val;
+        }
+        if (val > xDomain[1]) {
+          xDomain[1] = val;
+        }
+        if (val > 0 && val < xMinNoZero) {
+          xMinNoZero = val;
+        }
+        if (val > maxX) {
+          maxX = val;
+        }
+      }
+      if (xField != "position" && xField != "proportion") {
+        i++;
+        if (i == nRows) {
+          colWidths.push(maxX);
+          i = 0;
+          maxX = Number.NEGATIVE_INFINITY;
+        }
+      }
+    }
+    if (colWidths.length < nCols) {
+      colWidths.push(maxX);
+    }
+    let setXClamp = false;
+    if (plotData.meta.x.meta.scale == "scaleLog") {
+      if (xDomain[0] == 0) {
+        xDomain[0] = Math.pow(10, Math.floor(Math.log10(xMinNoZero)));
+        setXClamp = true;
+      }
+      let tmpScale = scaleLog()
+        .domain(xDomain)
+        .range([0, Math.max(...colWidths)]);
+      tmpScale.clamp(setXClamp);
+      colWidths = colWidths.map((val) => tmpScale(val));
+    }
+    let yDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    let yMinNoZero = Number.POSITIVE_INFINITY;
+    for (let arr of plotData.axes.y.values) {
+      for (let val of arr) {
+        if (val > yDomain[1]) {
+          yDomain[1] = val;
+        }
+        if (val < yDomain[0]) {
+          yDomain[0] = val;
+        }
+        if (val > 0 && val < yMinNoZero) {
+          yMinNoZero = val;
+        }
+      }
+    }
+    let maxWidth = Math.max(...colWidths);
+    let cellWidth =
+      (maxWidth / colWidths.reduce((a, b) => a + b)) *
+      (plotSize - colPad * (nCols - 1));
+    let cellHeight = (1 / nRows) * (plotHeight - rowPad * (nRows - 1));
+    let coords = [];
+    let grid = [];
+    let scales = {};
+    let axes = ["x", "y", "z"];
+    let zScale = d3[scale]()
+      .domain(plotData.meta.z.range)
+      .range([2, (4 * plotSize) / nRows / res]);
+    axes.forEach((axis) => {
+      scales[axis] = plotData.meta[axis].xScale
+        ? plotData.meta[axis].xScale.copy()
+        : d3.scaleLinear().domain([0, 10]);
+      if (axis == "z") {
+        scales[axis] = d3.scaleSqrt().domain(scales[axis].domain());
+        scales[axis].type = "scaleSqrt";
+      } else {
+        if (plotData.meta[axis].xScale.hasOwnProperty("type")) {
+          scales[axis].type = plotData.meta[axis].xScale.type;
+        }
+      }
+      if (plotShape == "grid") {
+        scales[axis].range([
+          0,
+          axis == "x" ? cellWidth : axis == "y" ? cellHeight : plotSize,
+        ]);
+      } else {
+        scales[axis].range([
+          0,
+          axis == "x" ? plotSize : axis == "y" ? plotHeight : plotSize,
+        ]);
+      }
+
+      if (axis == "y") {
+        if (yField == "position" || yField == "proportion") {
+          yDomain = scales[axis].domain();
+        }
+        if (plotData.meta.y.meta.scale == "scaleLog" && yDomain[0] == 0) {
+          yDomain[0] = Math.pow(10, Math.floor(Math.log10(yMinNoZero)));
+          scales[axis].clamp(true);
+        }
+        scales[axis].domain(yDomain);
+      }
+      if (axis == "x") {
+        if (xField == "position" || xField == "proportion") {
+          xDomain = scales[axis].domain();
+        }
+        scales[axis].clamp(setXClamp);
+        scales[axis].domain(xDomain);
+      }
+    });
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    let yClamp = Number.NEGATIVE_INFINITY;
+    if (plotData.meta.y.meta) {
+      let yClamp = plotData.meta.y.meta.clamp || Number.NEGATIVE_INFINITY;
+      let yMin = plotData.meta.y.meta.limit[0];
+      if (yClamp < yMin) {
+        yClamp = Number.NEGATIVE_INFINITY;
+      }
+    }
+    let xClamp = plotData.meta.x.meta.clamp || Number.NEGATIVE_INFINITY;
+    let xMin = plotData.meta.x.meta.limit[0];
+    if (xClamp < xMin) {
+      xClamp = Number.NEGATIVE_INFINITY;
+    }
+    let keys = {};
+    bins.forEach((bin, i) => {
+      bin.keys.forEach((key) => {
+        keys[key] = i;
+      });
+    });
+    axes = ["x", "y", "z", "cat"];
+    let offset = { x: 0, y: -legendSpace };
+    let j = 0;
+    let row = 0;
+    let visibleCats = new Set();
+    let visibleFullCats = new Set();
+    for (let i = 0; i < len; i++) {
+      visibleFullCats.add(bins[keys[mainData.axes.cat.values[i]]].id);
+      if (plotShape == "grid") {
+        if (i == 0) {
+          offset = {
+            x: 0,
+            y: (cellHeight + rowPad) * (nRows - 1) - legendSpace,
+          };
+          row = 0;
+        } else if (i % nRows == 0) {
+          j = i / nRows;
+          offset.x += (cellWidth * colWidths[j - 1]) / maxWidth;
+          offset.x += colPad;
+          offset.y = (cellHeight + rowPad) * (nRows - 1) - legendSpace;
+          row = 0;
+        } else {
+          offset.y -= cellHeight + rowPad;
+          row++;
+        }
+      }
+      let xs = [];
+      let ys = [];
+      let zs = [];
+      let rs = [];
+      let cats = [];
+      let xsd = [];
+      let ysd = [];
+      let wins = Math.max(
+        plotData.axes.x.values[i].length,
+        plotData.axes.y.values[i].length,
+        plotData.axes.z.values[i].length
+        // plotData.axes.cat.values[i].length
+      );
+      let zSize = -1;
+      for (let j = 0; j < wins; j++) {
+        let values = {};
+        let sd = {};
+        let valid = true;
+        axes.forEach((axis) => {
+          if (
+            plotData.axes[axis].values[i].length == wins ||
+            (axis == "cat" && plotData.axes[axis].values[i].length == wins + 1)
+          ) {
+            values[axis] = plotData.axes[axis].values[i][j];
+            if (plotData.axes[axis].sd) {
+              sd[axis] = plotData.axes[axis].sd[i][j];
+            }
+          } else {
+            values[axis] = plotData.axes[axis].values[i][0];
+            if (plotData.axes[axis].sd) {
+              sd[axis] = plotData.axes[axis].sd[i][0];
+            }
+          }
+          if (isNaN(values[axis]) || values[axis] === undefined) {
+            valid = false;
+          }
+        });
+        if (!valid) {
+          continue;
+        }
+        // ensure last bin is not too small to plot
+        // if (values.z >= zSize) {
+        //   zSize = values.z;
+        // } else {
+        //   if (values.z < zSize * 0.75) {
+        //     break;
+        //   }
+        // }
+        values.y = values.y < yClamp ? scales.y(yMin) : scales.y(values.y);
+        values.x = values.x < xClamp ? scales.x(xMin) : scales.x(values.x);
+        values.cat = keys[values.cat];
+        if (values.cat >= 0) {
+          visibleCats.add(bins[values.cat].id);
+        }
+        if (transform) [values.x, values.y] = transform([values.x, values.y]);
+        xs.push(values.x + offset.x);
+        ys.push(plotHeight - values.y - offset.y);
+        if (sd.x) {
+          sd.x = scales.x(scales.x.domain()[0] + sd.x);
+          xsd.push(sd.x);
+        }
+        if (sd.y) {
+          sd.y =
+            scales.y(scales.y.domain()[0] + sd.y) -
+            scales.y(scales.y.domain()[0]);
+          ysd.push(sd.y);
+        }
+        zs.push(values.z);
+        rs.push(zScale(values.z) * plotScale);
+        cats.push(values.cat);
+        max = Math.max(max, values.z);
+        min = Math.min(min, values.z);
+      }
+      if (xsd.length == 0) {
+        xsd = undefined;
+      }
+      if (ysd.length == 0) {
+        ysd = undefined;
+      }
+      coords.push({
+        id: list[i],
+        index: i,
+        x: xs,
+        y: ys,
+        z: zs,
+        r: rs,
+        cats: cats,
+        cat: keys[plotData.axes.mainCat.values[i]],
+        xsd,
+        ysd,
+      });
+      let width = (cellWidth * colWidths[j]) / maxWidth;
+      grid.push({
+        i,
+        col: j,
+        row,
+        x: offset.x,
+        y: plotHeight - offset.y,
+        width,
+        height: cellHeight,
+        label: identifiers[list[i]],
+        xDomain,
+        yDomain,
+        colWidth: colWidths[j],
+        barWidth: 2 * (xs[0] - offset.x),
+      });
+    }
+    let range = [min, max];
+    return {
+      coords,
+      range,
+      colors: palette.colors,
+      scales,
+      plotSize,
+      meta: plotData.meta,
+      grid,
+      nCols,
+      nRows,
+      visibleCats,
+      visibleFullCats,
+      legendSpace,
+    };
   }
 );
 // const weightedMeanSd = (values, weights, sumWeight, log) => {

@@ -97,7 +97,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit",  # Required
-    version="3.3.0",
+    version="3.4.0",
     description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
@@ -162,13 +162,17 @@ setup(
     # packages=find_packages(where="src"),  # Required
     packages=find_namespace_packages(
         where="src",
-        exclude=["blobtools.bin", "blobtools.example", "blobtools.schema",],
+        exclude=[
+            "blobtools.bin",
+            "blobtools.example",
+            "blobtools.schema",
+        ],
     ),
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
     # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-    python_requires=">=3.6, <4",
+    python_requires=">=3.7, <3.11",
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
     # installed, so they must be valid existing projects.
@@ -191,7 +195,7 @@ setup(
         # Additional pipeline dependencies
         "defusedxml==0.7.1",
         "requests==2.28.1",
-        "snakemake==6.15.3",
+        "snakemake==7.16.1",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
@@ -214,7 +218,10 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": ["blobtools = blobtools:cli", "btk = btk:cli",],
+        "console_scripts": [
+            "blobtools = blobtools:cli",
+            "btk = btk:cli",
+        ],
         "blobtools.subcmd": [
             "add = blobtools.lib.add:cli",
             "create = blobtools.lib.add:cli",

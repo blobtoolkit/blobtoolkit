@@ -27,6 +27,34 @@ export const plotShape = handleAction(
 );
 export const getPlotShape = (state) => state.plotShape;
 
+export const setPlotStyle = createAction("SET_PLOT_STYLE");
+export const choosePlotStyle = (plotStyle) => {
+  return function (dispatch) {
+    let values = { plotStyle };
+    dispatch(queryToStore({ values }));
+  };
+};
+export const plotStyle = handleAction(
+  "SET_PLOT_STYLE",
+  (state, action) => action.payload,
+  qsDefault("plotStyle")
+);
+export const getPlotStyle = (state) => state.plotStyle;
+
+export const setGridScale = createAction("SET_GRID_SCALE");
+export const chooseGridScale = (gridScale) => {
+  return function (dispatch) {
+    let values = { gridScale };
+    dispatch(queryToStore({ values }));
+  };
+};
+export const gridScale = handleAction(
+  "SET_GRID_SCALE",
+  (state, action) => action.payload,
+  qsDefault("gridScale")
+);
+export const getGridScale = (state) => state.gridScale;
+
 export const setPlotResolution = createAction("SET_PLOT_RESOLUTION");
 export const choosePlotResolution = (plotResolution) => {
   return function (dispatch) {
@@ -528,6 +556,8 @@ export const plotParameterReducers = {
   svgThreshold,
   pngResolution,
   plotScale,
+  plotStyle,
+  gridScale,
   zScale,
   zReducer,
   transformFunction,

@@ -819,7 +819,7 @@ export const circularCurves = createSelector(
     let lScale = d3scaleLog().range(lRange).domain([1, 10000000]);
     let oScale = d3scaleLinear().range([350, 425]).domain([0, 1]);
     let f = d3Format(".3f");
-    let si = d3Format(".2s");
+    let si = d3Format(".3s");
     let paths = {};
     let pathProps = {};
     paths.nXnum = d3RadialLine()(
@@ -1088,7 +1088,16 @@ export const circularCurves = createSelector(
       pathProps.endGC = { fill: "none", stroke: "#cccccc", strokeWidth: 2 };
     }
 
-    let format = d3Format(".2s");
+    let format = (d) => {
+      let fmt = d3Format(".3s");
+      d = fmt(d);
+      let match = d.match(/(\.0+[^\d])$/);
+      if (match) {
+        return d.replace(match[1], match[1].charAt(match[1].length - 1));
+      } else {
+        return d.replace(/\.0+$/, "");
+      }
+    };
     let gcFormat = d3Format(".1f");
     let legend = {
       stats: [

@@ -1,0 +1,630 @@
+openapi: 3.0.1
+info:
+  title: BlobToolKit API
+  description: A RESTful API for BlobToolKit
+  version: v3.0.0
+servers:
+  - url: //blobtoolkit.genomehubs.org/
+tags:
+  - name: Datasets
+    description: Fetch dataset metadata
+  - name: Fields
+    description: Fetch individual fields from a dataset
+  - name: Identifiers
+    description: Fetch the ordered list of sequence identifiers for a dataset
+  - name: Images
+    description: Fetch pre-rendered plots for a dataset
+  - name: Search
+    description: Find datasets by query term and manage the search index
+  - name: Status
+    description: Check API status
+  - name: Summary
+    description: Fetch summary information for a dataset
+paths:
+  /dataset/id/{dataset_id}:
+    get:
+      tags:
+        - Datasets
+      description: Returns the dataset specified by dataset_id
+      operationId: getDatasetById
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+      responses:
+        200:
+          description: A dataset object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dataset"
+      x-eov-operation-handler: routes/dataset
+  /dataset/id/{dataset_id}/{key}:
+    get:
+      tags:
+        - Datasets
+      description: Returns the dataset parameter specified by dataset_id and key
+      operationId: getDatasetByIdKey
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/keyParam"
+      responses:
+        200:
+          description: A dataset parameter
+          content:
+            application/json:
+              schema:
+                type: object
+      x-eov-operation-handler: routes/dataset
+  /dataset/id/{dataset_id}/{key}/{subkey}:
+    get:
+      tags:
+        - Datasets
+      description: |
+        Returns the dataset parameter specified by dataset_id, key and
+        subkey
+      operationId: getDatasetByIdKeySubkey
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/keyParam"
+        - $ref: "#/components/parameters/subkeyParam"
+      responses:
+        200:
+          description: A dataset parameter
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: array
+                  - type: boolean
+                  - type: number
+                  - type: object
+                  - type: string
+      x-eov-operation-handler: routes/dataset
+  /field/{dataset_id}/{field_id}:
+    get:
+      tags:
+        - Fields
+      description: Returns all values for a field
+      operationId: getFieldById
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/fieldIdParam"
+      responses:
+        200:
+          description: An object containing an array of variable values
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+      x-eov-operation-handler: routes/field
+  /field/{dataset_id}/{field_id}/{index}:
+    get:
+      tags:
+        - Fields
+      description: Returns specific values for a field
+      operationId: getFieldByIdIndex
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/fieldIdParam"
+        - $ref: "#/components/parameters/indexParam"
+      responses:
+        200:
+          description: An object containing an array of variable values
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Value"
+                  - type: array
+                  - type: object
+      x-eov-operation-handler: routes/field
+  /status:
+    get:
+      tags:
+        - Status
+      description: Returns API status and dataset count
+      operationId: getStatus
+      responses:
+        200:
+          description: Check the API is running
+          content:
+            application/json:
+              schema:
+                type: object
+      x-eov-operation-handler: routes/status
+  /identifiers/{dataset_id}:
+    get:
+      tags:
+        - Identifiers
+      description: Returns all identifiers for a dataset
+      operationId: getIdentifiers
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+      responses:
+        200:
+          description: An object containing an array of variable values
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+      x-eov-operation-handler: routes/identifier
+  /image/{dataset_id}:
+    get:
+      tags:
+        - Images
+      description: Returns an image of a dataset view
+      operationId: getImage
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+      responses:
+        200:
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/svg+xml:
+              schema:
+                type: string
+      x-eov-operation-handler: routes/image
+  /image/{dataset_id}/{view}:
+    get:
+      tags:
+        - Images
+      description: Returns an image of a dataset view
+      operationId: getImageView
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/viewParam"
+        - $ref: "#/components/parameters/formatParam"
+        - $ref: "#/components/parameters/widthParam"
+      responses:
+        200:
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/svg+xml:
+              schema:
+                type: string
+      x-eov-operation-handler: routes/image
+  /image/{dataset_id}/blob/{type}:
+    get:
+      tags:
+        - Images
+      description: Returns an image of a blob view plot type
+      operationId: getImageType
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/typeParam"
+        - $ref: "#/components/parameters/formatParam"
+        - $ref: "#/components/parameters/widthParam"
+      responses:
+        200:
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/svg+xml:
+              schema:
+                type: string
+      x-eov-operation-handler: routes/image
+  /search/tree/target:
+    get:
+      tags:
+        - Search
+      description: Returns tree of all publicly available Eukaryotic genome assemblies
+      operationId: getSearchTreeTargets
+      responses:
+        200:
+          description: A tree object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tree"
+      x-eov-operation-handler: routes/search
+  /search/tree/available:
+    get:
+      tags:
+        - Search
+      description: Returns tree of all analysed genome assemblies
+      operationId: getSearchTreeAvailable
+      responses:
+        200:
+          description: A tree object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tree"
+      x-eov-operation-handler: routes/search
+  /search/autocomplete/{term}:
+    get:
+      tags:
+        - Search
+      description: Returns an array of available search terms
+      operationId: getAutocompleteByTerm
+      parameters:
+        - $ref: "#/components/parameters/termParam"
+      responses:
+        200:
+          description: A tree object
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tree"
+      x-eov-operation-handler: routes/search
+  /search/{term}:
+    get:
+      tags:
+        - Search
+      description: Returns an array of datasets matching a search term
+      operationId: getSearchByTerm
+      parameters:
+        - $ref: "#/components/parameters/termParam"
+      responses:
+        200:
+          description: An array of Datasets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dataset"
+      x-eov-operation-handler: routes/search
+  /search/reload/{key}:
+    get:
+      tags:
+        - Search
+      description: Reload the search index
+      operationId: getSearchReload
+      parameters:
+        - $ref: "#/components/parameters/reloadKeyParam"
+      responses:
+        200:
+          description: Request status
+          content:
+            application/json:
+              schema:
+                type: object
+      x-eov-operation-handler: routes/search
+  /summary/{dataset_id}:
+    get:
+      tags:
+        - Summary
+      description: Returns processed summary data for a dataset
+      operationId: getSummaryById
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+      responses:
+        200:
+          description: An object containing summary data
+          content:
+            application/json:
+              schema:
+                type: array
+      x-eov-operation-handler: routes/summary
+components:
+  schemas:
+    Dataset:
+      type: object
+      properties:
+        id:
+          type: string
+        assembly:
+          type: object
+        description:
+          type: string
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/Field"
+        links:
+          type: object
+        name:
+          type: string
+        plot:
+          type: object
+        record_type:
+          type: string
+        records:
+          type: integer
+        settings:
+          type: object
+        similarity:
+          type: object
+        static_plots:
+          type: string
+        taxon:
+          type: object
+        version:
+          type: integer
+        revision:
+          type: integer
+    Field:
+      type: object
+      properties:
+        id:
+          type: string
+          description: a unique identifier
+        name:
+          type: string
+          description: a human-readable name
+        description:
+          type: string
+          description: a brief description
+        datatype:
+          type: string
+          description: the datatype must be one of integer, float, boolean or string
+          enum:
+            - float
+            - integer
+            - mixed
+            - string
+        type:
+          type: string
+          description: the type must be one of variable, category, label or identifier
+          enum:
+            - identifier
+            - variable
+            - category
+            - array
+            - multiarray
+        range:
+          maxItems: 2
+          minItems: 2
+          type: array
+          description: |
+            (optional) an array of length 2 containing minimum and maximum
+            values
+          items:
+            type: number
+            format: float
+        preload:
+          type: boolean
+          description: |
+            (optional) a flag to indicate whether this field should be
+            loaded for visualisation without user prompting
+        active:
+          type: boolean
+          description: |
+            (optional) a flag to indicate whether this field should be
+            part of preview set
+        scale:
+          type: string
+          description: (optional) scale to use when binning/presenting data
+          enum:
+            - scaleLinear
+            - scaleLog
+            - scaleSqrt
+        linked_field:
+          pattern: "^[A-Za-z0-9_.-]+$"
+          type: string
+          description: (optional) field ID to which the current field is linked
+        children:
+          type: array
+          description: (optional) an array of nested fields
+          items:
+            anyOf:
+              - type: object
+              - type: string
+        data:
+          type: array
+          description: (optional) an array of nested data
+          items:
+            type: object
+            properties: {}
+    Value:
+      type: object
+      properties:
+        values:
+          type: array
+          description: an array of values
+          items:
+            type: number
+        keys:
+          type: array
+          description: an array of key-value pairs
+    Tree:
+      type: object
+      properties:
+        n:
+          type: integer
+          description: node ID
+        r:
+          type: string
+          description: rank
+        a:
+          type: integer
+          description: number of assemblies analysed
+        s:
+          type: integer
+          description: number of species with at least one assembly analysed
+        ta:
+          type: integer
+          description: total number of publicly available assemblies
+        ts:
+          type: integer
+          description: number of species with at least one publicly available assembly
+        d:
+          type: object
+          properties: {}
+          description: descendant nodes
+    Term:
+      type: object
+      properties:
+        term:
+          type: string
+          description: search term
+        field:
+          type: string
+          description: search field
+        names:
+          type: array
+          description: matching dataset identifiers
+          items:
+            type: string
+  parameters:
+    datasetIdParam:
+      name: dataset_id
+      in: path
+      description: Unique identifier of the requested dataset (e.g. ACVV01)
+      examples:
+        CAJEUD01.1:
+          value: CAJEUD01.1
+          summary: Pipistrellus pipistrellus (mPipPip1) assembly dataset
+      required: true
+      schema:
+        type: string
+    subkeyParam:
+      name: subkey
+      in: path
+      description: Key object subkey (e.g. accession)
+      examples:
+        software_versions:
+          value: software_versions
+          summary: Dataset metadata software versions
+      required: true
+      schema:
+        type: string
+    fieldIdParam:
+      name: field_id
+      in: path
+      description: Unique identifier of the requested field (e.g. gc)
+      examples:
+        gc:
+          value: gc
+          summary: GC content
+        buscogenes_phylum:
+          value: buscogenes_phylum
+          summary: Putative phylum assignments based on the buscogenes taxrule
+      required: true
+      schema:
+        type: string
+    indexParam:
+      name: index
+      in: path
+      description: index of the requested record(s)
+      examples:
+        single:
+          value: "5"
+          summary: single value
+        list:
+          value: "5,7,10"
+          summary: list of values
+        range:
+          value: "12-14"
+          summary: range of values
+        mixed:
+          value: "5,7,10,12-14"
+          summary: mixed list and range
+      required: true
+      schema:
+        pattern: '\d+[,\d-]*'
+        type: string
+    viewParam:
+      name: view
+      in: path
+      description: view type
+      examples:
+        blob:
+          value: blob
+          summary: blob plot view
+        cumulative:
+          value: cumulative
+          summary: cumulative plot view
+        snail:
+          value: snail
+          summary: snail plot view
+      required: true
+      schema:
+        type: string
+        enum:
+          - blob
+          - cumulative
+          - kite
+          - snail
+    typeParam:
+      name: type
+      in: path
+      description: blob view plot type
+      examples:
+        circle:
+          value: circle
+          summary: plot contigs as circles
+        hex:
+          value: hex
+          summary: hex binned plot
+        square:
+          value: square
+          summary: square binned plot
+      required: true
+      schema:
+        type: string
+        enum:
+          - circle
+          - hex
+          - kite
+          - none
+          - square
+    formatParam:
+      name: format
+      in: query
+      description: image format
+      examples:
+        png:
+          value: png
+          summary: PNG format
+        svg:
+          value: svg
+          summary: SVG format
+      schema:
+        type: string
+        default: png
+        enum:
+          - png
+          - svg
+    widthParam:
+      name: width
+      in: query
+      deprecated: true
+      description: png image width
+      schema:
+        type: integer
+    termParam:
+      name: term
+      in: path
+      description: search term
+      examples:
+        nematoda:
+          value: Nematoda
+          summary: search for all Nematoda datasets
+        accession:
+          value: GCA_903992545.1
+          summary: search by GCA accession
+      required: true
+      schema:
+        type: string
+    keyParam:
+      name: key
+      in: path
+      description: Dataset metadata key
+      examples:
+        settings:
+          value: settings
+          summary: Dataset metadata settings
+      required: true
+      schema:
+        type: string
+    reloadKeyParam:
+      name: key
+      in: path
+      description: Search index reload key
+      required: true
+      schema:
+        type: string

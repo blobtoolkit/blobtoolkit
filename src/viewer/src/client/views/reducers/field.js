@@ -570,8 +570,31 @@ export const getBinsForFieldId = createBinSelectorForFieldId(
   getDetailsForFieldId,
   (state) => getParsedQueryString(state),
   getOtherLimit,
-  (rawData, details, parsed, otherLimit) => {
-    if (!rawData || !details) return undefined;
+  getCatAxis,
+  (rawData, details, parsed, otherLimit, catAxis) => {
+    if (!rawData || !details) {
+      if (!catAxis || isNaN(catAxis)) {
+        return undefined;
+      }
+      let bins = [];
+      for (let i = 0; i < catAxis; i++) {
+        bins[i] = {
+          id: i,
+          keys: [],
+          x0: i,
+          x1: i + 1,
+          length: 1,
+        };
+      }
+      bins[catAxis] = {
+        id: "all",
+        keys: [0],
+        x0: catAxis,
+        x1: catAxis * 1 + 1,
+        length: 1,
+      };
+      return bins;
+    }
     let data = rawData.values || [];
     let keys = rawData.keys || {};
     let bins = [];

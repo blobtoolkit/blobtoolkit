@@ -101,12 +101,12 @@ const mapDispatchToQuery = {
   largeFonts: {
     type: "SET_LARGE_FONTS",
     payload: (k, v) => v,
-    default: "false",
+    default: "true",
   },
   errorBars: {
     type: "SET_ERROR_BARS",
     payload: (k, v) => v,
-    default: "sd",
+    default: "0",
   },
   windowSize: {
     type: "SET_WINDOW_SIZE",
@@ -139,10 +139,20 @@ const mapDispatchToQuery = {
     payload: (k, v) => v,
     default: 1,
   },
+  plotStyle: {
+    type: "SET_PLOT_STYLE",
+    payload: (k, v) => v,
+    default: "circle",
+  },
   plotGraphics: {
     type: "SET_PLOT_GRAPHICS",
     payload: (k, v) => v,
     default: "auto",
+  },
+  gridScale: {
+    type: "SET_GRID_SCALE",
+    payload: (k, v) => v,
+    default: "uniform",
   },
   svgThreshold: {
     type: "SET_SVG_THRESHOLD",

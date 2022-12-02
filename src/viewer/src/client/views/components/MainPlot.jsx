@@ -6,6 +6,7 @@ import {
   getPlotGraphics,
   getPlotShape,
   getSVGThreshold,
+  getWindowSize,
 } from "../reducers/plotParameters";
 import {
   getHexGridScale,
@@ -35,6 +36,7 @@ import { NoHitWarning } from "./NoHitWarning";
 import PlotAxisTitle from "./PlotAxisTitle";
 import PlotBubblesCanvasLayers from "./PlotBubblesCanvasLayers";
 import PlotBubblesSVGLayers from "./PlotBubblesSVGLayers";
+import PlotGridSVG from "./PlotGridSVG";
 import PlotHexBinsSVG from "./PlotHexBinsSVG";
 import PlotHexGridSVG from "./PlotHexGridSVG";
 //import PlotHexBinsCanvas from './PlotHexBinsCanvas'
@@ -106,7 +108,7 @@ export default class MainPlot extends React.Component {
             nohitThreshold: getNohitThreshold(state),
             largeFonts: getLargeFonts(state),
           };
-        } else if (plotShape == "lines") {
+        } else if (plotShape == "grid" || plotShape == "lines") {
           return {
             datasetId: getDatasetID(state),
             plotShape: getPlotShape(state),
@@ -116,6 +118,7 @@ export default class MainPlot extends React.Component {
             nohitThreshold: getNohitThreshold(state),
             range: getScatterPlotData(state).range,
             largeFonts: getLargeFonts(state),
+            windowSize: getWindowSize(state),
           };
         }
         return {
@@ -310,19 +313,22 @@ class PlotBox extends React.Component {
     yPlot = <PlotSideBinsSVG axis="y" />;
     // }
     let legend;
-    if (this.props.largeFonts) {
-      legend = (
-        <g transform="translate(975,-290),scale(1.1)">
-          <PlotLegend />
-        </g>
-      );
-    } else {
-      legend = (
-        <g transform="translate(1010,-290)">
-          <PlotLegend />
-        </g>
-      );
+    if (plotShape != "grid" && plotShape != "lines") {
+      if (this.props.largeFonts) {
+        legend = (
+          <g transform="translate(975,-290),scale(1.1)">
+            <PlotLegend />
+          </g>
+        );
+      } else {
+        legend = (
+          <g transform="translate(1010,-290)">
+            <PlotLegend />
+          </g>
+        );
+      }
     }
+    let lasso;
     if (plotShape == "circle") {
       if (this.props.plotGraphics != "svg") {
         plotContainer = "";
@@ -333,6 +339,12 @@ class PlotBox extends React.Component {
       plotContainer = <PlotKitesSVG />;
     } else if (plotShape == "lines") {
       plotContainer = <PlotLinesSVG />;
+      xPlot = undefined;
+      yPlot = undefined;
+    } else if (plotShape == "grid") {
+      plotContainer = <PlotGridSVG />;
+      xPlot = undefined;
+      yPlot = undefined;
     } else if (plotShape == "square") {
       plotContainer = <PlotSquareBinsSVG />;
       plotGrid = <PlotSquareGridSVG />;
@@ -395,7 +407,7 @@ class PlotBox extends React.Component {
             )}
         </div>
       );
-    } else if (plotShape == "kite" || plotShape == "lines") {
+    } else if (plotShape == "kite") {
       return (
         <div className={styles.outer}>
           <div className={styles.fill_parent}>
@@ -424,6 +436,32 @@ class PlotBox extends React.Component {
                 )}
                 <PlotAxisTitle axis="x" side={side} />
                 <PlotAxisTitle axis="y" side={side} />
+              </g>
+            </svg>
+            {exportButtons}
+          </div>
+          <FigureCaption {...this.props} />
+        </div>
+      );
+    } else if (plotShape == "grid" || plotShape == "lines") {
+      return (
+        <div className={styles.outer}>
+          <div className={styles.fill_parent}>
+            <svg
+              id="main_plot"
+              ref={(elem) => {
+                this.svg = elem;
+              }}
+              className={styles.main_plot + " " + styles.fill_parent}
+              viewBox={viewbox}
+              preserveAspectRatio="xMinYMin"
+            >
+              {mask}
+              <g transform={"translate(100,320)"}>
+                <g transform="translate(0,-300)">{plotContainer}</g>
+                {legend}
+                <PlotAxisTitle axis="x" side={side} offset={150} />
+                <PlotAxisTitle axis="y" side={side} offset={150} />
               </g>
             </svg>
             {exportButtons}
