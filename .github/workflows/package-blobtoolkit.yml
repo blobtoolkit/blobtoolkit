@@ -85,8 +85,6 @@ jobs:
           chmod 755 src/data/bin/*
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_arm64
-          ./pip_install_latest.sh macosx_10_9_x86_64
-          blobtools -v
       - uses: actions/upload-artifact@v3
         with:
           path: ./dist/*.whl
