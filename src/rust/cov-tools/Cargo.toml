@@ -1,0 +1,13 @@
+[package]
+name = "cov-tools"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+atty = "0.2.14"
+clap = { version = "4.0.29", features = [ "derive" ]}
+needletail = "0.4.1"
+regex = "1.7.0"
+rust-htslib = "0.40.2"
