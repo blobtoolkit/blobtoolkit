@@ -163,6 +163,7 @@ version = "0.1.0"
 dependencies = [
  "atty",
  "clap",
+ "flate2",
  "needletail",
  "regex",
  "rust-htslib",

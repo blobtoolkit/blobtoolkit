@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 atty = "0.2.14"
 clap = { version = "4.0.29", features = [ "derive" ]}
+flate2 = "1.0.25"
 needletail = "0.4.1"
 regex = "1.7.0"
 rust-htslib = "0.40.2"

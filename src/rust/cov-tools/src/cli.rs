@@ -18,7 +18,7 @@ pub struct Config {
     /// Path to CRAM file
     #[arg(long, short = 'c', requires = "fasta")]
     pub cram: Option<PathBuf>,
-    /// Assembly FASTA file (required for CRAM)
+    /// Path to assembly FASTA input file (required for CRAM)
     #[arg(long, short = 'a')]
     pub fasta: Option<PathBuf>,
     /// Path to FASTQ file to filter (forward or single reads)
@@ -32,8 +32,27 @@ pub struct Config {
         requires = "fastq1"
     )]
     pub fastq2: Option<PathBuf>,
-    /// Output list of read IDs
-    #[arg(long = "read-list", short = 'o', value_name = "TXT")]
+    /// Suffix to use for output filtered files
+    #[arg(long, short = 'S', value_name = "SUFFIX", default_value_t = String::from("filtered"))]
+    pub suffix: String,
+    /// Flag to output a filtered FASTA file
+    #[arg(
+        long = "fasta-out",
+        short = 'A',
+        requires = "fasta",
+        default_value_t = false
+    )]
+    pub fasta_out: bool,
+    /// Flag to output filtered FASTQ files
+    #[arg(
+        long = "fastq-out",
+        short = 'F',
+        requires = "fastq1",
+        default_value_t = false
+    )]
+    pub fastq_out: bool,
+    /// Path to output list of read IDs
+    #[arg(long = "read-list", short = 'O', value_name = "TXT")]
     pub read_list: Option<PathBuf>,
 }
 
