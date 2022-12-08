@@ -10,6 +10,7 @@ use std::path::PathBuf;
 ))]
 pub struct Config {
     /// File containing a list of sequence IDs
+    // TODO: add option to invert list (use BAM header)
     #[arg(long, short = 'l', value_name = "TXT")]
     pub list: Option<PathBuf>,
     /// Path to BAM file

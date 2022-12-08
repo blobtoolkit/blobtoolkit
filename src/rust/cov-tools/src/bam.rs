@@ -36,6 +36,7 @@ pub fn reads_from_bam(seq_names: &Vec<String>, mut bam: IndexedReader) -> HashSe
         for read in bam
             .rc_records()
             .map(|x| x.expect("Failure parsing Bam file"))
+            // TODO: include filter options in config
             .filter(|read| {
                 read.flags()
                     & (htslib::BAM_FUNMAP
@@ -46,13 +47,13 @@ pub fn reads_from_bam(seq_names: &Vec<String>, mut bam: IndexedReader) -> HashSe
             })
         {
             wanted_reads.insert(read.qname().to_vec());
-            // let read_name = str::from_utf8(read.qname()).unwrap();
-            // println!("Found a forward read: {:?}", read_name);
-            // println!("Mapped to contig: {:?}", read.tid());
+            // TODO: add option to print info from matching records file, e.g.
+            // println!(
+            //     "{:?}: {:?}",
+            //     String::from_utf8(read.qname().to_vec()).unwrap(),
+            //     read.cigar().to_string()
+            // );
         }
     }
     wanted_reads
-    // .into_iter()
-    // .map(|x| String::from_utf8(x).unwrap())
-    // .collect()
 }

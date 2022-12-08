@@ -29,24 +29,42 @@ fn subsample_paired(
     read_names: &HashSet<Vec<u8>>,
     mut reader: Box<dyn FastxReader>,
     mut paired_reader: Box<dyn FastxReader>,
+    writer: &mut dyn Write,
+    paired_writer: &mut dyn Write,
+    read_suffix: &[Vec<u8>; 2],
 ) {
     while let Some(record) = reader.next() {
         let seqrec = record.expect("invalid record");
         let paired_record = paired_reader.next().unwrap();
         let paired_seqrec = paired_record.expect("invalid paired record");
-        let seq_id: Vec<u8> = trim_read_id(seqrec.id());
-        let paired_id: Vec<u8> = trim_read_id(paired_seqrec.id());
-        // println!("{:?}", String::from_utf8(&seq_id));
-        // println!("{:?}", String::from_utf8(&paired_id));
+        let mut seq_id: Vec<u8> = trim_read_id(seqrec.id());
+        let mut paired_id: Vec<u8> = trim_read_id(paired_seqrec.id());
         if seq_id != paired_id {
-            // println!(
-            //     "Fasta files not sorted consistently {:?} ne {:?}",
-            //     String::from_utf8(seq_id),
-            //     String::from_utf8(paired_id)
-            // );
+            panic!(
+                "Fasta files not sorted consistently {:?} ne {:?}",
+                String::from_utf8(seq_id),
+                String::from_utf8(paired_id)
+            );
         }
         if read_names.contains(&seq_id) || read_names.contains(&paired_id) {
-            println!("{:?}", String::from_utf8(seq_id));
+            seq_id.extend(&read_suffix[0]);
+            write_fastq(
+                &seq_id as &[u8],
+                &seqrec.seq(),
+                seqrec.qual(),
+                writer,
+                LineEnding::Unix,
+            )
+            .expect("Unable to write FASTQ");
+            paired_id.extend(&read_suffix[1]);
+            write_fastq(
+                &paired_id as &[u8],
+                &paired_seqrec.seq(),
+                paired_seqrec.qual(),
+                paired_writer,
+                LineEnding::Unix,
+            )
+            .expect("Unable to write FASTQ")
         }
     }
 }
@@ -55,11 +73,13 @@ fn subsample_single(
     read_names: &HashSet<Vec<u8>>,
     mut reader: Box<dyn FastxReader>,
     writer: &mut dyn Write,
+    read_suffix: &[Vec<u8>; 2],
 ) {
     while let Some(record) = reader.next() {
         let seqrec = record.as_ref().expect("invalid record");
-        let seq_id: Vec<u8> = trim_read_id(seqrec.id());
+        let mut seq_id: Vec<u8> = trim_read_id(seqrec.id());
         if read_names.contains(&seq_id) {
+            seq_id.extend(&read_suffix[0]);
             write_fastq(
                 &seq_id as &[u8],
                 &seqrec.seq(),
@@ -101,23 +121,41 @@ fn suffix_file_name(path: impl AsRef<Path>, suffix: &String) -> PathBuf {
     result
 }
 
+fn set_read_suffix(read_names: &HashSet<Vec<u8>>) -> [Vec<u8>; 2] {
+    let first_name = read_names.iter().next().unwrap();
+    if first_name.contains(&b'/') {
+        return [vec![] as Vec<u8>, vec![] as Vec<u8>];
+    }
+    [vec![b'/', b'1'], vec![b'/', b'2']]
+}
+
 pub fn subsample(
     read_names: &HashSet<Vec<u8>>,
     fastq_path_1: &Option<PathBuf>,
     fastq_path_2: &Option<PathBuf>,
     suffix: &String,
 ) -> () {
+    if let None = fastq_path_1 {
+        return;
+    }
     let reader = open_fastx(fastq_path_1);
     let paired_reader = open_fastx(fastq_path_2);
-
+    let read_suffix = set_read_suffix(read_names);
+    println!("{:?}", read_suffix);
     let out_path = suffix_file_name(fastq_path_1.as_ref().unwrap(), &suffix);
     let mut writer = get_writer(out_path);
-    // let mut writer: Box<&mut dyn Write> = get_writer(PathBuf::from("filtered.reads_1.fq"));
     if let Some(_) = paired_reader {
-        subsample_paired(read_names, reader.unwrap(), paired_reader.unwrap());
+        let paired_out_path = suffix_file_name(fastq_path_2.as_ref().unwrap(), &suffix);
+        let mut paired_writer = get_writer(paired_out_path);
+        subsample_paired(
+            read_names,
+            reader.unwrap(),
+            paired_reader.unwrap(),
+            &mut *writer,
+            &mut *paired_writer,
+            &read_suffix,
+        );
     } else if let Some(_) = reader {
-        subsample_single(read_names, reader.unwrap(), &mut *writer);
+        subsample_single(read_names, reader.unwrap(), &mut *writer, &read_suffix);
     }
-
-    // let mut paired_reader = paired_reader.unwrap();
 }
