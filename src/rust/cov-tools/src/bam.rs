@@ -1,3 +1,4 @@
+use crate::utils::styled_progress_bar;
 use rust_htslib::bam::{index, IndexedReader, Read};
 use rust_htslib::htslib;
 use std::collections::HashSet;
@@ -27,8 +28,8 @@ pub fn create_index(bam_path: &PathBuf) -> () {
         return;
     }
     match index::build(bam_path, None, index::Type::Csi(14), 1) {
-        Err(e) => println!("Error writing BAM index: {e:?}"),
-        Ok(_) => println!("Successfully created BAM index"),
+        Err(e) => eprintln!("Error writing BAM index: {e:?}"),
+        Ok(_) => eprintln!("Successfully created BAM index"),
     }
 }
 
@@ -48,11 +49,13 @@ pub fn open_bam(
 
 pub fn reads_from_bam(seq_names: &HashSet<Vec<u8>>, mut bam: IndexedReader) -> HashSet<Vec<u8>> {
     let mut wanted_reads = HashSet::new();
+    let total = seq_names.len() as u64;
+    let progress_bar = styled_progress_bar(total, "Locating alignments");
 
     for seq_name in seq_names {
         match bam.fetch(seq_name) {
-            Err(_) => println!("Sequence name not found in BAM file: {:?}", seq_name),
-            Ok(_) => println!("Found {:?}", seq_name),
+            Err(_) => eprintln!("Sequence {:?} not found in BAM file", seq_name),
+            Ok(_) => (),
         }
 
         for read in bam
@@ -76,6 +79,8 @@ pub fn reads_from_bam(seq_names: &HashSet<Vec<u8>>, mut bam: IndexedReader) -> H
             //     read.cigar().to_string()
             // );
         }
+        progress_bar.inc(1);
     }
+    progress_bar.finish();
     wanted_reads
 }

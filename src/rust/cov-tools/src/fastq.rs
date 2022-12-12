@@ -7,6 +7,7 @@ use needletail::parser::{write_fastq, LineEnding};
 use needletail::{parse_fastx_file, FastxReader};
 
 use crate::io::get_writer;
+use crate::utils::styled_progress_bar;
 
 pub fn open_fastx(fastx_path: &Option<PathBuf>) -> Option<Box<dyn FastxReader>> {
     let reader = match fastx_path {
@@ -33,6 +34,9 @@ fn subsample_paired(
     paired_writer: &mut dyn Write,
     read_suffix: &[Vec<u8>; 2],
 ) {
+    let total = read_names.len() as u64;
+    let progress_bar = styled_progress_bar(total, "Subsampling FASTQ");
+
     while let Some(record) = reader.next() {
         let seqrec = record.expect("invalid record");
         let paired_record = paired_reader.next().unwrap();
@@ -64,9 +68,14 @@ fn subsample_paired(
                 paired_writer,
                 LineEnding::Unix,
             )
-            .expect("Unable to write FASTQ")
+            .expect("Unable to write FASTQ");
+            progress_bar.inc(1);
+            if progress_bar.position() == total {
+                break;
+            }
         }
     }
+    progress_bar.finish();
 }
 
 fn subsample_single(
@@ -75,6 +84,9 @@ fn subsample_single(
     writer: &mut dyn Write,
     read_suffix: &[Vec<u8>; 2],
 ) {
+    let total = read_names.len() as u64;
+    let progress_bar = styled_progress_bar(total, "Subsampling FASTQ");
+
     while let Some(record) = reader.next() {
         let seqrec = record.as_ref().expect("invalid record");
         let mut seq_id: Vec<u8> = trim_read_id(seqrec.id());
@@ -87,9 +99,14 @@ fn subsample_single(
                 writer,
                 LineEnding::Unix,
             )
-            .expect("Unable to write FASTQ")
+            .expect("Unable to write FASTQ");
+            progress_bar.inc(1);
+            if progress_bar.position() == total {
+                break;
+            }
         }
     }
+    progress_bar.finish();
 }
 
 pub fn suffix_file_name(path: impl AsRef<Path>, suffix: &String) -> PathBuf {
@@ -133,15 +150,18 @@ pub fn subsample(
     read_names: &HashSet<Vec<u8>>,
     fastq_path_1: &Option<PathBuf>,
     fastq_path_2: &Option<PathBuf>,
+    fastq_out: &bool,
     suffix: &String,
 ) -> () {
     if let None = fastq_path_1 {
         return;
     }
+    if !fastq_out {
+        return;
+    }
     let reader = open_fastx(fastq_path_1);
     let paired_reader = open_fastx(fastq_path_2);
     let read_suffix = set_read_suffix(read_names);
-    println!("{:?}", read_suffix);
     let out_path = suffix_file_name(fastq_path_1.as_ref().unwrap(), &suffix);
     let mut writer = get_writer(out_path);
     if let Some(_) = paired_reader {

@@ -13,7 +13,7 @@ fn read_stdin() -> Vec<Vec<u8>> {
     let stdin = io::stdin();
     let mut list: Vec<Vec<u8>> = vec![];
     if atty::is(atty::Stream::Stdin) {
-        println!("No input on STDIN!");
+        eprintln!("No input on STDIN!");
         return list;
     }
     for line in stdin.lock().lines() {

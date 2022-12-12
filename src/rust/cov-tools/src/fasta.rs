@@ -6,9 +6,9 @@ extern crate needletail;
 use needletail::parser::{write_fasta, LineEnding};
 use needletail::FastxReader;
 
-use crate::io::get_writer;
-
 use crate::fastq::{open_fastx, suffix_file_name};
+use crate::io::get_writer;
+use crate::utils::styled_progress_bar;
 
 fn trim_seq_id(input: &[u8]) -> Vec<u8> {
     input
@@ -24,27 +24,34 @@ fn subsample_fasta(
     mut reader: Box<dyn FastxReader>,
     writer: &mut dyn Write,
 ) {
-    let mut iter: u32 = 0;
+    let total = seq_names.len() as u64;
+    let progress_bar = styled_progress_bar(total, "Subsampling FASTA");
+
     while let Some(record) = reader.next() {
         let seqrec = record.as_ref().expect("invalid record");
         let seq_id: Vec<u8> = trim_seq_id(seqrec.id());
         if seq_names.contains(&seq_id) {
             write_fasta(&seqrec.id(), &seqrec.seq(), writer, LineEnding::Unix)
                 .expect("Unable to write FASTA");
-            iter += 1;
-            if iter == seq_names.len() as u32 {
+            progress_bar.inc(1);
+            if progress_bar.position() == total {
                 break;
             }
         }
     }
+    progress_bar.finish();
 }
 
 pub fn subsample(
     seq_names: &HashSet<Vec<u8>>,
     fasta_path: &Option<PathBuf>,
+    fasta_out: &bool,
     suffix: &String,
 ) -> () {
     if let None = fasta_path {
+        return;
+    }
+    if !fasta_out {
         return;
     }
     let reader = open_fastx(fasta_path);

@@ -12,6 +12,7 @@ crate-type = ["cdylib", "lib"]
 atty = "0.2.14"
 clap = { version = "4.0.29", features = [ "derive" ]}
 flate2 = "1.0.25"
+indicatif = "0.17.2"
 needletail = "0.4.1"
 pyo3 = { version = "0.17.3", features = ["extension-module"] }
 regex = "1.7.0"
