@@ -8,7 +8,7 @@ use needletail::{parse_fastx_file, FastxReader};
 
 use crate::io::get_writer;
 
-fn open_fastx(fastx_path: &Option<PathBuf>) -> Option<Box<dyn FastxReader>> {
+pub fn open_fastx(fastx_path: &Option<PathBuf>) -> Option<Box<dyn FastxReader>> {
     let reader = match fastx_path {
         None => None,
         &Some(_) => Some(parse_fastx_file(&fastx_path.as_ref().unwrap()).expect("valid path/file")),
@@ -92,7 +92,7 @@ fn subsample_single(
     }
 }
 
-fn suffix_file_name(path: impl AsRef<Path>, suffix: &String) -> PathBuf {
+pub fn suffix_file_name(path: impl AsRef<Path>, suffix: &String) -> PathBuf {
     let path = path.as_ref();
     let mut result = path.to_owned();
     let mut new_name = String::from("_tmp");

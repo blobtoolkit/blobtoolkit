@@ -1,10 +1,32 @@
 use rust_htslib::bam::{index, IndexedReader, Read};
 use rust_htslib::htslib;
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+fn add_extension(path: &mut PathBuf, extension: impl AsRef<Path>) {
+    match path.extension() {
+        Some(ext) => {
+            let mut ext = ext.to_os_string();
+            ext.push(".");
+            ext.push(extension.as_ref());
+            path.set_extension(ext)
+        }
+        None => path.set_extension(extension.as_ref()),
+    };
+}
 
 pub fn create_index(bam_path: &PathBuf) -> () {
-    match index::build(bam_path, None, index::Type::Bai, 1) {
+    let mut csi = PathBuf::from(bam_path);
+    add_extension(&mut csi, "csi");
+    if Path::new(&csi).exists() {
+        return;
+    }
+    let mut bai = PathBuf::from(bam_path);
+    add_extension(&mut bai, "bai");
+    if Path::new(&bai).exists() {
+        return;
+    }
+    match index::build(bam_path, None, index::Type::Csi(14), 1) {
         Err(e) => println!("Error writing BAM index: {e:?}"),
         Ok(_) => println!("Successfully created BAM index"),
     }
@@ -24,7 +46,7 @@ pub fn open_bam(
     bam
 }
 
-pub fn reads_from_bam(seq_names: &Vec<String>, mut bam: IndexedReader) -> HashSet<Vec<u8>> {
+pub fn reads_from_bam(seq_names: &HashSet<Vec<u8>>, mut bam: IndexedReader) -> HashSet<Vec<u8>> {
     let mut wanted_reads = HashSet::new();
 
     for seq_name in seq_names {

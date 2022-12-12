@@ -1,6 +1,6 @@
 extern crate atty;
 use std::collections::HashSet;
-use std::io::{self, BufRead, BufReader, BufWriter, Result, Write};
+use std::io::{self, BufRead, BufWriter, Result, Write};
 use std::path::{Path, PathBuf};
 
 use std::fs::File;
@@ -9,25 +9,43 @@ use flate2::write;
 use flate2::Compression;
 use std::ffi::OsStr;
 
-fn read_stdin() -> Vec<String> {
+fn read_stdin() -> Vec<Vec<u8>> {
     let stdin = io::stdin();
-    let mut list: Vec<String> = vec![];
+    let mut list: Vec<Vec<u8>> = vec![];
     if atty::is(atty::Stream::Stdin) {
         println!("No input on STDIN!");
         return list;
     }
     for line in stdin.lock().lines() {
-        list.extend(line);
+        let line_as_vec = match line {
+            Err(why) => panic!("couldn't read line: {}", why),
+            Ok(l) => l.as_bytes().to_vec(),
+        };
+        list.push(line_as_vec)
     }
     list
 }
 
-fn read_file(file_path: &PathBuf) -> Vec<String> {
-    let file = File::open(file_path).expect("no such file");
-    let buf = BufReader::new(file);
-    buf.lines()
-        .map(|line| line.expect("Could not parse line"))
-        .collect()
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where
+    P: AsRef<Path>,
+{
+    let file = File::open(filename).expect("no such file");
+    Ok(io::BufReader::new(file).lines())
+}
+
+fn read_file(file_path: &PathBuf) -> Vec<Vec<u8>> {
+    let mut output: Vec<Vec<u8>> = vec![];
+    if let Ok(lines) = read_lines(file_path) {
+        for line in lines {
+            let line_as_vec = match line {
+                Err(why) => panic!("couldn't read line: {}", why),
+                Ok(l) => l.as_bytes().to_vec(),
+            };
+            output.push(line_as_vec)
+        }
+    }
+    output
 }
 
 fn write_stdout(entries: &HashSet<Vec<u8>>) -> Result<()> {
@@ -48,12 +66,12 @@ fn write_file(entries: &HashSet<Vec<u8>>, file_path: &PathBuf) -> Result<()> {
     Ok(())
 }
 
-pub fn get_list(file_path: &Option<PathBuf>) -> Vec<String> {
+pub fn get_list(file_path: &Option<PathBuf>) -> HashSet<Vec<u8>> {
     let list = match file_path {
         None => read_stdin(),
         &Some(_) => read_file(file_path.as_ref().unwrap()),
     };
-    list
+    HashSet::from_iter(list)
 }
 
 pub fn write_list(entries: &HashSet<Vec<u8>>, file_path: &Option<PathBuf>) -> Result<()> {
