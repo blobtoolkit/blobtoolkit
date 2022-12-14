@@ -1,11 +1,11 @@
 use std::process;
 
-use cov_tools;
-use cov_tools::cli;
+use blobtoolkit_core;
+use blobtoolkit_core::cli;
 
 fn main() {
     let options = cli::parse();
-    if let Err(e) = cov_tools::run(options) {
+    if let Err(e) = blobtoolkit_core::run(options) {
         eprintln!("Application error: {e}");
         process::exit(1);
     }

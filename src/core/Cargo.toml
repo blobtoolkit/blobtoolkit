@@ -1,10 +1,10 @@
 [package]
-name = "cov-tools"
+name = "blobtoolkit-core"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "cov_tools"
+name = "blobtoolkit_core"
 path = "src/lib.rs"
 crate-type = ["cdylib", "lib"]
 

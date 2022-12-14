@@ -1,19 +1,67 @@
 use std::collections::HashMap;
-use std::error::Error;
 use std::path::PathBuf;
 
-use cli::{Config, Options};
-
-pub mod bam;
-pub mod cli;
-pub mod fasta;
-pub mod fastq;
-pub mod io;
-pub mod utils;
-
+use crate::bam;
+use crate::fasta;
+use crate::fastq;
+use crate::io;
 use pyo3::prelude::*;
 
-/// runs python cov_tools.
+#[derive(Debug)]
+#[pyclass]
+pub struct Options {
+    /// File containing a list of sequence IDs
+    pub list: Option<PathBuf>,
+    /// Path to BAM file
+    pub bam: Option<PathBuf>,
+    /// Path to CRAM file
+    pub cram: Option<PathBuf>,
+    /// Path to assembly FASTA input file (required for CRAM)
+    pub fasta: Option<PathBuf>,
+    /// Path to FASTQ file to filter (forward or single reads)
+    pub fastq1: Option<PathBuf>,
+    /// Path to paired FASTQ file to filter (reverse reads)
+    pub fastq2: Option<PathBuf>,
+    /// Suffix to use for output filtered files
+    pub suffix: String,
+    /// Flag to output a filtered FASTA file
+    pub fasta_out: bool,
+    /// Flag to output filtered FASTQ files
+    pub fastq_out: bool,
+    /// Path to output list of read IDs
+    pub read_list: Option<PathBuf>,
+}
+
+#[pymethods]
+impl Options {
+    #[new]
+    fn new(
+        list: Option<PathBuf>,
+        bam: Option<PathBuf>,
+        cram: Option<PathBuf>,
+        fasta: Option<PathBuf>,
+        fastq1: Option<PathBuf>,
+        fastq2: Option<PathBuf>,
+        suffix: String,
+        fasta_out: bool,
+        fastq_out: bool,
+        read_list: Option<PathBuf>,
+    ) -> Self {
+        Options {
+            list,
+            bam,
+            cram,
+            fasta,
+            fastq1,
+            fastq2,
+            suffix,
+            fasta_out,
+            fastq_out,
+            read_list,
+        }
+    }
+}
+
 #[pyfunction]
 fn cov_filter(options: &Options) -> PyResult<usize> {
     let seq_names = io::get_list(&options.list);
@@ -104,30 +152,13 @@ fn cov_filter_dict(py: Python<'_>, map: HashMap<String, PyObject>) -> PyResult<u
 }
 
 #[pymodule]
-fn cov_tools(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(cov_filter, m)?)?;
-    m.add_function(wrap_pyfunction!(cov_filter_dict, m)?)?;
-    m.add_class::<Options>()?;
-    Ok(())
-}
+fn blobtoolkit_core(py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    let filter = PyModule::new(py, "filter")?;
+    filter.add_function(wrap_pyfunction!(cov_filter, m)?)?;
+    filter.add_function(wrap_pyfunction!(cov_filter_dict, m)?)?;
+    filter.add_class::<Options>()?;
 
-pub fn run(options: Config) -> Result<(), Box<dyn Error>> {
-    let seq_names = io::get_list(&options.list);
-    fasta::subsample(
-        &seq_names,
-        &options.fasta,
-        &options.fasta_out,
-        &options.suffix,
-    );
-    let bam = bam::open_bam(&options.bam, &options.cram, &options.fasta);
-    let read_names = bam::reads_from_bam(&seq_names, bam);
-    io::write_list(&read_names, &options.read_list)?;
-    fastq::subsample(
-        &read_names,
-        &options.fastq1,
-        &options.fastq2,
-        &options.fastq_out,
-        &options.suffix,
-    );
+    m.add_submodule(filter)?;
+
     Ok(())
 }
