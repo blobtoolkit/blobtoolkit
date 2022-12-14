@@ -7,7 +7,10 @@ use crate::fastq;
 use crate::io;
 
 pub fn filter(options: &cli::FilterOptions) -> Result<(), Box<dyn Error>> {
-    let seq_names = io::get_list(&options.list);
+    let seq_names = io::get_list(&options.list_file);
+    if seq_names.len() == 0 {
+        return Ok(());
+    }
     fasta::subsample(
         &seq_names,
         &options.fasta,

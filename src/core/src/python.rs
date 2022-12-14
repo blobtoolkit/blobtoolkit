@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 use crate::bam;
@@ -9,9 +10,11 @@ use pyo3::prelude::*;
 
 #[derive(Debug)]
 #[pyclass]
-pub struct Options {
+pub struct FilterOptions {
     /// File containing a list of sequence IDs
-    pub list: Option<PathBuf>,
+    pub list: Option<HashSet<Vec<u8>>>,
+    /// File containing a list of sequence IDs
+    pub list_file: Option<PathBuf>,
     /// Path to BAM file
     pub bam: Option<PathBuf>,
     /// Path to CRAM file
@@ -33,10 +36,11 @@ pub struct Options {
 }
 
 #[pymethods]
-impl Options {
+impl FilterOptions {
     #[new]
     fn new(
-        list: Option<PathBuf>,
+        list: Option<HashSet<Vec<u8>>>,
+        list_file: Option<PathBuf>,
         bam: Option<PathBuf>,
         cram: Option<PathBuf>,
         fasta: Option<PathBuf>,
@@ -47,8 +51,9 @@ impl Options {
         fastq_out: bool,
         read_list: Option<PathBuf>,
     ) -> Self {
-        Options {
+        FilterOptions {
             list,
+            list_file,
             bam,
             cram,
             fasta,
@@ -63,8 +68,16 @@ impl Options {
 }
 
 #[pyfunction]
-fn cov_filter(options: &Options) -> PyResult<usize> {
-    let seq_names = io::get_list(&options.list);
+fn fastx_with_options(options: &FilterOptions) -> PyResult<usize> {
+    let seq_names = match options.list.to_owned() {
+        Some(value) => value,
+        _ => match options.list_file.to_owned() {
+            value => io::get_list(&value),
+        },
+    };
+    if seq_names.len() == 0 {
+        return Ok(0);
+    }
     fasta::subsample(
         &seq_names,
         &options.fasta,
@@ -82,6 +95,26 @@ fn cov_filter(options: &Options) -> PyResult<usize> {
         &options.suffix,
     );
     Ok(read_names.len())
+}
+
+fn extract_to_option_list(
+    py: Python<'_>,
+    map: &HashMap<String, PyObject>,
+    key: &str,
+) -> Option<HashSet<Vec<u8>>> {
+    let hash_key = String::from(key);
+    let option: Option<HashSet<Vec<u8>>> = match map.get(&hash_key) {
+        Some(value) => {
+            let list: Vec<String> = value.extract(py).unwrap();
+            let mut unique_values = HashSet::new();
+            for item in list {
+                unique_values.insert(item.as_bytes().to_vec());
+            }
+            Some(unique_values)
+        }
+        _ => None,
+    };
+    option
 }
 
 fn extract_to_option_pathbuf(
@@ -120,8 +153,9 @@ fn extract_to_bool(py: Python<'_>, map: &HashMap<String, PyObject>, key: &str) -
     value
 }
 
-fn convert_hashmap_to_options(py: Python<'_>, map: HashMap<String, PyObject>) -> Options {
-    let list = extract_to_option_pathbuf(py, &map, "list");
+fn convert_hashmap_to_options(py: Python<'_>, map: HashMap<String, PyObject>) -> FilterOptions {
+    let list = extract_to_option_list(py, &map, "list");
+    let list_file = extract_to_option_pathbuf(py, &map, "list_file");
     let bam = extract_to_option_pathbuf(py, &map, "bam");
     let cram = extract_to_option_pathbuf(py, &map, "cram");
     let fasta = extract_to_option_pathbuf(py, &map, "fasta");
@@ -131,8 +165,9 @@ fn convert_hashmap_to_options(py: Python<'_>, map: HashMap<String, PyObject>) ->
     let suffix = extract_to_default_string(py, &map, "suffix", "filtered");
     let fasta_out = extract_to_bool(py, &map, "fasta_out");
     let fastq_out = extract_to_bool(py, &map, "fastq_out");
-    Options {
+    FilterOptions {
         list,
+        list_file,
         bam,
         cram,
         fasta,
@@ -146,17 +181,17 @@ fn convert_hashmap_to_options(py: Python<'_>, map: HashMap<String, PyObject>) ->
 }
 
 #[pyfunction]
-fn cov_filter_dict(py: Python<'_>, map: HashMap<String, PyObject>) -> PyResult<usize> {
+fn fastx(py: Python<'_>, map: HashMap<String, PyObject>) -> PyResult<usize> {
     let options = &convert_hashmap_to_options(py, map);
-    cov_filter(options)
+    fastx_with_options(options)
 }
 
 #[pymodule]
 fn blobtoolkit_core(py: Python<'_>, m: &PyModule) -> PyResult<()> {
     let filter = PyModule::new(py, "filter")?;
-    filter.add_function(wrap_pyfunction!(cov_filter, m)?)?;
-    filter.add_function(wrap_pyfunction!(cov_filter_dict, m)?)?;
-    filter.add_class::<Options>()?;
+    filter.add_function(wrap_pyfunction!(fastx_with_options, m)?)?;
+    filter.add_function(wrap_pyfunction!(fastx, m)?)?;
+    filter.add_class::<FilterOptions>()?;
 
     m.add_submodule(filter)?;
 

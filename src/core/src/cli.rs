@@ -22,10 +22,10 @@ pub enum SubCommand {
         .args(["bam", "cram"]),
 ))]
 pub struct FilterOptions {
-    /// File containing a list of sequence IDs
+    /// Path to input file containing a list of sequence IDs
     // TODO: add option to invert list (use BAM header)
-    #[arg(long, short = 'l', value_name = "TXT")]
-    pub list: Option<PathBuf>,
+    #[arg(long = "list", short = 'i', value_name = "TXT")]
+    pub list_file: Option<PathBuf>,
     /// Path to BAM file
     #[arg(long, short = 'b')]
     pub bam: Option<PathBuf>,
