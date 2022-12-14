@@ -1,14 +1,27 @@
-use clap::{ArgGroup, Parser};
+use clap::{ArgGroup, Parser, Subcommand};
 use std::path::PathBuf;
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
+
+pub struct Arguments {
+    #[clap(subcommand)]
+    pub cmd: SubCommand,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum SubCommand {
+    /// Filter files based on list of sequence names
+    Filter(FilterOptions),
+}
+
+#[derive(Parser, Debug)]
 #[command(group(
     ArgGroup::new("alignment")
         .required(true)
         .args(["bam", "cram"]),
 ))]
-pub struct Config {
+pub struct FilterOptions {
     /// File containing a list of sequence IDs
     // TODO: add option to invert list (use BAM header)
     #[arg(long, short = 'l', value_name = "TXT")]
@@ -57,6 +70,6 @@ pub struct Config {
     pub read_list: Option<PathBuf>,
 }
 
-pub fn parse() -> Config {
-    Config::parse()
+pub fn parse() -> Arguments {
+    Arguments::parse()
 }
