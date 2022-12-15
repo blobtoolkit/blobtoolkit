@@ -488,10 +488,10 @@ def fetch_read_info(accession, per_platform):
             ):
                 platform = "ILLUMINA_XTEN"
             values[header[i]] = value
-        if "base_count" in values:
+        try:
             values["base_count"] = int(values["base_count"])
-        else:
-            values["base_count"] = 0
+        except (KeyError, ValueError):
+            continue
         try:
             per_platform[platform].append(values)
         except KeyError:
