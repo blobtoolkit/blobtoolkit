@@ -1,6 +1,6 @@
 {
   "name": "blobtoolkit-api",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "repository": "https://github.com/blobtoolkit/viewer",
   "description": "",
   "bin": "src/app.js",
