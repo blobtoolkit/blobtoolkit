@@ -149,7 +149,7 @@ const PlotOutline = ({ data, params, plotPaths, plotText, fill }) => {
   }
 
   return (
-    <g>
+    <g style={{ fill: "none" }}>
       <rect
         style={{
           ...plotPaths.boundary,
