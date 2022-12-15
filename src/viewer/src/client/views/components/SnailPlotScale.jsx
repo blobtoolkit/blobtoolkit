@@ -37,7 +37,7 @@ export const PlotTextInput = ({
 }) => {
   if (!display) return null;
   return (
-    <g>
+    <g style={{ fill: "none" }}>
       <foreignObject width={width} height={height}>
         <div xmlns="http://www.w3.org/1999/xhtml">
           <input
@@ -51,6 +51,7 @@ export const PlotTextInput = ({
               marginLeft: x,
               marginTop: y,
               padding: 0,
+              fill: "none",
               border: "3px solid",
             }}
           />
@@ -110,7 +111,8 @@ export class SnailPlotScaleComponent extends React.Component {
           width="80px"
           height={w}
           style={Object.assign({}, this.props.plotPaths.axis, {
-            fill: "rgba(255,255,255,0)",
+            fill: "rgb(255,255,255)",
+            fillOpacity: 0,
             stroke: "black",
             pointerEvents: "auto",
             cursor: "pointer",
@@ -168,7 +170,8 @@ export class SnailPlotScaleComponent extends React.Component {
           width="80px"
           height={w}
           style={Object.assign({}, this.props.plotPaths.axis, {
-            fill: "rgba(255,255,255,0)",
+            fill: "rgb(255,255,255)",
+            fillOpacity: 0,
             stroke: "black",
             pointerEvents: "auto",
             cursor: "pointer",
