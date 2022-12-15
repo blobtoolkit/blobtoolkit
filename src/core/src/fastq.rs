@@ -53,7 +53,7 @@ fn subsample_paired(
         if read_names.contains(&seq_id) || read_names.contains(&paired_id) {
             seq_id.extend(&read_suffix[0]);
             write_fastq(
-                &seq_id as &[u8],
+                &seqrec.id(),
                 &seqrec.seq(),
                 seqrec.qual(),
                 writer,
@@ -62,7 +62,7 @@ fn subsample_paired(
             .expect("Unable to write FASTQ");
             paired_id.extend(&read_suffix[1]);
             write_fastq(
-                &paired_id as &[u8],
+                &paired_seqrec.id(),
                 &paired_seqrec.seq(),
                 paired_seqrec.qual(),
                 paired_writer,
@@ -93,7 +93,7 @@ fn subsample_single(
         if read_names.contains(&seq_id) {
             seq_id.extend(&read_suffix[0]);
             write_fastq(
-                &seq_id as &[u8],
+                &seqrec.id(),
                 &seqrec.seq(),
                 seqrec.qual(),
                 writer,

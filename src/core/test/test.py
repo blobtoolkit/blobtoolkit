@@ -12,6 +12,18 @@ read_count = filter.fastx(
 
 print(read_count)
 
+read_count = filter.fastx(
+    {
+        "list_file": "test/test.list",
+        "bam": "test/test.bam",
+        "fastq1": "test/reads_1.fq.gz",
+        "fastq2": "test/reads_2.fq.gz",
+        "fastq_out": True,
+    }
+)
+
+print(read_count)
+
 options = filter.FilterOptions(
     None,
     "test/alt.list",
