@@ -17,10 +17,12 @@ rule run_windowmasker:
                      -infmt fasta \
                      -mk_counts \
                      -sformat obinary \
+                     -mem 10000 \
                      -out {output.counts} 2> {log} && \
         windowmasker -in {input} \
                      -infmt fasta \
                      -ustat {output.counts} \
                      -dust T \
                      -outfmt fasta \
+                     -mem 10000 \
                      -out {output.masked} 2>> {log}"""
