@@ -10,6 +10,7 @@ Options:
     --out FILE      Output file
 """
 
+
 import logging
 import re
 import subprocess
@@ -33,7 +34,7 @@ logger_config = {
 logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
-logger.info("Starting script: " + __file__)
+logger.info(f"Starting script: {__file__}")
 
 
 def add_pipeline_version(meta):
@@ -60,12 +61,14 @@ def add_software_versions(meta):
     logger.info("Adding software version details")
     for key, opts in programs.items():
         cmd = [key]
-        flag = opts.get("flag", "--version")
-        if flag:
+        if flag := opts.get("flag", "--version"):
             cmd.append(flag)
         try:
             p = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8",
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                encoding="utf-8",
             )
             (output, err) = p.communicate()
             status = p.wait()
@@ -83,7 +86,7 @@ def add_software_versions(meta):
         except FileNotFoundError:
             version = "not found"
         logger.info("%s: %s", key, version)
-        versions.update({key: version})
+        versions[key] = version
     meta["settings"]["software_versions"] = versions
 
 
@@ -117,6 +120,8 @@ def main():
                 value["url"] = []
         add_pipeline_version(meta)
         add_software_versions(meta)
+        meta["version"] = config.get("version", 1)
+        meta["revision"] = config.get("revision", 0)
 
         yaml.add_representer(
             OrderedDict,
