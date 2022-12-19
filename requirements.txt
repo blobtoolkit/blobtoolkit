@@ -1,5 +1,5 @@
 blobtoolkit-core==0.1.0
-chromedriver-binary-auto==0.1.1
+chromedriver-binary-auto==0.2.3
 docopt==0.6.2
 geckodriver-autoinstaller==0.1.0
 psutil==5.9.0

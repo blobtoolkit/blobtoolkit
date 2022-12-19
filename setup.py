@@ -181,7 +181,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "blobtoolkit-core>=0.1.0",
-        "chromedriver-binary-auto==0.1.1",
+        "chromedriver-binary-auto==0.2.3",
         "docopt>=0.6.2",
         "fastjsonschema==2.15.3",
         "geckodriver-autoinstaller==0.1.0",
