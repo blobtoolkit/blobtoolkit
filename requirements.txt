@@ -8,7 +8,7 @@ pytest_mock==3.7.0
 pyvirtualdisplay==3.0
 PyYAML==6.0
 selenium==4.3.0
-setuptools==49.2.0
+setuptools==65.5.1
 tolkein==0.4.0
 tqdm==4.64.0
 ujson==5.4.0
