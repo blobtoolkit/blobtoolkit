@@ -4,7 +4,7 @@
 Generate static image files.
 
 Usage:
-  btk pipeline generate-static-images --blobdir STRING [--coverage] [--host STRING]
+  blobtoolkit-pipeline generate-static-images --blobdir STRING [--coverage] [--host STRING]
                          [--ports RANGE] [--timeout INT] [--path PATH]
 
 Options:
@@ -54,13 +54,15 @@ logger = logging.getLogger()
 #         pass
 
 
-def main():
+def main(rename=None):
     """Entry point."""
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
     try:
-        # parse_args()
-        args = docopt(__doc__)
-    except DocoptExit:
-        raise DocoptExit
+        args = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
 
     blob_path = "%s/%s" % (args["--path"], args["--blobdir"])
 

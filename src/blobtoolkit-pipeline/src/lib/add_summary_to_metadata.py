@@ -3,7 +3,7 @@
 """
 Add summary data to metadata.
 
-Usage: btk pipeline add-summary-to-metadata --config FILE --out FILE
+Usage: blobtoolkit-pipeline add-summary-to-metadata --config FILE --out FILE
 
 Options:
     --config FILE   YAML format config file
@@ -90,12 +90,15 @@ def add_software_versions(meta):
     meta["settings"]["software_versions"] = versions
 
 
-def main():
+def main(rename=None):
     """Entry point."""
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
     try:
-        args = docopt(__doc__)
-    except DocoptExit:
-        raise DocoptExit
+        args = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     try:
         meta = {}
         config = args["--config"]

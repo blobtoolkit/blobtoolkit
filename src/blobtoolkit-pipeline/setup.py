@@ -96,10 +96,10 @@ def read(*names, **kwargs):
 
 
 setup(
-    name="blobtoolkit",  # Required
+    name="blobtoolkit-pipeline",  # Required
     version="3.5.5",
-    description="blobtoolkit",  # Optional
-    long_description="blobtoolkit",  # Optional
+    description="blobtoolkit-pipeline",  # Optional
+    long_description="blobtoolkit-pipeline",  # Optional
     long_description_content_type="text/markdown",
     # long_description="%s\n%s"
     # % (
@@ -159,16 +159,12 @@ setup(
     # the `py_modules` argument instead as follows, which will expect a file
     # called `my_module.py` to exist:
     #
-    #   py_modules=["my_module"],
+    py_modules=["blobtoolkit_pipeline"],
     #
     # packages=find_packages(where="src"),  # Required
     packages=find_namespace_packages(
         where="src",
-        exclude=[
-            "blobtools.bin",
-            "blobtools.example",
-            "blobtools.schema",
-        ],
+        exclude=[],
     ),
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -182,15 +178,15 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "blobtoolkit-core>=0.1.0",
         "docopt>=0.6.2",
-        "fastjsonschema==2.15.3",
         "psutil==5.9.4",
-        "pysam==0.19.1",
         "pyyaml",
         "tolkein>=0.5.0",
         "tqdm==4.64.1",
         "ujson>=5.7.0",
+        "defusedxml==0.7.1",
+        "requests==2.28.1",
+        "snakemake==7.19.1",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
@@ -211,42 +207,25 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
-        "pipeline": ["blobtoolkit-pipeline==3.5"],
-        "view": ["blobtoolkit-view==3.5"],
     },
     entry_points={
         "console_scripts": [
-            "blobtools = blobtools:cli",
-            "btk = btk:cli",
+            "blobtoolkit-pipeline = blobtoolkit_pipeline:cli",
         ],
-        "blobtools.subcmd": [
-            "add = blobtools.lib.add:cli",
-            "create = blobtools.lib.add:cli",
-            "filter = blobtools.lib.filter:cli",
-            "host = blobtools.lib.host:cli",
-            "remove = blobtools.lib.remove:cli",
-            "replace = blobtools.lib.add:cli",
-            "validate = blobtools.lib.validate:cli",
-            "view = blobtools.lib.view:cli",
+        "blobtoolkit_pipeline.subcmd": [
+            "data = lib.data:main",
+            "run = lib.run:main",
+            "add-summary-to-metadata = lib.add_summary_to_metadata:main",
+            "chunk-fasta = lib.chunk_fasta:main",
+            "count-busco-genes = lib.count_busco_genes:main",
+            "extract-busco-genes = lib.extract_busco_genes:main",
+            "generate-config = lib.generate_config:main",
+            "generate-static-images = lib.generate_static_images:main",
+            "resume-pipeline = lib.resume_pipeline:main",
+            "transfer-completed = lib.transfer_completed:main",
+            "unchunk-blast = lib.unchunk_blast:main",
+            "window-stats = lib.window_stats:main",
         ],
-        "btk.subcmd": [
-            "pipeline = btk.lib.pipeline:main",
-            # "blobtools = blobtools:cli",
-        ],
-        # "pipeline.subcmd": [
-        #     "data = pipeline.lib.data:main",
-        #     "run = pipeline.lib.run:main",
-        #     "add-summary-to-metadata = pipeline.lib.add_summary_to_metadata:main",
-        #     "chunk-fasta = pipeline.lib.chunk_fasta:main",
-        #     "count-busco-genes = pipeline.lib.count_busco_genes:main",
-        #     "extract-busco-genes = pipeline.lib.extract_busco_genes:main",
-        #     "generate-config = pipeline.lib.generate_config:main",
-        #     "generate-static-images = pipeline.lib.generate_static_images:main",
-        #     "resume-pipeline = pipeline.lib.resume_pipeline:main",
-        #     "transfer-completed = pipeline.lib.transfer_completed:main",
-        #     "unchunk-blast = pipeline.lib.unchunk_blast:main",
-        #     "window-stats = pipeline.lib.window_stats:main",
-        # ],
     },
     project_urls={
         "Bug Reports": "https://github.com/blobtoolkit/blobtoolkit/issues",

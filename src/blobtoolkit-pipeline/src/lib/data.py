@@ -4,7 +4,7 @@ Fetch BlobToolKit Pipeline data.
 
 NOT YET IMPLEMENTED
 
-Usage: blobtools pipeline data --config YAML
+Usage: blobtoolkit-pipeline data --config YAML
 
 Options:
     --config YAML  YAML format configuration filename.
@@ -27,9 +27,12 @@ logging.basicConfig(**logger_config)
 logger = logging.getLogger()
 
 
-def main():
+def main(rename=None):
     """Entry point."""
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
     try:
-        args = docopt(__doc__)
-    except DocoptExit:
-        raise DocoptExit
+        args = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e

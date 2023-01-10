@@ -2,7 +2,7 @@
 """
 Split long sequences into chunks.
 
-Usage: btk pipeline chunk-fasta --in FASTA [--chunk INT] [--overlap INT] [--max-chunks INT]
+Usage: blobtoolkit-pipeline chunk-fasta --in FASTA [--chunk INT] [--overlap INT] [--max-chunks INT]
                 [--busco TSV] [--min-length INT] [--out FASTA] [--bed BEDFILE]
 
 Options:
@@ -260,64 +260,72 @@ def write_bedfiles(bed_data, args):
 #         pass
 
 
-def main():
+def main(rename=None):
     """Entry point."""
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
     try:
-        # parse_args()
-        args = docopt(__doc__)
-    except DocoptExit:
-        raise DocoptExit
+        args = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     try:
-        busco_windows = {}
+        make_chunks(args)
+    except Exception as err:
+        logger.error(err)
+        exit(1)
+
+
+def make_chunks(args):
+    busco_windows = (
+        parse_busco_full_summary(args["--busco"])
         if (
             "--busco" in args
             and args["--busco"] is not None
             and args["--busco"] != "None"
+        )
+        else {}
+    )
+    logger.info(f'Splitting {args["--in"]} into chunks')
+    bed_data = defaultdict(list)
+    seqs = []
+    for seq in chunk_fasta(
+        args["--in"],
+        chunk=int(args["--chunk"]),
+        overlap=int(args["--overlap"]),
+        max_chunks=int(args["--max-chunks"]),
+    ):
+        if (
+            busco_windows
+            and seq["chunks"] == int(args["--max-chunks"])
+            and seq["length"] > int(args["--chunk"]) + int(args["--overlap"])
         ):
-            busco_windows = parse_busco_full_summary(args["--busco"])
-        logger.info("Splitting %s into chunks" % args["--in"])
-        bed_data = defaultdict(list)
-        seqs = []
-        for seq in chunk_fasta(
-            args["--in"],
-            chunk=int(args["--chunk"]),
-            overlap=int(args["--overlap"]),
-            max_chunks=int(args["--max-chunks"]),
-        ):
-            if (
-                busco_windows
-                and seq["chunks"] == int(args["--max-chunks"])
-                and seq["length"] > int(args["--chunk"]) + int(args["--overlap"])
-            ):
-                chunk_by_busco(seq, seqs, busco_windows, args)
-            else:
-                if "--bed" in args and args["--bed"] and args["--bed"] != "None":
-                    stats = seq_stats(seq["seq"])
-                    bed_data[seq["title"]].append(
-                        {
-                            "start": seq["start"],
-                            "end": seq["start"] + len(seq["seq"]),
-                            "stats": stats,
-                        }
-                    )
-                if check_for_unmasked_bases(seq["seq"]):
-                    seqs.append((seq))
-        if bed_data:
-            write_bedfiles(bed_data, args)
-        if args["--out"] is not None and args["--out"] != "None":
-            chunked = ""
-            for seq in seqs:
-                if seq["length"] >= int(args["--min-length"]):
-                    chunked += ">%s_-_%d\n" % (seq["title"], seq["start"])
-                    chunked += "%s\n" % seq["seq"]
-            outfile = args["--out"]
-            if outfile.startswith("."):
-                outfile = "%s%s" % (args["--in"], args["--out"])
-            with open(outfile, "w") as ofh:
-                ofh.writelines(chunked)
-    except Exception as err:
-        logger.error(err)
-        exit(1)
+            chunk_by_busco(seq, seqs, busco_windows, args)
+        else:
+            if "--bed" in args and args["--bed"] and args["--bed"] != "None":
+                stats = seq_stats(seq["seq"])
+                bed_data[seq["title"]].append(
+                    {
+                        "start": seq["start"],
+                        "end": seq["start"] + len(seq["seq"]),
+                        "stats": stats,
+                    }
+                )
+            if check_for_unmasked_bases(seq["seq"]):
+                seqs.append((seq))
+    if bed_data:
+        write_bedfiles(bed_data, args)
+    if args["--out"] is not None and args["--out"] != "None":
+        chunked = ""
+        for seq in seqs:
+            if seq["length"] >= int(args["--min-length"]):
+                chunked += ">%s_-_%d\n" % (seq["title"], seq["start"])
+                chunked += "%s\n" % seq["seq"]
+        outfile = args["--out"]
+        if outfile.startswith("."):
+            outfile = f'{args["--in"]}{args["--out"]}'
+        with open(outfile, "w") as ofh:
+            ofh.writelines(chunked)
 
 
 if __name__ == "__main__":

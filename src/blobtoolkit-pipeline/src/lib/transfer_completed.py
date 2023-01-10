@@ -4,7 +4,7 @@
 Transfer completed BlobDirs and intermediate files.
 
 Usage:
-  btk pipeline transfer-completed --in PATH --out PATH [--bin PATH]
+  blobtoolkit-pipeline transfer-completed --in PATH --out PATH [--bin PATH]
 
 Options:
   --in PATH              Path to input directory.
@@ -108,9 +108,15 @@ def remove_unwanted_files(indir, bindir):
         shutil.rmtree(indir)
 
 
-def main():
+def main(rename=None):
     """Entry point."""
-    opts = docopt(__doc__)
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
+    try:
+        opts = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     data = tofile.read_file("%s/config.yaml" % opts["--in"])
     meta = yaml.full_load(data)
     prefix = meta["assembly"]["prefix"]

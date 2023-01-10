@@ -2,7 +2,7 @@
 """
 Count BUSCO genes.
 
-Usage: btk pipeline count-busco-genes --in TSV... --mask TSV --out TSV
+Usage: blobtoolkit-pipeline count-busco-genes --in TSV... --mask TSV --out TSV
 
 Options:
     --in TSV      chunked summary stats tsv file.
@@ -90,13 +90,15 @@ def parse_busco_summary(filename, mask, header):
     return mask, header
 
 
-def main():
+def main(rename=None):
     """Entry point."""
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
     try:
-        # parse_args()
-        args = docopt(__doc__)
-    except DocoptExit:
-        raise DocoptExit
+        args = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     try:
         mask, header = load_mask(args["--mask"])
         for buscofile in args["--in"]:

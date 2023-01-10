@@ -12,9 +12,5 @@ recursive-exclude tests *
 recursive-exclude conda-recipe *
 recursive-exclude ci *
 recursive-exclude tests *
-recursive-include src/data/example *
+recursive-exclude src *
 recursive-include src/data/schema *
-recursive-include src/pipeline *.smk
-recursive-include src/pipeline/rules *
-recursive-include src/pipeline/lib *
-recursive-include src/btk/lib *

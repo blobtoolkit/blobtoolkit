@@ -2,7 +2,7 @@
 """
 Run BlobToolKit Pipeline.
 
-Usage: btk pipeline run [--dry-run] [--tool STRING] [--unlock]
+Usage: blobtoolkit-pipeline run [--dry-run] [--tool STRING] [--unlock]
                         [--workdir DIR] [--threads INT] --config YAML
 
 Options:
@@ -85,12 +85,15 @@ def run_pipeline(workdir, args):
     exit_code = run_command(cmd)
 
 
-def main():
+def main(rename=None):
     """Entry point."""
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
     try:
-        args = docopt(__doc__)
-    except DocoptExit:
-        raise DocoptExit
+        args = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     try:
         config = os.path.abspath(args["--config"])
         if args["--workdir"] is not None:

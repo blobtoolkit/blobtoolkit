@@ -3,7 +3,7 @@
 """
 BlobToolKit Pipeline.
 
-Usage: blobtools pipeline [<command>] [<args>...] [-h|--help] [--version]
+Usage: blobtoolkit-pipeline [<command>] [<args>...] [-h|--help] [-v|--version]
 
 Commands:
     data                      Fetch pipeline data
@@ -19,7 +19,7 @@ Commands:
     window-stats              Pipeline helper script
     -h, --help      Show this
     -v, --version   Show version number
-See 'blobtools pipeline <command> --help' for more information on a specific command.
+See 'blobtoolkit-pipeline <command> --help' for more information on a specific command.
 
 """
 
@@ -27,23 +27,28 @@ import sys
 
 from docopt import DocoptExit
 from docopt import docopt
+from lib.version import __version__
 from pkg_resources import working_set
 
-from .lib.version import __version__
 
-
-def main():
+def cli(rename=None):
     """Entry point."""
+    # if sys.argv[1].match("-pipeline"):
+    command = sys.argv[1]
     if len(sys.argv) > 2:
-        try:
-            args = docopt(__doc__, help=False, version=__version__)
-        except DocoptExit:
-            args = {"<command>": sys.argv[2]}
-        if args["<command>"]:
-            # load <command> from entry_points
-            for entry_point in working_set.iter_entry_points("pipeline.subcmd"):
-                if entry_point.name == args["<command>"]:
-                    subcommand = entry_point.load()
-                    sys.exit(subcommand())
-    print(__doc__)
+        command = sys.argv[2]
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
+    try:
+        args = docopt(docs, help=False, version=__version__)
+    except DocoptExit:
+        args = {"<command>": command}
+    if args["<command>"]:
+        # load <command> from entry_points
+        for entry_point in working_set.iter_entry_points("blobtoolkit_pipeline.subcmd"):
+            if entry_point.name == args["<command>"]:
+                subcommand = entry_point.load()
+                sys.exit(subcommand(rename))
+    print(docs)
     raise DocoptExit

@@ -4,7 +4,7 @@
 Window stats.
 
 Usage:
-    btk pipeline window-stats --in TSV [--window FLOAT...] [--min-window-length INT] [--min-window-count INT] --out TSV
+    blobtoolkit-pipeline window-stats --in TSV [--window FLOAT...] [--min-window-length INT] [--min-window-count INT] --out TSV
 
 Options:
     --in TSV                 chunked summary stats tsv file.
@@ -154,13 +154,15 @@ def calculate_window_stats(lengths, chunks, window, interval, args):
     return values
 
 
-def main():
+def main(rename=None):
     """Entry point."""
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
     try:
-        # parse_args()
-        args = docopt(__doc__)
-    except DocoptExit:
-        raise DocoptExit
+        args = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     try:
         lengths, chunks, interval = parse_chunked_values(args["--in"])
         outfile = args["--out"]

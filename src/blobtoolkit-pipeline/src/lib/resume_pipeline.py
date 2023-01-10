@@ -4,7 +4,7 @@
 Restore intermediate files from partial analyses.
 
 Usage:
-  btk pipeline resume-pipeline --in PATH [--update-cov] --out PATH
+  blobtoolkit-pipeline resume-pipeline --in PATH [--update-cov] --out PATH
 
 Options:
   --in PATH              Path to input directory.
@@ -22,6 +22,7 @@ from pathlib import Path
 from time import sleep
 
 import yaml
+from docopt import DocoptExit
 from docopt import docopt
 from tolkein import tofile
 from tolkein import tolog
@@ -90,9 +91,15 @@ def list_accessions(config):
     return f"{gca} {' '.join(paired+single)}"
 
 
-def main():
+def main(rename=None):
     """Entry point."""
-    opts = docopt(__doc__)
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
+    try:
+        opts = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     indir = opts["--in"]
     config_file = "%s/config.yaml" % indir
     data = tofile.read_file(config_file)

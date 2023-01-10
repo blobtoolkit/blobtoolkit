@@ -4,7 +4,7 @@
 Generate config files for BlobToolKit pipeline.
 
 Usage:
-  btk pipeline generate-config <ACCESSION> [--coverage 30] [--download]
+  blobtoolkit-pipeline generate-config <ACCESSION> [--coverage 30] [--download]
     [--out /path/to/output/directory] [--db /path/to/database/directory]
     [--db-suffix STRING] [--reads STRING...] [--read-runs INT] [--api-key STRING]
     [--platforms STRING] [--datasets] [--protocol STRING] 
@@ -46,6 +46,7 @@ import requests
 import ujson
 import yaml
 from defusedxml import ElementTree as ET
+from docopt import DocoptExit
 from docopt import docopt
 from tolkein import tofetch
 from tolkein import tofile
@@ -691,9 +692,15 @@ def set_defaults(opts):
     )
 
 
-def main():
+def main(rename=None):
     """Entry point."""
-    opts = docopt(__doc__)
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
+    try:
+        opts = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     (
         accession,
         outdir,

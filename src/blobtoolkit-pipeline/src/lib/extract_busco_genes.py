@@ -2,7 +2,7 @@
 """
 Extract BUSCO gene sequences and set headers.
 
-Usage: btk pipeline extract-busco-genes --busco PATH... --out FASTA
+Usage: blobtoolkit-pipeline extract-busco-genes --busco PATH... --out FASTA
 
 Options:
     --busco PATH         BUSCO full summary tsv file.
@@ -42,13 +42,15 @@ logger = logging.getLogger()
 #         sys.argv.append(value)
 
 
-def main():
+def main(rename=None):
     """Entry point."""
+    docs = __doc__
+    if rename is not None:
+        docs = docs.replace("blobtoolkit-pipeline", rename)
     try:
-        # parse_args()
-        args = docopt(__doc__)
-    except DocoptExit:
-        raise DocoptExit
+        args = docopt(docs)
+    except DocoptExit as e:
+        raise DocoptExit from e
     file_pattern = re.compile(r"busco_sequences\/(\w+?)_\w+\/(\d+at\d+).faa")
     header_pattern = re.compile(r">\S+:\d+-\d+")
     utf8reader = codecs.getreader("utf-8")

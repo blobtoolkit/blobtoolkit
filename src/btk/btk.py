@@ -28,6 +28,22 @@ from .lib.version import __version__
 LOGGER = tolog.logger(__name__)
 
 
+def suggest_option(command):
+    options = {
+        "pipeline": ["pipeline"],
+    }
+    options_list = options.get(command, [])
+    options_list.append("full")
+    LOGGER.error(
+        f"The `btk {command}` command is not available, to enable this option use{' one of' if len(options_list)>1 else ''}:"
+    )
+    for option in options_list:
+        print(
+            f"                                - pip install blobtoolkit[{option}]",
+            file=sys.stderr,
+        )
+
+
 def cli():
     """Entry point."""
     if len(sys.argv) > 2:
@@ -49,8 +65,13 @@ def cli():
         # load <command> from entry_points
         for entry_point in working_set.iter_entry_points("%s.subcmd" % args["<tool>"]):
             if entry_point.name == args["<command>"]:
-                subcommand = entry_point.load()
-                sys.exit(subcommand())
+                if entry_point.name == args["<command>"]:
+                    try:
+                        subcommand = entry_point.load()
+                        sys.exit(subcommand())
+                    except ModuleNotFoundError:
+                        suggest_option(args["<command>"])
+                        exit(1)
         LOGGER.error(
             "'%s %s' is not a valid command", args["<tool>"], args["<command>"]
         )
