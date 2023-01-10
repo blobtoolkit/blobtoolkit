@@ -14,7 +14,6 @@ recursive-exclude ci *
 recursive-exclude tests *
 recursive-include src/data/example *
 recursive-include src/data/schema *
-recursive-include src/data/bin *
 recursive-include src/pipeline *.smk
 recursive-include src/pipeline/rules *
 recursive-include src/pipeline/lib *
