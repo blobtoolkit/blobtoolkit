@@ -96,10 +96,10 @@ def read(*names, **kwargs):
 
 
 setup(
-    name="blobtoolkit-view",  # Required
+    name="blobtoolkit-host",  # Required
     version="3.5.5",
-    description="blobtoolkit-view",  # Optional
-    long_description="blobtoolkit-view",  # Optional
+    description="blobtoolkit-host",  # Optional
+    long_description="blobtoolkit-host",  # Optional
     long_description_content_type="text/markdown",
     # long_description="%s\n%s"
     # % (
@@ -159,7 +159,7 @@ setup(
     # the `py_modules` argument instead as follows, which will expect a file
     # called `my_module.py` to exist:
     #
-    py_modules=["blobtoolkit_host", "blobtoolkit_view"],
+    py_modules=["blobtoolkit_host"],
     #
     # packages=find_packages(where="src"),  # Required
     packages=find_namespace_packages(
@@ -178,16 +178,8 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "chromedriver-binary-auto==0.2.3",
         "docopt>=0.6.2",
-        "geckodriver-autoinstaller==0.1.0",
         "psutil==5.9.4",
-        "pyvirtualdisplay==3.0",
-        "pyyaml",
-        "selenium==4.7.2",
-        "tolkein>=0.5.0",
-        "tqdm==4.64.1",
-        "ujson>=5.7.0",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"

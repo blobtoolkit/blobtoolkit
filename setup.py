@@ -183,11 +183,15 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "blobtoolkit-core>=0.1.0",
+        "chromedriver-binary-auto==0.2.3",
         "docopt>=0.6.2",
         "fastjsonschema==2.15.3",
+        "geckodriver-autoinstaller==0.1.0",
         "psutil==5.9.4",
         "pysam==0.19.1",
+        "pyvirtualdisplay==3.0",
         "pyyaml",
+        "selenium==4.7.2",
         "tolkein>=0.5.0",
         "tqdm==4.64.1",
         "ujson>=5.7.0",
@@ -211,8 +215,9 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
+        "full": ["blobtoolkit-host==3.5", "blobtoolkit-pipeline==3.5"],
+        "host": ["blobtoolkit-host==3.5"],
         "pipeline": ["blobtoolkit-pipeline==3.5"],
-        "view": ["blobtoolkit-view==3.5"],
     },
     entry_points={
         "console_scripts": [
@@ -233,20 +238,6 @@ setup(
             "pipeline = btk.lib.pipeline:main",
             # "blobtools = blobtools:cli",
         ],
-        # "pipeline.subcmd": [
-        #     "data = pipeline.lib.data:main",
-        #     "run = pipeline.lib.run:main",
-        #     "add-summary-to-metadata = pipeline.lib.add_summary_to_metadata:main",
-        #     "chunk-fasta = pipeline.lib.chunk_fasta:main",
-        #     "count-busco-genes = pipeline.lib.count_busco_genes:main",
-        #     "extract-busco-genes = pipeline.lib.extract_busco_genes:main",
-        #     "generate-config = pipeline.lib.generate_config:main",
-        #     "generate-static-images = pipeline.lib.generate_static_images:main",
-        #     "resume-pipeline = pipeline.lib.resume_pipeline:main",
-        #     "transfer-completed = pipeline.lib.transfer_completed:main",
-        #     "unchunk-blast = pipeline.lib.unchunk_blast:main",
-        #     "window-stats = pipeline.lib.window_stats:main",
-        # ],
     },
     project_urls={
         "Bug Reports": "https://github.com/blobtoolkit/blobtoolkit/issues",

@@ -114,7 +114,7 @@ def test_port(port, service):
 
 def find_binary(tool):
     """Find a binary executable for the blobtoolkit viewer or API."""
-    script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    script_dir = os.path.dirname(os.path.realpath(__file__))
     system = platform.system()
     # arch, _ = platform.architecture()
     default_binaries = {"api": "blobtoolkit-api", "viewer": "blobtoolkit-viewer"}
