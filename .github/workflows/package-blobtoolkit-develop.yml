@@ -72,8 +72,8 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install setuptools wheel twine
       - name: Build pip package
+        working-directory: ./src/blobtoolkit-pipeline
         run: |
-          working-directory: ./src/blobtoolkit-pipeline
           ./pip_install_latest.sh manylinux2014_x86_64
           blobtoolkit-pipeline -v
       - uses: actions/upload-artifact@v3
@@ -81,7 +81,7 @@ jobs:
           name: blobtoolkit-pipeline
           path: ./src/blobtoolkit-pipeline/dist/*
 
-  package-python-blobtools:
+  package-python-blobtoolkit:
     runs-on: ubuntu-latest
     needs:
       - package-python-host
