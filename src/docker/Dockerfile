@@ -34,13 +34,12 @@ FROM base_image as build_dev
 
 ONBUILD WORKDIR /tmp
 
-ONBUILD COPY blobtoolkit-api-linux /blobtoolkit/blobtoolkit-api
-ONBUILD COPY blobtoolkit-viewer-linux /blobtoolkit/blobtoolkit-viewer
+ONBUILD COPY *.whl /tmp
 
 ONBUILD RUN chown -R blobtoolkit:blobtoolkit /blobtoolkit \
     && chmod 755 /blobtoolkit/blobtoolkit-api /blobtoolkit/blobtoolkit-viewer \
-    && git clone https://github.com/blobtoolkit/blobtoolkit \
     && sed -i '/- blobtoolkit/d' /tmp/env.yaml
+#    && git clone https://github.com/blobtoolkit/blobtoolkit \
 
 ONBUILD WORKDIR /blobtoolkit
 
@@ -80,28 +79,29 @@ RUN $CONDA_DIR/bin/conda env create --experimental-solver=libmamba -f /tmp/env.y
 COPY setup.sh /blobtoolkit
 
 RUN /blobtoolkit/setup.sh \
-    && rm /blobtoolkit/setup.sh
+    && rm /blobtoolkit/setup.sh \
+    && rm -r /tmp/*
 
-# USER blobtoolkit
-
-
-# # RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.bashrc
-
-# # RUN $CONDA_DIR/bin/conda install mamba -n base -c conda-forge
-
-# # RUN mkdir -p /blobtoolkit/.conda
-
-# # WORKDIR /blobtoolkit
+USER blobtoolkit
 
 
-# ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/btk_env
+# RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.bashrc
 
-# ENV PATH /blobtoolkit:$CONDA_DEFAULT_ENV/bin:$PATH
+# RUN $CONDA_DIR/bin/conda install mamba -n base -c conda-forge
 
-# ENV PYTHONPATH $CONDA_DEFAULT_ENV/lib/python3.9/site-packages:$PYTHONPATH
+# RUN mkdir -p /blobtoolkit/.conda
 
-# COPY startup.sh /blobtoolkit
+# WORKDIR /blobtoolkit
 
-# EXPOSE 8000 8001 8080
 
-# CMD /blobtoolkit/startup.sh
+ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/btk_env
+
+ENV PATH /blobtoolkit:$CONDA_DEFAULT_ENV/bin:$PATH
+
+ENV PYTHONPATH $CONDA_DEFAULT_ENV/lib/python3.9/site-packages:$PYTHONPATH
+
+COPY startup.sh /blobtoolkit
+
+EXPOSE 8000 8001 8080
+
+CMD /blobtoolkit/startup.sh

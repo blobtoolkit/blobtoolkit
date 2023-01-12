@@ -1,20 +1,24 @@
 #!/bin/bash
 
-touch /tmp/build_env.t$BUILD_ENV
+ls /tmp/*.whl | while read WHEEL; do
+    pip3 install $WHEEL
+done
 
-# if [ "${BUILD_ENV}" == "dev" ]; then
-  cd /tmp/blobtoolkit
-  git fetch origin feature/split-packaging
-  git checkout feature/split-packaging
+# touch /tmp/build_env.t$BUILD_ENV
 
-  pip install setuptools wheel twine
+# # if [ "${BUILD_ENV}" == "dev" ]; then
+#   cd /tmp/blobtoolkit
+#   git fetch origin feature/split-packaging
+#   git checkout feature/split-packaging
 
-  cd /tmp/blobtoolkit/src/blobtoolkit-pipeline
-  ./pip_install_latest.sh manylinux2014_x86_64
+#   pip install setuptools wheel twine
 
-  cd /tmp/blobtoolkit/src/blobtoolkit-host
-  ./pip_install_latest.sh manylinux2014_x86_64
+#   cd /tmp/blobtoolkit/src/blobtoolkit-pipeline
+#   ./pip_install_latest.sh manylinux2014_x86_64
 
-  cd /tmp/blobtoolkit
-  ./pip_install_latest.sh manylinux2014_x86_64
-# fi
+#   cd /tmp/blobtoolkit/src/blobtoolkit-host
+#   ./pip_install_latest.sh manylinux2014_x86_64
+
+#   cd /tmp/blobtoolkit
+#   ./pip_install_latest.sh manylinux2014_x86_64
+# # fi
