@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ls /tmp/*.whl | while read WHEEL; do
-    pip3 install $WHEEL
+    $CONDA_DIR/envs/btk_env/bin/pip install $WHEEL
 done
 
 # touch /tmp/build_env.t$BUILD_ENV
