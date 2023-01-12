@@ -34,6 +34,8 @@ FROM base_image as build_dev
 
 ONBUILD WORKDIR /tmp
 
+ONBUILD COPY blobtoolkit-api-linux /tmp/blobtoolkit-api
+ONBUILD COPY blobtoolkit-viewer-linux /tmp/blobtoolkit-viewer
 ONBUILD COPY *.whl /tmp
 
 ONBUILD RUN chown -R blobtoolkit:blobtoolkit /blobtoolkit \
