@@ -32,11 +32,11 @@ ONBUILD COPY env.yaml /tmp/env.yaml
 
 FROM base_image as build_dev
 
-ONBUILD WORKDIR /tmp
-
-ONBUILD COPY blobtoolkit-api-linux /tmp/blobtoolkit-api
-ONBUILD COPY blobtoolkit-viewer-linux /tmp/blobtoolkit-viewer
+ONBUILD COPY blobtoolkit-api-linux /blobtoolkit/blobtoolkit-api
+ONBUILD COPY blobtoolkit-viewer-linux /blobtoolkit/blobtoolkit-viewer
 ONBUILD COPY *.whl /tmp
+
+ONBUILD WORKDIR /tmp
 
 ONBUILD RUN chown -R blobtoolkit:blobtoolkit /blobtoolkit \
     && chmod 755 /blobtoolkit/blobtoolkit-api /blobtoolkit/blobtoolkit-viewer \
