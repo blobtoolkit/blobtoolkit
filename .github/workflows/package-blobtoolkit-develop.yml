@@ -103,11 +103,7 @@ jobs:
           path: ./dist
       - name: Move artifacts
         run: |
-          echo ls dist
-          ls dist
-          echo ls src/docker
-          ls src/docker
-          mv dist/* src/docker/
+          mv dist/artifact/* src/docker/
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
