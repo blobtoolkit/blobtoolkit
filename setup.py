@@ -215,9 +215,9 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
-        "full": ["blobtoolkit-host==3.5", "blobtoolkit-pipeline==3.5"],
-        "host": ["blobtoolkit-host==3.5"],
-        "pipeline": ["blobtoolkit-pipeline==3.5"],
+        "full": ["blobtoolkit-host==3.5.5", "blobtoolkit-pipeline==3.5.5"],
+        "host": ["blobtoolkit-host==3.5.5"],
+        "pipeline": ["blobtoolkit-pipeline==3.5.5"],
     },
     entry_points={
         "console_scripts": [
