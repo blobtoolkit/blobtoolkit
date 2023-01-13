@@ -7,6 +7,13 @@ if [ -z "$LEVEL" ]; then
   exit 1;
 fi
 
+echo $LEVEL
+exit
+
+if [[ "$LEVEL" == pre* ]]; then
+  LEVEL="-preid rc $LEVEL"
+fi
+
 cd src/api &&
 
 npm version --no-git-tag-version $LEVEL &&
@@ -23,8 +30,6 @@ cd src/packaged-viewer &&
 
 npm version --no-git-tag-version $LEVEL &&
 
-cd - &&
+cd -
 
 git commit -a -m "bump UI/API version"
-
-bump2version $LEVEL
