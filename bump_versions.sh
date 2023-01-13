@@ -7,6 +7,12 @@ if [ -z "$LEVEL" ]; then
   exit 1;
 fi
 
+if output=$(git status --porcelain) && [ ! -z "$output" ]; then
+  # Uncommitted changes
+  echo "Unable to bump version. Git working directory is not clean."
+  exit 1
+fi
+
 LATEST_TAG=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
 NPM_UPDATE=0
 HOST_UPDATE=0
