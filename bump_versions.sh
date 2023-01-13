@@ -71,13 +71,14 @@ fi
 
 if [ "$BLOBTOOLS_UPDATE" == 1 ]; then
   bump2version --allow-dirty --config-file .prebumpversion.cfg $LEVEL
+  VERSION=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
   if [ "$HOST_UPDATE" == 1 ]; then
-    echo TODO: bump host version
+    bump2version --allow-dirty --config-file .hostbumpversion.cfg $VERSION
   fi
   if [ "$PIPELINE_UPDATE" == 1 ]; then
-    echo TODO: bump pipeline version
+    bump2version --allow-dirty --config-file .hostbumpversion.cfg $VERSION
   fi
-  ./bump_full_version.sh $NPM_UPDATE
+  ./bump_full_version.sh $NPM_UPDATE $VERSION
 elif [ "$NPM_UPDATE" == 1 ]; then
   ./bump_npm_version.sh $LEVEL
 fi

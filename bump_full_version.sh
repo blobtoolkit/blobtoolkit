@@ -2,7 +2,7 @@
 
 NPM_UPDATE=$1
 
-VERSION=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
+VERSION=$2
 
 if [ $NPM_UPDATE == 1 ]; then
   cd src/api &&
