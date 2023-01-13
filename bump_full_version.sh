@@ -15,9 +15,7 @@ if [ $NPM_UPDATE == 1 ]; then
 
   cd src/packaged-viewer &&
   npm version --no-git-tag-version $VERSION &&
-  cd - &&
-
-  git commit -a -m "bump UI/API version"
+  cd -
 fi
 
-bump2version $VERSION
+bump2version --allow-dirty $VERSION

@@ -82,9 +82,5 @@ elif [ "$NPM_UPDATE" == 1 ]; then
   ./bump_npm_version.sh $LEVEL
 fi
 
-echo Level: $LEVEL
-echo NPM: $NPM_UPDATE
-echo Host: $HOST_UPDATE
-echo Pipeline: $PIPELINE_UPDATE
-echo Blobtools: $BLOBTOOLS_UPDATE
+
 
