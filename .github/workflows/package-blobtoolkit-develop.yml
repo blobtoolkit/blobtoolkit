@@ -46,7 +46,7 @@ jobs:
           echo "::set-output name=blobtoolkit-version::$VERSION"
 
   package-python-host:
-    uses: ./.github/workflows/package-viewer.yml
+    uses: ./.github/workflows/package-host.yml
     # runs-on: ubuntu-latest
     # steps:
     #   - uses: actions/checkout@v3
