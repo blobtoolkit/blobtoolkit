@@ -6,11 +6,12 @@ PLATFORM=$1
 
 if [ -z $PLATFORM ]; then
     echo USAGE: ./pip_install_latest.sh linux_x86_64
+    echo    OR: ./pip_install_latest.sh macosx_10_9_x86_64
     exit 1
 fi
 
 BTK_VERSION=$(
-    grep current_version `dirname "$0"`/.bumpversion.cfg \
+    grep current_version `dirname "$0"`/../../.bumpversion.cfg \
     | head -n 1 \
     | awk '{print $3}')
 
