@@ -74,11 +74,13 @@ if [ "$BLOBTOOLS_UPDATE" == 1 ]; then
   VERSION=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
   if [ "$HOST_UPDATE" == 1 ]; then
     bump2version --allow-dirty --config-file .hostbumpversion.cfg $LEVEL
-    sed -i 's/blobtoolkit-host=='$LATEST_TAG'/blobtoolkit-host=='$VERSION'/' setup.py
+    sed -i ".bak" 's/blobtoolkit-host=='$LATEST_TAG'/blobtoolkit-host=='$VERSION'/' setup.py
+    rm setup.py.bak
   fi
   if [ "$PIPELINE_UPDATE" == 1 ]; then
     bump2version --allow-dirty --config-file .pipelinebumpversion.cfg $LEVEL
-    sed -i 's/blobtoolkit-pipeline=='$LATEST_TAG'/blobtoolkit-pipeline=='$VERSION'/' setup.py
+    sed -i ".bak" 's/blobtoolkit-pipeline=='$LATEST_TAG'/blobtoolkit-pipeline=='$VERSION'/' setup.py
+    rm setup.py.bak
   fi
   ./bump_full_version.sh $LEVEL $VERSION $NPM_UPDATE
 elif [ "$NPM_UPDATE" == 1 ]; then
