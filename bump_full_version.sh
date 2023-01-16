@@ -1,8 +1,8 @@
 #!/bin/bash
 
-NPM_UPDATE=$1
-
+LEVEL=$1
 VERSION=$2
+NPM_UPDATE=$3
 
 if [ $NPM_UPDATE == 1 ]; then
   cd src/api &&
@@ -18,4 +18,4 @@ if [ $NPM_UPDATE == 1 ]; then
   cd -
 fi
 
-bump2version --allow-dirty $VERSION
+bump2version --allow-dirty $LEVEL

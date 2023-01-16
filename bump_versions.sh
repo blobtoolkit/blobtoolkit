@@ -10,7 +10,7 @@ fi
 if output=$(git status --porcelain) && [ ! -z "$output" ]; then
   # Uncommitted changes
   echo "Unable to bump version. Git working directory is not clean."
-  exit 1
+  #exit 1
 fi
 
 LATEST_TAG=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
@@ -76,9 +76,9 @@ if [ "$BLOBTOOLS_UPDATE" == 1 ]; then
     bump2version --allow-dirty --config-file .hostbumpversion.cfg $VERSION
   fi
   if [ "$PIPELINE_UPDATE" == 1 ]; then
-    bump2version --allow-dirty --config-file .hostbumpversion.cfg $VERSION
+    bump2version --allow-dirty --config-file .pipelinebumpversion.cfg $VERSION
   fi
-  ./bump_full_version.sh $NPM_UPDATE $VERSION
+  ./bump_full_version.sh $LEVEL $VERSION $NPM_UPDATE
 elif [ "$NPM_UPDATE" == 1 ]; then
   ./bump_npm_version.sh $LEVEL
 fi
