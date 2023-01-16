@@ -52,7 +52,7 @@ ONBUILD WORKDIR /blobtoolkit
 FROM build_${BUILD_ENV}
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION=3.5.5
+ARG VERSION=3.5.6
 LABEL version=$VERSION
 ENV CONTAINER_VERSION=$VERSION
 
