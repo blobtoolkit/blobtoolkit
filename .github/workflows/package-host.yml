@@ -1,0 +1,38 @@
+name: package-host
+env:
+  VERSION: 3.5.5
+
+on:
+  workflow_call:
+    inputs:
+      blobtoolkit-version:
+        required: true
+        type: string
+        default: ${{ env.VERSION }}
+
+jobs:
+  package-python-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Collect artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./dist
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install setuptools wheel twine
+      - name: Build pip package
+        working-directory: ./src/blobtoolkit-host
+        run: |
+          ./pip_install_latest.sh manylinux2014_x86_64
+          blobtoolkit-host -v
+      - name: Pip download wheel
+        run: |
+          mkdir -p ./src/blobtoolkit-host
+          [[ "${{ blobtoolkit-version }}" = "${{ env.VERSION }}" ]] && ./pip_install_latest.sh manylinux2014_x86_64 || pip download -d ./src/blobtoolkit-host/dist blobtoolkit
+        # blobtoolkit-host -v
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./src/blobtoolkit-host/dist/*

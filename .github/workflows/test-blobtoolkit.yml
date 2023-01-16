@@ -1,5 +1,5 @@
 name: test-blobtoolkit
-on: [push]
+on: workflow_dispatch
 jobs:
   package-ui:
     runs-on: ubuntu-latest
