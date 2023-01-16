@@ -1,24 +1,20 @@
-name: package-host
+name: package-pipeline
 on: workflow_call
 
 jobs:
-  package-python-host:
+  package-python-pipeline:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Collect artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: ./dist
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
           pip install setuptools wheel twine
       - name: Build pip package
-        working-directory: ./src/blobtoolkit-host
+        working-directory: ./src/blobtoolkit-pipeline
         run: |
           ./pip_install_latest.sh manylinux2014_x86_64
-          blobtoolkit-host -v
+          blobtoolkit-pipeline -v
       - uses: actions/upload-artifact@v3
         with:
-          path: ./src/blobtoolkit-host/dist/*
+          path: ./src/blobtoolkit-pipeline/dist/*
