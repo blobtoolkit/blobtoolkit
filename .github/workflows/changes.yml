@@ -19,6 +19,10 @@ on:
         value: ${{ jobs.detect-changes.outputs.docker }}
       all:
         value: ${{ jobs.detect-changes.outputs.all }}
+      is-host-release:
+        value: ${{ jobs.is-host-release.outputs.tagged }}
+      requires-node:
+        value: ${{ jobs.requires-node.outputs.node }}
 
 jobs:
   detect-changes:
@@ -61,3 +65,31 @@ jobs:
               - 'src/docker/**'
             blobtoolkit:
               - 'src/**'
+
+  is-host-release:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    outputs:
+      tagged: ${{ steps.host-release.outputs.tagged }}
+    steps:
+      - id: host-release
+        if: |
+          startsWith(github.ref, 'refs/tags/') &&
+          ${{ needs.changes.outputs.host == 'true' }}
+        run: |
+          echo "tagged=true" >> $GITHUB_OUTPUT
+
+  requires-node:
+    needs:
+      - detect-changes
+      - is-host-release
+    runs-on: ubuntu-latest
+    outputs:
+      node: ${{ steps.needs-node.outputs.node }}
+    steps:
+      - id: needs-node
+        if: |
+          ${{ needs.changes.outputs.node == 'true' }} ||
+          ${{ steps.host-release.outputs.tagged }}
+        run: |
+          echo "node=true" >> $GITHUB_OUTPUT
