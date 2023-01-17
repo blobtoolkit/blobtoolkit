@@ -113,7 +113,7 @@ jobs:
   requires-node:
     needs:
       - detect-changes
-      - is-host-release
+      - is-release
     if: always()
     runs-on: ubuntu-latest
     outputs:
