@@ -13,7 +13,7 @@ RUN mkdir -p /blobtoolkit/conf \
 
 COPY blobtoolkit-viewer-linux /blobtoolkit/blobtoolkit-viewer
 
-RUN chmod 755 blobtoolkit-viewer
+RUN chmod 755 /blobtoolkit/blobtoolkit-viewer
 
 RUN addgroup -S blobtoolkit \
     && adduser -S blobtoolkit -G blobtoolkit \
