@@ -3,25 +3,25 @@ name: changes
 on:
   workflow_call:
     outputs:
-      filter:
-        description: Paths with changes
-        value:
-          api: ${{ jobs.changes.outputs.api }}
-          ui: ${{ jobs.changes.outputs.api }}
-          node: ${{ jobs.changes.outputs.api }}
+      api:
+        value: ${{ jobs.detect-changes.outputs.api }}
+      ui:
+        value: ${{ jobs.detect-changes.outputs.ui }}
+      node:
+        value: ${{ jobs.detect-changes.outputs.node }}
       host:
-        value: ${{ jobs.changes.outputs.host }}
+        value: ${{ jobs.detect-changes.outputs.host }}
       pipeline:
-        value: ${{ jobs.changes.outputs.pipeline }}
+        value: ${{ jobs.detect-changes.outputs.pipeline }}
       blobtools:
-        value: ${{ jobs.changes.outputs.blobtools }}
+        value: ${{ jobs.detect-changes.outputs.blobtools }}
       docker:
-        value: ${{ jobs.changes.outputs.docker }}
+        value: ${{ jobs.detect-changes.outputs.docker }}
       all:
-        value: ${{ jobs.changes.outputs.all }}
+        value: ${{ jobs.detect-changes.outputs.all }}
 
 jobs:
-  changes:
+  detect-changes:
     runs-on: ubuntu-latest
     outputs:
       output1: ${{ steps.filter.outputs.workflows }}
