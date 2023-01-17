@@ -3,9 +3,22 @@ name: changes
 on:
   workflow_call:
     outputs:
-      filter:
-        description: "filtered paths"
-        value: ${{ jobs.changes.outputs.output1 }}
+      api:
+        value: ${{ jobs.changes.outputs.api }}
+      ui:
+        value: ${{ jobs.changes.outputs.ui }}
+      node:
+        value: ${{ jobs.changes.outputs.node }}
+      host:
+        value: ${{ jobs.changes.outputs.host }}
+      pipeline:
+        value: ${{ jobs.changes.outputs.pipeline }}
+      blobtools:
+        value: ${{ jobs.changes.outputs.blobtools }}
+      docker:
+        value: ${{ jobs.changes.outputs.docker }}
+      all:
+        value: ${{ jobs.changes.outputs.all }}
 
 jobs:
   changes:
