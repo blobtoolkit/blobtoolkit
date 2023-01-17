@@ -7,7 +7,38 @@ on:
 
 jobs:
   changes:
-    uses: ./.github/workflows/changes.yml
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'src/api/**'
+            ui:
+              - 'src/viewer/**'
+              - 'src/packaged-viewer/**'
+            node:
+              - 'src/api/**'
+              - 'src/viewer/**'
+              - 'src/packaged-viewer/**'
+            host:
+              - 'src/blobtoolkit-host/**'
+            pipeline:
+              - 'src/blobtoolkit-pipeline/**'
+            blobtools:
+              - 'src/blobtoolkit-host/**'
+              - 'src/blobtoolkit-pipeline/**'
+              - 'src/blobtools/**'
+              - 'src/btk/**'
+            docker:
+              - 'src/docker/**'
+            blobtoolkit:
+              - 'src/**'
 
   job2:
     runs-on: ubuntu-latest
@@ -18,8 +49,6 @@ jobs:
           echo api: ${{ needs.changes.outputs.api }}
           echo ui: ${{ needs.changes.outputs.ui }}
           echo node: ${{ needs.changes.outputs.node }}
-          echo output1: ${{ needs.changes.outputs.output1 }}
-          echo eg: ${{ needs.job1.outputs.firstword }} ${{ needs.job1.outputs.secondword }}
 
   package-api:
     needs: changes
