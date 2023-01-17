@@ -19,6 +19,7 @@ jobs:
           echo ui: ${{ needs.changes.outputs.ui }}
           echo node: ${{ needs.changes.outputs.node }}
           echo output1: ${{ needs.changes.outputs.output1 }}
+          echo eg: ${{ needs.job1.outputs.firstword }} ${{ needs.job1.outputs.secondword }}
 
   package-api:
     needs: changes

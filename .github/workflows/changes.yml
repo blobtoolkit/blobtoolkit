@@ -21,6 +21,12 @@ on:
         value: ${{ jobs.detect-changes.outputs.all }}
       outputs:
         value: ${{ jobs.detect-changes.outputs.output1 }}
+      firstword:
+        description: "The first output string"
+        value: ${{ jobs.example_job.outputs.output1 }}
+      secondword:
+        description: "The second output string"
+        value: ${{ jobs.example_job.outputs.output2 }}
 
 jobs:
   detect-changes:
@@ -55,3 +61,15 @@ jobs:
               - 'src/docker/**'
             blobtoolkit:
               - 'src/**'
+  example_job:
+    name: Generate output
+    runs-on: ubuntu-latest
+    # Map the job outputs to step outputs
+    outputs:
+      output1: ${{ steps.step1.outputs.firstword }}
+      output2: ${{ steps.step2.outputs.secondword }}
+    steps:
+      - id: step1
+        run: echo "::set-output name=firstword::hello"
+      - id: step2
+        run: echo "::set-output name=secondword::world"
