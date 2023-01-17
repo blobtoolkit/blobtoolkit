@@ -11,17 +11,17 @@ jobs:
 
   package-api:
     needs: changes
-    if: ${{ needs.changes.outputs.api == 'true' && needs.changes.outputs.node != 'true' }}
+    if: ${{ needs.changes.outputs.filter.api == 'true' }}
     uses: ./.github/workflows/package-api.yml
 
   package-ui:
     needs: changes
-    if: ${{ needs.changes.outputs.ui == 'true' && needs.changes.outputs.node != 'true' }}
+    if: ${{ needs.changes.outputs.ui == 'true' }}
     uses: ./.github/workflows/package-ui.yml
 
   package-node:
     needs: changes
-    if: ${{ needs.changes.outputs.node == 'true' }}
+    if: ${{ needs.changes.outputs.filter.node == 'true' }}
     uses: ./.github/workflows/package-node.yml
 
   # package-python-host:

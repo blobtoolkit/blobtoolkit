@@ -3,7 +3,7 @@ name: changes
 on:
   workflow_call:
     outputs:
-      output1:
+      filter:
         description: "filtered paths"
         value: ${{ jobs.changes.outputs.output1 }}
 
