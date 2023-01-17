@@ -1,6 +1,9 @@
 name: changes
 
-on: workflow_call
+on:
+  workflow_call:
+    outputs:
+      output1: ${{ jobs.changes.outputs.output1 }}
 
 jobs:
   changes:
