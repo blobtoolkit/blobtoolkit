@@ -32,6 +32,7 @@ jobs:
     if: |
       needs.changes.outputs.ui == 'true' ||
       needs.changes.outputs.requires-node == 'true'
+    secrets: inherit
     uses: ./.github/workflows/package-ui.yml
 
   package-python-host:

@@ -9,15 +9,16 @@ jobs:
       - name: Collect artifacts
         uses: actions/download-artifact@v3
         with:
+          name: node
           path: ./dist
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
           pip install setuptools wheel twine
-      - name: Copy viewer
+      - name: Move viewer
         run: |
           mkdir -p ./src/blobtoolkit-host/src/data/bin
-          cp ./dist/node/*-linux ./src/blobtoolkit-host/src/data/bin/ || exit 0
+          mv ./dist/node/*-linux ./src/blobtoolkit-host/src/data/bin/ || exit 0
       - name: Build pip package
         working-directory: ./src/blobtoolkit-host
         run: |

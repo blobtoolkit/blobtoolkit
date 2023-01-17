@@ -19,8 +19,9 @@ USER blobtoolkit
 
 WORKDIR /blobtoolkit
 
-RUN curl -Ls https://github.com/blobtoolkit/blobtoolkit/releases/download/${VERSION}/blobtoolkit-viewer-linux > blobtoolkit-viewer \
-    && chmod 755 blobtoolkit-viewer
+COPY blobtoolkit-viewer-linux blobtoolkit-viewer
+
+RUN chmod 755 blobtoolkit-viewer
 
 ENV PATH /blobtoolkit:$PATH
 
