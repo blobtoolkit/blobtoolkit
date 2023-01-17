@@ -3,7 +3,7 @@ name: build-api
 on: workflow_call
 
 jobs:
-  build-ui:
+  build-api:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -17,4 +17,5 @@ jobs:
           blobtoolkit-pipeline -v
       - uses: actions/upload-artifact@v3
         with:
+          name: pip
           path: ./src/blobtoolkit-pipeline/dist/*

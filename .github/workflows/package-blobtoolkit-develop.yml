@@ -48,13 +48,13 @@ jobs:
     if: always() && needs.changes.outputs.host == 'true'
     uses: ./.github/workflows/package-host.yml
 
-  # package-python-pipeline:
-  #   if: needs.changes.outputs.pipeline == 'true'
-  #   uses: ./.github/workflows/package-pipeline.yml
+  package-python-pipeline:
+    if: needs.changes.outputs.pipeline == 'true'
+    uses: ./.github/workflows/package-pipeline.yml
 
-  # package-python-blobtools:
-  #   if: needs.changes.outputs.blobtools == 'true'
-  #   uses: ./.github/workflows/package-blobtools.yml
+  package-python-blobtools:
+    if: needs.changes.outputs.blobtools == 'true'
+    uses: ./.github/workflows/package-blobtools.yml
 
   # build-and-push-blobtoolkit:
   #   runs-on: ubuntu-latest

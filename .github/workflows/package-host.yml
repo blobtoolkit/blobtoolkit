@@ -18,7 +18,7 @@ jobs:
       - name: Move viewer
         run: |
           mkdir -p ./src/blobtoolkit-host/src/data/bin
-          mv ./dist/node/*-linux ./src/blobtoolkit-host/src/data/bin/ || exit 0
+          mv ./dist/*-linux ./src/blobtoolkit-host/src/data/bin/ || exit 0
       - name: Build pip package
         working-directory: ./src/blobtoolkit-host
         run: |
@@ -26,5 +26,5 @@ jobs:
           blobtoolkit-host -v
       - uses: actions/upload-artifact@v3
         with:
-          name: host
+          name: pip
           path: ./src/blobtoolkit-host/dist/*
