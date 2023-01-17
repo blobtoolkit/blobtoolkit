@@ -49,10 +49,12 @@ jobs:
     uses: ./.github/workflows/package-host.yml
 
   package-python-pipeline:
+    needs: changes
     if: needs.changes.outputs.pipeline == 'true'
     uses: ./.github/workflows/package-pipeline.yml
 
   package-python-blobtools:
+    needs: changes
     if: needs.changes.outputs.blobtools == 'true'
     uses: ./.github/workflows/package-blobtools.yml
 
