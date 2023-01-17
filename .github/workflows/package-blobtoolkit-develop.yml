@@ -18,6 +18,7 @@ jobs:
           echo api: ${{ needs.changes.outputs.api }}
           echo ui: ${{ needs.changes.outputs.ui }}
           echo node: ${{ needs.changes.outputs.node }}
+          echo output1: ${{ needs.changes.outputs.output1 }}
 
   package-api:
     needs: changes

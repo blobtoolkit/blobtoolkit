@@ -19,6 +19,8 @@ on:
         value: ${{ jobs.detect-changes.outputs.docker }}
       all:
         value: ${{ jobs.detect-changes.outputs.all }}
+      outputs:
+        value: ${{ jobs.detect-changes.outputs.output1 }}
 
 jobs:
   detect-changes:
