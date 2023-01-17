@@ -10,7 +10,14 @@ jobs:
     name: Detect changes
     runs-on: ubuntu-latest
     outputs:
-      output1: ${{ steps.filter.outputs.workflows }}
+      api: ${{ steps.filter.outputs.api }}
+      ui: ${{ steps.filter.outputs.ui }}
+      node: ${{ steps.filter.outputs.node }}
+      host: ${{ steps.filter.outputs.host }}
+      pipeline: ${{ steps.filter.outputs.pipeline }}
+      blobtools: ${{ steps.filter.outputs.blobtools }}
+      docker: ${{ steps.filter.outputs.docker }}
+      all: ${{ steps.filter.outputs.all }}
     steps:
       - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
