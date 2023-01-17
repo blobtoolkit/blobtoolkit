@@ -16,6 +16,14 @@ jobs:
       needs.changes.outputs.requires-node == 'true'
     uses: ./.github/workflows/package-api.yml
 
+  build-api:
+    needs:
+      - changes
+      - package-api
+    if: needs.changes.outputs.is-api-release == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/build-api.yml
+
   package-ui:
     needs: changes
     if: |
@@ -23,6 +31,14 @@ jobs:
       needs.changes.outputs.requires-node == 'true'
     secrets: inherit
     uses: ./.github/workflows/package-ui.yml
+
+  build-ui:
+    needs:
+      - changes
+      - package-ui
+    if: needs.changes.outputs.is-ui-release == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/build-ui.yml
 
   package-python-host:
     needs:
