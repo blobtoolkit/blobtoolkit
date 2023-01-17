@@ -16,7 +16,7 @@ jobs:
           pip install setuptools wheel twine
       - name: Copy viewer
         run: |
-          cp ./dist/{node}/*-linux ./src/blobtoolkit-host/src/data/bin || exit 0
+          cp ./dist/node/*-linux ./src/blobtoolkit-host/src/data/bin || exit 0
       - name: Build pip package
         working-directory: ./src/blobtoolkit-host
         run: |
