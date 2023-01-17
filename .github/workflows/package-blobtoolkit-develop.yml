@@ -7,45 +7,7 @@ on:
 
 jobs:
   changes:
-    name: Detect changes
-    runs-on: ubuntu-latest
-    outputs:
-      api: ${{ steps.filter.outputs.api }}
-      ui: ${{ steps.filter.outputs.ui }}
-      node: ${{ steps.filter.outputs.node }}
-      host: ${{ steps.filter.outputs.host }}
-      pipeline: ${{ steps.filter.outputs.pipeline }}
-      blobtools: ${{ steps.filter.outputs.blobtools }}
-      docker: ${{ steps.filter.outputs.docker }}
-      all: ${{ steps.filter.outputs.all }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            api:
-              - 'src/api/**'
-            ui:
-              - 'src/viewer/**'
-              - 'src/packaged-viewer/**'
-            node:
-              - 'src/api/**'
-              - 'src/viewer/**'
-              - 'src/packaged-viewer/**'
-            host:
-              - 'src/blobtoolkit-host/**'
-            pipeline:
-              - 'src/blobtoolkit-pipeline/**'
-            blobtools:
-              - 'src/blobtoolkit-host/**'
-              - 'src/blobtoolkit-pipeline/**'
-              - 'src/blobtools/**'
-              - 'src/btk/**'
-            docker:
-              - 'src/docker/**'
-            blobtoolkit:
-              - 'src/**'
+    uses: ./.github/workflows/changes.yml
 
   job2:
     runs-on: ubuntu-latest
