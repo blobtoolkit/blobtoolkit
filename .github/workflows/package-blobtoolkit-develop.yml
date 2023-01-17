@@ -23,28 +23,23 @@ jobs:
   package-api:
     needs: changes
     if: |
-      ${{ needs.changes.outputs.api == 'true' }} && 
-      ${{ needs.changes.outputs.requires-node != 'true' }}
+      ${{ needs.changes.outputs.api == 'true' }} || 
+      ${{ needs.changes.outputs.requires-node == 'true' }}
     uses: ./.github/workflows/package-api.yml
 
   package-ui:
     needs: changes
     if: |
-      ${{ needs.changes.outputs.ui == 'true' }} && 
-      ${{ needs.changes.outputs.requires-node != 'true' }}
-    uses: ./.github/workflows/package-ui.yml
-
-  package-node:
-    needs: changes
-    if: |
+      ${{ needs.changes.outputs.ui == 'true' }} || 
       ${{ needs.changes.outputs.requires-node == 'true' }}
-    uses: ./.github/workflows/package-node.yml
+    uses: ./.github/workflows/package-ui.yml
 
   package-python-host:
     needs:
       - changes
-      - package-node
-    if: ${{ needs.changes.outputs.host == 'true' }}
+      - package-ui
+      - package-api
+    if: always() && ${{ needs.changes.outputs.host == 'true' }}
     uses: ./.github/workflows/package-host.yml
 
   # package-python-pipeline:
