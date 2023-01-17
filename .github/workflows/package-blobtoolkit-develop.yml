@@ -30,6 +30,10 @@ jobs:
     uses: ./.github/workflows/package-node.yml
 
   package-python-host:
+    needs:
+      - changes
+      - package-node
+    if: ${{ needs.changes.outputs.host == 'true' }}
     uses: ./.github/workflows/package-host.yml
 
   # package-python-pipeline:
