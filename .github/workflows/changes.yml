@@ -1,0 +1,37 @@
+name: changes
+
+on: workflow_call
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'src/api/**'
+            ui:
+              - 'src/viewer/**'
+              - 'src/packaged-viewer/**'
+            node:
+              - 'src/api/**'
+              - 'src/viewer/**'
+              - 'src/packaged-viewer/**'
+            host:
+              - 'src/blobtoolkit-host/**'
+            pipeline:
+              - 'src/blobtoolkit-pipeline/**'
+            blobtools:
+              - 'src/blobtoolkit-host/**'
+              - 'src/blobtoolkit-pipeline/**'
+              - 'src/blobtools/**'
+              - 'src/btk/**'
+            docker:
+              - 'src/docker/**'
+            blobtoolkit:
+              - 'src/**'

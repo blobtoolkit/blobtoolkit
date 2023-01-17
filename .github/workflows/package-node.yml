@@ -1,0 +1,10 @@
+name: package-node
+
+on: workflow_call
+
+jobs:
+  package-api:
+    uses: ./.github/workflows/package-api.yml
+
+  package-ui:
+    uses: ./.github/workflows/package-ui.yml
