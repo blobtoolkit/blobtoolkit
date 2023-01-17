@@ -11,6 +11,10 @@ RUN apk add --no-cache curl gcompat libstdc++ libgcc
 RUN mkdir -p /blobtoolkit/conf \
     && mkdir -p /blobtoolkit/datasets
 
+COPY blobtoolkit-viewer-linux /blobtoolkit/blobtoolkit-viewer
+
+RUN chmod 755 blobtoolkit-viewer
+
 RUN addgroup -S blobtoolkit \
     && adduser -S blobtoolkit -G blobtoolkit \
     && chown -R blobtoolkit:blobtoolkit /blobtoolkit
@@ -18,10 +22,6 @@ RUN addgroup -S blobtoolkit \
 USER blobtoolkit
 
 WORKDIR /blobtoolkit
-
-COPY blobtoolkit-viewer-linux blobtoolkit-viewer
-
-RUN chmod 755 blobtoolkit-viewer
 
 ENV PATH /blobtoolkit:$PATH
 

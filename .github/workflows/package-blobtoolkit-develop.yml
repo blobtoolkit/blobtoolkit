@@ -9,17 +9,6 @@ jobs:
   changes:
     uses: ./.github/workflows/changes.yml
 
-  test:
-    needs: changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: test
-        run: |
-          echo api: ${{ needs.changes.outputs.api }}
-          echo ui: ${{ needs.changes.outputs.ui }}
-          echo node: ${{ needs.changes.outputs.node }}
-          echo requires-node: ${{ needs.changes.outputs.requires-node }}
-
   package-api:
     needs: changes
     if: |
@@ -44,9 +33,11 @@ jobs:
     uses: ./.github/workflows/package-host.yml
 
   # package-python-pipeline:
+  #   if: needs.changes.outputs.pipeline == 'true'
   #   uses: ./.github/workflows/package-pipeline.yml
 
   # package-python-blobtools:
+  #   if: needs.changes.outputs.blobtools == 'true'
   #   uses: ./.github/workflows/package-blobtools.yml
 
   # build-and-push-blobtoolkit:
