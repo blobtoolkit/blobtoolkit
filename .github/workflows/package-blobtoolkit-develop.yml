@@ -9,6 +9,17 @@ jobs:
   changes:
     uses: ./.github/workflows/changes.yml
 
+  test:
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: test
+        run: |
+          echo api: ${{ needs.changes.outputs.api }}
+          echo api: ${{ needs.changes.outputs.ui }}
+          echo api: ${{ needs.changes.outputs.node }}
+          echo api: ${{ needs.changes.outputs.requires-node }}
+
   package-api:
     needs: changes
     if: |
