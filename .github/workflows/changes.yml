@@ -3,12 +3,12 @@ name: changes
 on:
   workflow_call:
     outputs:
-      api:
-        value: ${{ jobs.changes.outputs.api }}
-      ui:
-        value: ${{ jobs.changes.outputs.ui }}
-      node:
-        value: ${{ jobs.changes.outputs.node }}
+      filter:
+        description: Paths with changes
+        value:
+          api: ${{ jobs.changes.outputs.api }}
+          ui: ${{ jobs.changes.outputs.api }}
+          node: ${{ jobs.changes.outputs.api }}
       host:
         value: ${{ jobs.changes.outputs.host }}
       pipeline:
