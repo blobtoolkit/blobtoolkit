@@ -3,7 +3,9 @@ name: changes
 on:
   workflow_call:
     outputs:
-      output1: ${{ jobs.changes.outputs.output1 }}
+      output1:
+        description: "filtered paths"
+        value: ${{ jobs.changes.outputs.output1 }}
 
 jobs:
   changes:
@@ -11,7 +13,7 @@ jobs:
     outputs:
       output1: ${{ steps.filter.outputs.workflows }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
         id: filter
         with:
