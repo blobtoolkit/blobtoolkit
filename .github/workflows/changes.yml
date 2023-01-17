@@ -75,7 +75,7 @@ jobs:
     steps:
       - id: host-release
         run: |
-          if [ ${{ needs.changes.outputs.host == 'true' ];
+          if [ ${{ needs.changes.outputs.host == 'true' }} ];
             echo "tagged=true" >> $GITHUB_OUTPUT
           fi
           echo ${{ github.ref }}
