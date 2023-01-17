@@ -91,6 +91,6 @@ jobs:
     steps:
       - id: needs-node
         run: |
-          if [ ${{ needs.changes.outputs.node == 'true' }} || ${{ steps.host-release.outputs.tagged == 'true' }} ]; then
+          if [ "${{ needs.changes.outputs.node }}" == 'true' || "${{ steps.host-release.outputs.tagged }}" == 'true' ]; then
             echo "node=true" >> $GITHUB_OUTPUT
           fi
