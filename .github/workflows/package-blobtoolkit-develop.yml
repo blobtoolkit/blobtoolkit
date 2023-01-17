@@ -16,9 +16,9 @@ jobs:
       - name: test
         run: |
           echo api: ${{ needs.changes.outputs.api }}
-          echo api: ${{ needs.changes.outputs.ui }}
-          echo api: ${{ needs.changes.outputs.node }}
-          echo api: ${{ needs.changes.outputs.requires-node }}
+          echo ui: ${{ needs.changes.outputs.ui }}
+          echo node: ${{ needs.changes.outputs.node }}
+          echo requires-node: ${{ needs.changes.outputs.requires-node }}
 
   package-api:
     needs: changes
