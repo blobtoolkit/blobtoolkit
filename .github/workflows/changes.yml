@@ -120,7 +120,7 @@ jobs:
             echo "blobtools='true'" >> $GITHUB_OUTPUT
           fi
 
-  release-dependant:
+  release-dependent:
     needs:
       - detect-changes
       - is-release
@@ -149,7 +149,7 @@ jobs:
           if [ ${{ needs.is-release.outputs.pipeline == 'true' }} ]; then
             echo "matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "matrix={\"include\":[\"3.9\"]}" >> $GITHUB_OUTPUT
+            echo "matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
           fi
       - id: blobtools-matrix
         run: |
