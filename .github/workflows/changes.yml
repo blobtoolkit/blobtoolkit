@@ -149,7 +149,7 @@ jobs:
           if [ ${{ needs.is-release.outputs.pipeline == 'true' }} ]; then
             echo "pipeline-matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "pipeline-matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
+            echo "pipeline-matrix={\"include\":[\"3.9\"]}" >> $GITHUB_OUTPUT
           fi
       - id: blobtools-matrix
         run: |
