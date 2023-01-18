@@ -38,11 +38,11 @@ on:
       requires-node:
         value: ${{ jobs.release-dependent.outputs.node }}
       host-matrix:
-        value: ${{ jobs.release-dependent.outputs.matrix }}
+        value: ${{ jobs.release-dependent.outputs.host-matrix }}
       pipeline-matrix:
-        value: ${{ jobs.release-dependent.outputs.matrix }}
+        value: ${{ jobs.release-dependent.outputs.pipeline-matrix }}
       blobtools-matrix:
-        value: ${{ jobs.release-dependent.outputs.matrix }}
+        value: ${{ jobs.release-dependent.outputs.blobtools-matrix }}
 
 jobs:
   detect-changes:
