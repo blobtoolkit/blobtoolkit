@@ -38,11 +38,11 @@ on:
       requires-node:
         value: ${{ jobs.release-dependent.outputs.node }}
       host-matrix:
-        value: ${{ jobs.release-dependent.outputs.host-matrix }}
+        value: ${{ jobs.release-dependent.outputs.matrix }}
       pipeline-matrix:
-        value: ${{ jobs.release-dependent.outputs.pipeline-matrix }}
+        value: ${{ jobs.release-dependent.outputs.matrix }}
       blobtools-matrix:
-        value: ${{ jobs.release-dependent.outputs.blobtools-matrix }}
+        value: ${{ jobs.release-dependent.outputs.matrix }}
 
 jobs:
   detect-changes:
@@ -128,9 +128,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       node: ${{ steps.needs-node.outputs.node || 'false' }}
-      host-matrix: ${{ steps.host-matrix.outputs.host-matrix }}
-      pipeline-matrix: ${{ steps.pipeline-matrix.outputs.pipeline-matrix }}
-      blobtools-matrix: ${{ steps.blobtools-matrix.outputs.blobtools-matrix }}
+      host-matrix: ${{ steps.host-matrix.outputs.matrix }}
+      pipeline-matrix: ${{ steps.pipeline-matrix.outputs.matrix }}
+      blobtools-matrix: ${{ steps.blobtools-matrix.outputs.matrix }}
     steps:
       - id: needs-node
         run: |
@@ -140,21 +140,21 @@ jobs:
       - id: host-matrix
         run: |
           if [ ${{ needs.is-release.outputs.host == 'true' }} ]; then
-            echo "host-matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
+            echo "matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "host-matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
+            echo "matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
           fi
       - id: pipeline-matrix
         run: |
           if [ ${{ needs.is-release.outputs.pipeline == 'true' }} ]; then
-            echo "pipeline-matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
+            echo "matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "pipeline-matrix={\"include\":[\"3.9\"]}" >> $GITHUB_OUTPUT
+            echo "matrix={\"include\":[\"3.9\"]}" >> $GITHUB_OUTPUT
           fi
       - id: blobtools-matrix
         run: |
           if [ ${{ needs.is-release.outputs.blobtools == 'true' }} ]; then
-            echo "blobtools-matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
+            echo "matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "blobtools-matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
+            echo "matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
           fi
