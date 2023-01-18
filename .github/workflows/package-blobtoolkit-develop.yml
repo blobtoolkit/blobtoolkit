@@ -9,36 +9,36 @@ jobs:
   changes:
     uses: ./.github/workflows/changes.yml
 
-  # package-api:
-  #   needs: changes
-  #   if: |
-  #     needs.changes.outputs.api == 'true' ||
-  #     needs.changes.outputs.requires-node == 'true'
-  #   uses: ./.github/workflows/package-api.yml
+  package-api:
+    needs: changes
+    if: |
+      needs.changes.outputs.api == 'true' ||
+      needs.changes.outputs.requires-node == 'true'
+    uses: ./.github/workflows/package-api.yml
 
-  # build-api:
-  #   needs:
-  #     - changes
-  #     - package-api
-  #   if: needs.changes.outputs.is-api-release == 'true'
-  #   secrets: inherit
-  #   uses: ./.github/workflows/build-api.yml
+  build-api:
+    needs:
+      - changes
+      - package-api
+    if: needs.changes.outputs.is-api-release == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/build-api.yml
 
-  # package-ui:
-  #   needs: changes
-  #   if: |
-  #     needs.changes.outputs.ui == 'true' ||
-  #     needs.changes.outputs.requires-node == 'true'
-  #   secrets: inherit
-  #   uses: ./.github/workflows/package-ui.yml
+  package-ui:
+    needs: changes
+    if: |
+      needs.changes.outputs.ui == 'true' ||
+      needs.changes.outputs.requires-node == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/package-ui.yml
 
-  # build-ui:
-  #   needs:
-  #     - changes
-  #     - package-ui
-  #   if: needs.changes.outputs.is-ui-release == 'true'
-  #   secrets: inherit
-  #   uses: ./.github/workflows/build-ui.yml
+  build-ui:
+    needs:
+      - changes
+      - package-ui
+    if: needs.changes.outputs.is-ui-release == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/build-ui.yml
 
   package-host:
     needs:
@@ -96,14 +96,14 @@ jobs:
   #   if: always() && needs.changes.outputs.is-host-release == 'true'
   #   uses: ./.github/workflows/release-blobtools.yml
 
-  # build-blobtoolkit:
-  #   needs:
-  #     - changes
-  #     - package-ui
-  #     - package-api
-  #     - package-host
-  #     - package-pipeline
-  #     - package-blobtools
-  #   if: needs.changes.outputs.is-blobtools-release == 'true'
-  #   secrets: inherit
-  #   uses: ./.github/workflows/build-blobtoolkit.yml
+  build-blobtoolkit:
+    needs:
+      - changes
+      - package-ui
+      - package-api
+      - package-host
+      - package-pipeline
+      - package-blobtools
+    if: needs.changes.outputs.is-blobtools-release == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/build-blobtoolkit.yml
