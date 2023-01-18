@@ -47,7 +47,7 @@ jobs:
       - package-api
     strategy:
       matrix:
-        python-version: ${{ needs.changes.outputs.host-matrix }}
+        python-version: ${{ fromJSON(needs.changes.outputs.host-matrix) }}
     if: always() && needs.changes.outputs.host == 'true'
     uses: ./.github/workflows/package-host.yml
     with:
@@ -64,7 +64,7 @@ jobs:
     needs: changes
     strategy:
       matrix:
-        python-version: ${{ needs.changes.outputs.pipeline-matrix }}
+        python-version: ${{ fromJSON(needs.changes.outputs.pipeline-matrix) }}
     if: needs.changes.outputs.pipeline == 'true'
     uses: ./.github/workflows/package-pipeline.yml
     with:
@@ -81,7 +81,7 @@ jobs:
     needs: changes
     strategy:
       matrix:
-        python-version: ${{ needs.changes.outputs.blobtools-matrix }}
+        python-version: ${{ fromJSON(needs.changes.outputs.blobtools-matrix) }}
     if: needs.changes.outputs.blobtools == 'true'
     uses: ./.github/workflows/package-blobtools.yml
     with:
