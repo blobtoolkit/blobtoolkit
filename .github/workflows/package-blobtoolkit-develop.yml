@@ -20,7 +20,7 @@ jobs:
     needs:
       - changes
       - package-api
-    if: needs.changes.outputs.is-api-release == 'true'
+    # if: needs.changes.outputs.is-api-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/build-api.yml
 
@@ -36,7 +36,7 @@ jobs:
     needs:
       - changes
       - package-ui
-    if: needs.changes.outputs.is-ui-release == 'true'
+    # if: needs.changes.outputs.is-ui-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/build-ui.yml
 
@@ -45,18 +45,50 @@ jobs:
       - changes
       - package-ui
       - package-api
+    strategy:
+      matrix:
+        python-version: [3.9]
     if: always() && needs.changes.outputs.host == 'true'
     uses: ./.github/workflows/package-host.yml
 
+  # release-host:
+  #   needs:
+  #     - changes
+  #     - package-host
+  #   if: needs.changes.outputs.is-host-release == 'true'
+  #   uses: ./.github/workflows/release-host.yml
+
   package-pipeline:
     needs: changes
+    strategy:
+      matrix:
+        python-version: [3.9]
     if: needs.changes.outputs.pipeline == 'true'
     uses: ./.github/workflows/package-pipeline.yml
 
+  # release-pipeline:
+  #   needs:
+  #     - changes
+  #     - package-pipeline
+  #   if: needs.changes.outputs.is-pipeline-release == 'true'
+  #   uses: ./.github/workflows/release-pipeline.yml
+
   package-blobtools:
     needs: changes
+    strategy:
+      matrix:
+        python-version: [3.9]
     if: needs.changes.outputs.blobtools == 'true'
     uses: ./.github/workflows/package-blobtools.yml
+
+  # release-blobtools:
+  #   needs:
+  #     - changes
+  #     - package-blobtools
+  #     - release-host
+  #     - release-pipeline
+  #   if: always() && needs.changes.outputs.is-host-release == 'true'
+  #   uses: ./.github/workflows/release-blobtools.yml
 
   build-blobtoolkit:
     needs:
@@ -66,40 +98,6 @@ jobs:
       - package-host
       - package-pipeline
       - package-blobtools
-    if: needs.changes.outputs.is-ui-release == 'true'
+    # if: needs.changes.outputs.is-blobtools-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/build-blobtoolkit.yml
-  # build-and-push-blobtoolkit:
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #     - package-viewer
-  #     - package-python-host
-  #     - package-python-pipeline
-  #     - package-python-blobtools
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Collect artifacts
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         path: ./dist
-  #     - name: Move artifacts
-  #       run: |
-  #         mv dist/artifact/* src/docker/
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v2
-  #       with:
-  #         username: ${{ secrets.DOCKER_HUB_USERNAME }}
-  #         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-  #     - name: Extract metadata (tags, labels) for Docker
-  #       id: meta
-  #       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-  #       with:
-  #         images: genomehubs/blobtoolkit
-  #     - name: Build and push Docker image
-  #       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-  #       with:
-  #         context: src/docker
-  #         push: true
-  #         tags: genomehubs/blobtoolkit:develop
-  #         labels: ${{ steps.meta.outputs.labels }}

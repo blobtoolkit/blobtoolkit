@@ -11,6 +11,9 @@ jobs:
         with:
           name: node
           path: ./dist
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.version }}
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
