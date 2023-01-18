@@ -50,6 +50,8 @@ jobs:
         python-version: [3.9]
     if: always() && needs.changes.outputs.host == 'true'
     uses: ./.github/workflows/package-host.yml
+    with:
+      python-version: ${{ matrix.python-version }}
 
   # release-host:
   #   needs:
@@ -65,6 +67,8 @@ jobs:
         python-version: [3.9]
     if: needs.changes.outputs.pipeline == 'true'
     uses: ./.github/workflows/package-pipeline.yml
+    with:
+      python-version: ${{ matrix.python-version }}
 
   # release-pipeline:
   #   needs:
@@ -80,6 +84,8 @@ jobs:
         python-version: [3.9]
     if: needs.changes.outputs.blobtools == 'true'
     uses: ./.github/workflows/package-blobtools.yml
+    with:
+      python-version: ${{ matrix.python-version }}
 
   # release-blobtools:
   #   needs:
