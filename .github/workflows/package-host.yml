@@ -1,5 +1,10 @@
 name: package-host
-on: workflow_call
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
 
 jobs:
   package-python-host:
@@ -13,7 +18,7 @@ jobs:
           path: ./dist
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.version }}
+          python-version: ${{ inputs.python-version }}
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
