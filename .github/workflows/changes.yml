@@ -142,7 +142,7 @@ jobs:
           if [ ${{ needs.is-release.outputs.host == 'true' }} ]; then
             echo "host-matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "host-matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
+            echo "host-matrix=[\"3.9\"]" >> $GITHUB_OUTPUT
           fi
       - id: pipeline-matrix
         run: |
