@@ -140,21 +140,21 @@ jobs:
       - id: host-matrix
         run: |
           if [ ${{ needs.is-release.outputs.host == 'true' }} ]; then
-            echo "host-matrix='${MATRIX_PYTHON}'" >> $GITHUB_OUTPUT
+            echo "host-matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "host-matrix='${DEFAULT_PYTHON}'" >> $GITHUB_OUTPUT
+            echo "host-matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
           fi
       - id: pipeline-matrix
         run: |
           if [ ${{ needs.is-release.outputs.pipeline == 'true' }} ]; then
-            echo "pipeline-matrix='${MATRIX_PYTHON}'" >> $GITHUB_OUTPUT
+            echo "pipeline-matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "pipeline-matrix='${DEFAULT_PYTHON}'" >> $GITHUB_OUTPUT
+            echo "pipeline-matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
           fi
       - id: blobtools-matrix
         run: |
           if [ ${{ needs.is-release.outputs.blobtools == 'true' }} ]; then
-            echo "blobtools-matrix='${MATRIX_PYTHON}'" >> $GITHUB_OUTPUT
+            echo "blobtools-matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
           else
-            echo "blobtools-matrix='${DEFAULT_PYTHON}'" >> $GITHUB_OUTPUT
+            echo "blobtools-matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
           fi
