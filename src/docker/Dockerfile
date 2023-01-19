@@ -53,6 +53,7 @@ FROM build_${BUILD_ENV}
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
 LABEL version=$VERSION
+ARG VERSION
 ENV CONTAINER_VERSION=$VERSION
 
 RUN mkdir -p /blobtoolkit/conf \
