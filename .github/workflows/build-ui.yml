@@ -1,6 +1,14 @@
 name: build-ui
 
-on: workflow_call
+on:
+  workflow_call:
+    inputs:
+      container-version:
+        required: true
+        type: string
+      docker-tags:
+        required: true
+        type: string
 
 jobs:
   build-ui:
@@ -31,6 +39,6 @@ jobs:
         with:
           context: src/docker/viewer
           push: true
-          tags: |
-            genomehubs/blobtoolkit-viewer:develop
+          build-args: VERSION=${{ inputs.container-version }}
+          tags: ${{ inputs.container-version }}
           labels: ${{ steps.meta.outputs.labels }}

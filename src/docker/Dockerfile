@@ -34,7 +34,7 @@ FROM base_image as build_dev
 
 ONBUILD COPY blobtoolkit-api-linux /blobtoolkit/blobtoolkit-api
 ONBUILD COPY blobtoolkit-viewer-linux /blobtoolkit/blobtoolkit-viewer
-ONBUILD COPY *.whl /tmp
+ONBUILD COPY *-${VERSION}-*.whl /tmp
 
 ONBUILD WORKDIR /tmp
 
@@ -52,7 +52,6 @@ ONBUILD WORKDIR /blobtoolkit
 FROM build_${BUILD_ENV}
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION=3.5.5
 LABEL version=$VERSION
 ENV CONTAINER_VERSION=$VERSION
 

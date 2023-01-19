@@ -32,9 +32,4 @@ npm version --no-git-tag-version $LEVEL &&
 
 cd -
 
-# Update Dockerfiles
-VERSION=$(grep '"version":' src/api/package.json | cut -d'"' -f 4)
-sed -i '/ARG VERSION=/s/.*/ARG VERSION='$VERSION'/' src/docker/api/Dockerfile
-sed -i '/ARG VERSION=/s/.*/ARG VERSION='$VERSION'/' src/docker/viewer/Dockerfile
-
 git commit -a -m "bump UI/API version"

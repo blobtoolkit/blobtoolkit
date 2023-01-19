@@ -1,6 +1,14 @@
 name: build-api
 
-on: workflow_call
+on:
+  workflow_call:
+    inputs:
+      container-version:
+        required: true
+        type: string
+      docker-tags:
+        required: true
+        type: string
 
 jobs:
   build-api:
@@ -31,6 +39,6 @@ jobs:
         with:
           context: src/docker/api
           push: true
-          tags: |
-            genomehubs/blobtoolkit-api:develop
+          build-args: VERSION=${{ inputs.container-version }}
+          tags: ${{ inputs.container-version }}
           labels: ${{ steps.meta.outputs.labels }}
