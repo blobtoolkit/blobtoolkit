@@ -9,7 +9,7 @@ jobs:
   changes:
     uses: ./.github/workflows/changes.yml
     with:
-      container-version: ${{ env.VERSION }}
+      container-version: $VERSION
 
   test:
     needs: changes
@@ -35,7 +35,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/build-api.yml
     with:
-      container-version: ${{ env.VERSION }}
+      container-version: $VERSION
       docker-tags: ${{ needs.changes.outputs.api-tag }}
 
   package-ui:
@@ -54,7 +54,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/build-ui.yml
     with:
-      container-version: ${{ env.VERSION }}
+      container-version: $VERSION
       docker-tags: ${{ needs.changes.outputs.api-tag }}
 
   package-host:
@@ -125,5 +125,5 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/build-blobtoolkit.yml
     with:
-      container-version: ${{ env.VERSION }}
+      container-version: $VERSION
       docker-tags: ${{ needs.changes.outputs.api-tag }}
