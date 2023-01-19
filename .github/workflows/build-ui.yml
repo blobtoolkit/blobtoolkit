@@ -40,5 +40,5 @@ jobs:
           context: src/docker/viewer
           push: true
           build-args: VERSION=${{ inputs.container-version }}
-          tags: ${{ inputs.container-version }}
+          tags: ${{ inputs.docker-tags }}
           labels: ${{ steps.meta.outputs.labels }}
