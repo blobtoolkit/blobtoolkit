@@ -1,4 +1,4 @@
-blobtoolkit-core==0.1.0
+blobtoolkit-core==0.1.2
 docopt==0.6.2
 psutil==5.9.4
 pysam==0.19.1
