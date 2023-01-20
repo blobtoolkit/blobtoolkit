@@ -22,7 +22,7 @@ Options:
 
 Examples:
     # 1. Remove BUSCO and ncount fields from a BlobDir
-    ./blobtools remove --busco --field ncount BlobDir
+    blobtools remove --busco --field ncount BlobDir
 
 """
 
