@@ -64,7 +64,7 @@ jobs:
     # if: needs.changes.outputs.is-host-release == 'true'
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
-      component: blobtoolkit-host
+      component: blobtoolkit_host
       version: ${{ needs.changes.outputs.container-version }}
 
   package-pipeline:
@@ -77,12 +77,15 @@ jobs:
     with:
       python-version: ${{ matrix.python-version }}
 
-  # release-pipeline:
-  #   needs:
-  #     - changes
-  #     - package-pipeline
-  #   if: needs.changes.outputs.is-pipeline-release == 'true'
-  #   uses: ./.github/workflows/release-pipeline.yml
+  release-pipeline:
+    needs:
+      - changes
+      - package-pipeline
+    # if: needs.changes.outputs.is-pipeline-release == 'true'
+    uses: ./.github/workflows/upload-to-pypi.yml
+    with:
+      component: blobtoolkit_pipeline
+      version: ${{ needs.changes.outputs.container-version }}
 
   package-blobtools:
     needs: changes
@@ -94,14 +97,17 @@ jobs:
     with:
       python-version: ${{ matrix.python-version }}
 
-  # release-blobtools:
-  #   needs:
-  #     - changes
-  #     - package-blobtools
-  #     - release-host
-  #     - release-pipeline
-  #   if: always() && needs.changes.outputs.is-host-release == 'true'
-  #   uses: ./.github/workflows/release-blobtools.yml
+  release-blobtools:
+    needs:
+      - changes
+      - package-blobtools
+      - release-host
+      - release-pipeline
+    # if: always() && needs.changes.outputs.is-host-release == 'true'
+    uses: ./.github/workflows/upload-to-pypi.yml
+    with:
+      component: blobtoolkit
+      version: ${{ needs.changes.outputs.container-version }}
 
   build-blobtoolkit:
     needs:
