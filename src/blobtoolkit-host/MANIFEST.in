@@ -1,0 +1,8 @@
+# MANIFEST.in
+include setup.py
+prune .cache
+prune .git
+prune build
+prune dist
+recursive-exclude *.egg-info *
+recursive-include src/data/bin *

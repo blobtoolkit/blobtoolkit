@@ -1,0 +1,155 @@
+name: package-blobtoolkit-develop
+
+on:
+  push:
+
+jobs:
+  changes:
+    uses: ./.github/workflows/changes.yml
+
+  package-api:
+    needs: changes
+    if: |
+      needs.changes.outputs.api == 'true' ||
+      needs.changes.outputs.requires-node == 'true'
+    uses: ./.github/workflows/package-api.yml
+
+  build-api:
+    needs:
+      - changes
+      - package-api
+    if: needs.changes.outputs.is-api-release == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/build-api.yml
+    with:
+      container-version: ${{ needs.changes.outputs.container-version }}
+      docker-tags: ${{ needs.changes.outputs.api-tag }}
+
+  package-ui:
+    needs: changes
+    if: |
+      needs.changes.outputs.ui == 'true' ||
+      needs.changes.outputs.requires-node == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/package-ui.yml
+
+  build-ui:
+    needs:
+      - changes
+      - package-ui
+    if: needs.changes.outputs.is-ui-release == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/build-ui.yml
+    with:
+      container-version: ${{ needs.changes.outputs.container-version }}
+      docker-tags: ${{ needs.changes.outputs.ui-tag }}
+
+  package-host:
+    needs:
+      - changes
+      - package-ui
+      - package-api
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(needs.changes.outputs.host-matrix) }}
+        platform: ${{ fromJSON(needs.changes.outputs.platform-matrix) }}
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.changes.outputs.host == 'true'
+    uses: ./.github/workflows/package-host.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+      platform: ${{ matrix.platform }}
+
+  release-host:
+    needs:
+      - changes
+      - package-host
+    if: needs.changes.outputs.is-host-release == 'true'
+    uses: ./.github/workflows/upload-to-pypi.yml
+    with:
+      component: blobtoolkit_host
+      version: ${{ needs.changes.outputs.container-version }}
+
+  package-pipeline:
+    needs: changes
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(needs.changes.outputs.pipeline-matrix) }}
+        platform: ${{ fromJSON(needs.changes.outputs.platform-matrix) }}
+    if: needs.changes.outputs.pipeline == 'true'
+    uses: ./.github/workflows/package-pipeline.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+      platform: ${{ matrix.platform }}
+
+  release-pipeline:
+    needs:
+      - changes
+      - package-pipeline
+    if: needs.changes.outputs.is-pipeline-release == 'true'
+    uses: ./.github/workflows/upload-to-pypi.yml
+    with:
+      component: blobtoolkit_pipeline
+      version: ${{ needs.changes.outputs.container-version }}
+
+  package-blobtools:
+    needs: changes
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(needs.changes.outputs.blobtools-matrix) }}
+        platform: ${{ fromJSON(needs.changes.outputs.platform-matrix) }}
+    if: needs.changes.outputs.blobtools == 'true'
+    uses: ./.github/workflows/package-blobtools.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+      platform: ${{ matrix.platform }}
+
+  release-blobtools:
+    needs:
+      - changes
+      - package-blobtools
+      - release-host
+      - release-pipeline
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.changes.outputs.is-host-release == 'true'
+    uses: ./.github/workflows/upload-to-pypi.yml
+    with:
+      component: blobtoolkit
+      version: ${{ needs.changes.outputs.container-version }}
+
+  build-blobtoolkit:
+    needs:
+      - changes
+      - package-ui
+      - package-api
+      - package-host
+      - package-pipeline
+      - package-blobtools
+    if: needs.changes.outputs.is-blobtools-release == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/build-blobtoolkit.yml
+    with:
+      container-version: ${{ needs.changes.outputs.container-version }}
+      docker-tags: ${{ needs.changes.outputs.blobtoolkit-tag }}
+
+  create-github-release:
+    needs:
+      - package-api
+      - package-ui
+      - release-blobtools
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      (
+        needs.changes.outputs.is-api-release == 'true' ||
+        needs.changes.outputs.is-ui-release == 'true' ||
+        needs.changes.outputs.is-blobtools-release == 'true'
+      )
+    uses: ./.github/workflows/github-release.yml

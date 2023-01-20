@@ -1,0 +1,44 @@
+name: build-ui
+
+on:
+  workflow_call:
+    inputs:
+      container-version:
+        required: true
+        type: string
+      docker-tags:
+        required: true
+        type: string
+
+jobs:
+  build-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Collect artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: node
+          path: ./dist
+      - name: Move UI
+        run: |
+          mv ./dist/blobtoolkit-viewer-linux src/docker/viewer/
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: genomehubs/blobtoolkit-viewer
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: src/docker/viewer
+          push: true
+          build-args: VERSION=${{ inputs.container-version }}
+          tags: ${{ inputs.docker-tags }}
+          labels: ${{ steps.meta.outputs.labels }}

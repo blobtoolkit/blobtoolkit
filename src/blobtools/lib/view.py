@@ -32,6 +32,7 @@ import contextlib
 import os
 import shlex
 import signal
+import socket
 import sys
 import time
 from pathlib import Path
@@ -51,10 +52,31 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from tolkein import tolog
 
-from .host import test_port
 from .version import __version__
 
 LOGGER = tolog.logger(__name__)
+
+
+def test_port(port, service):
+    """Exit if port is already in use."""
+    port = int(port)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as skt:
+        try:
+            skt.bind(("", port))
+        except OSError:
+            if service == "test":
+                return False
+            print("ERROR: Port %d already in use, unable to host %s." % (port, service))
+            print(
+                "       Use: `lsof -nP -iTCP:%d | grep LISTEN` to find the associated process."
+                % port
+            )
+            print(
+                f"       It may take ~30s for this port to become available when restarting {service}."
+            )
+
+            sys.exit(1)
+    return True
 
 
 def file_ready(file_path, timeout, callback):
@@ -136,12 +158,13 @@ def test_loc(args):
     loc = "%s:%d/%s" % (args["--host"], port, args["--prefix"])
     loc += f"/{dataset}/dataset/{dataset}" if level == "dataset" else "/all"
     print("Initializing viewer")
-    for _ in range(10):
+    time.sleep(2)
+    for i in range(4):
         poll = process.poll()
         if poll is None:
-            if test_port(port, "test"):
-                break
             time.sleep(1)
+            if i > 1 and test_port(port, "test"):
+                break
         else:
             print(process.stdout.read(), file=sys.stderr)
             print(process.stderr.read(), file=sys.stderr)

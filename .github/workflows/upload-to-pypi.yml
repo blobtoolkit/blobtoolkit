@@ -1,0 +1,31 @@
+name: upload-to-pypi
+on:
+  workflow_call:
+    inputs:
+      component:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+
+jobs:
+  upload-to-pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: pip
+          path: ./tmp
+      - run: |
+          mkdir -p ./dist
+          COMPONENT=${{ inputs.component }}
+          mv tmp/${{ inputs.component }}-${{ inputs.version }}-*.whl dist/
+          mv tmp/${COMPONENT/_/-}-${{ inputs.version }}.tar.gz dist/
+      # - name: Publish package to PyPI
+      #   uses: pypa/gh-action-pypi-publish@v1.5.0
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.PYPI_API_TOKEN }}
+      #     repository_url: https://upload.pypi.org/legacy/
