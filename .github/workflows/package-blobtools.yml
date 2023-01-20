@@ -30,3 +30,25 @@ jobs:
         with:
           name: pip
           path: ./dist/*
+
+  package-python-blobtools-macos:
+    runs-on: macos-11
+    # if: inputs.platform == 'macos'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install setuptools wheel twine
+          pip3 install --upgrade cython
+      - name: Build pip package
+        run: |
+          python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_x86_64
+          python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_arm64
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pip
+          path: ./dist/*

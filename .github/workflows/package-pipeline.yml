@@ -34,7 +34,7 @@ jobs:
 
   package-python-pipeline-macos:
     runs-on: macos-11
-    # if: inputs.platform == 'linux'
+    # if: inputs.platform == 'macos'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -46,10 +46,11 @@ jobs:
           pip3 install setuptools wheel twine
           pip3 install --upgrade cython
       - name: Build pip package
+        working-directory: ./src/blobtoolkit-pipeline
         run: |
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py3 --plat-name macosx_11_0_arm64
       - uses: actions/upload-artifact@v3
         with:
           name: pip
-          path: ./dist/*.whl
+          path: ./src/blobtoolkit-pipeline/dist/*
