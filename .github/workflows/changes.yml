@@ -4,13 +4,10 @@ env:
   DEFAULT_PYTHON: '["3.9"]'
   MATRIX_PYTHON: '["3.8","3.9","3.10","3.11"]'
   BASE_TAG: "genomehubs/blobtoolkit"
+  VERSION: 3.5.5
 
 on:
   workflow_call:
-    inputs:
-      container-version:
-        required: true
-        type: string
     outputs:
       api:
         value: ${{ jobs.detect-changes.outputs.api }}
@@ -48,6 +45,8 @@ on:
         value: ${{ jobs.release-dependent.outputs.pipeline-matrix }}
       blobtools-matrix:
         value: ${{ jobs.release-dependent.outputs.blobtools-matrix }}
+      container-version:
+        value: ${{ jobs.release-dependent.outputs.container-version }}
       blobtoolkit-tag:
         value: ${{ jobs.release-dependent.outputs.blobtoolkit-tag }}
       blobtools-tag:
@@ -148,6 +147,7 @@ jobs:
       blobtools-tag: ${{ steps.docker-tags.outputs.blobtools-tag }}
       api-tag: ${{ steps.docker-tags.outputs.api-tag }}
       ui-tag: ${{ steps.docker-tags.outputs.ui-tag }}
+      container-version: ${{ steps.docker-tags.outputs.container-version }}
     steps:
       - id: needs-node
         run: |
@@ -177,20 +177,21 @@ jobs:
           fi
       - id: docker-tags
         run: |
+          echo "container-version=${VERSION}" >> $GITHUB_OUTPUT
           if ${{ needs.is-release.outputs.blobtools == 'true' }}; then
-            echo "blobtoolkit-tag=${BASE_TAG}:${{inputs.container-version}},${BASE_TAG}:latest" >> $GITHUB_OUTPUT
-            echo "blobtools-tag=${BASE_TAG}-blobtools:${{inputs.container-version}},${BASE_TAG}-blobtools:latest" >> $GITHUB_OUTPUT
+            echo "blobtoolkit-tag=${BASE_TAG}:${VERSION},${BASE_TAG}:latest" >> $GITHUB_OUTPUT
+            echo "blobtools-tag=${BASE_TAG}-blobtools:${VERSION},${BASE_TAG}-blobtools:latest" >> $GITHUB_OUTPUT
           else
             echo "blobtoolkit-tag=${BASE_TAG}:develop" >> $GITHUB_OUTPUT
             echo "blobtools-tag=${BASE_TAG}-blobtools:develop" >> $GITHUB_OUTPUT
           fi
           if ${{ needs.is-release.outputs.api == 'true' }}; then
-            echo "api-tag=${BASE_TAG}-api:${{inputs.container-version}},${BASE_TAG}-blobtools:latest" >> $GITHUB_OUTPUT
+            echo "api-tag=${BASE_TAG}-api:${VERSION},${BASE_TAG}-blobtools:latest" >> $GITHUB_OUTPUT
           else
             echo "api-tag=${BASE_TAG}-api:develop" >> $GITHUB_OUTPUT
           fi
           if ${{ needs.is-release.outputs.ui == 'true' }}; then
-            echo "ui-tag=${BASE_TAG}-viewer:${{inputs.container-version}},${BASE_TAG}-viewer:latest" >> $GITHUB_OUTPUT
+            echo "ui-tag=${BASE_TAG}-viewer:${VERSION},${BASE_TAG}-viewer:latest" >> $GITHUB_OUTPUT
           else
             echo "ui-tag=${BASE_TAG}-viewer:develop" >> $GITHUB_OUTPUT
           fi

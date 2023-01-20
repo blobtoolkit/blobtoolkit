@@ -1,6 +1,4 @@
 name: package-blobtoolkit-develop
-env:
-  VERSION: 3.5.5
 
 on:
   push:
@@ -8,21 +6,6 @@ on:
 jobs:
   changes:
     uses: ./.github/workflows/changes.yml
-    with:
-      container-version: $VERSION
-
-  test:
-    needs: changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: step1
-        run: echo ${{ needs.changes.outputs.host-matrix }}
-      - name: step2
-        run: echo ${{ fromJSON(needs.changes.outputs.host-matrix) }}
-      - name: step3
-        run: echo ${{ needs.changes.outputs.api-tag }}
-      - name: step3
-        run: echo $VERSION
 
   package-api:
     needs: changes
@@ -39,7 +22,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/build-api.yml
     with:
-      container-version: $VERSION
+      container-version: ${{ needs.changes.outputs.container-version }}
       docker-tags: ${{ needs.changes.outputs.api-tag }}
 
   package-ui:
@@ -58,8 +41,8 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/build-ui.yml
     with:
-      container-version: $VERSION
-      docker-tags: ${{ needs.changes.outputs.api-tag }}
+      container-version: ${{ needs.changes.outputs.container-version }}
+      docker-tags: ${{ needs.changes.outputs.ui-tag }}
 
   package-host:
     needs:
@@ -129,5 +112,5 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/build-blobtoolkit.yml
     with:
-      container-version: $VERSION
-      docker-tags: ${{ needs.changes.outputs.api-tag }}
+      container-version: ${{ needs.changes.outputs.container-version }}
+      docker-tags: ${{ needs.changes.outputs.blobtoolkit-tag }}
