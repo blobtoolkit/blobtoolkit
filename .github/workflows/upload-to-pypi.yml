@@ -20,8 +20,9 @@ jobs:
           path: ./tmp
       - run: |
           ls ./tmp
+          COMPONENT=${{ inputs.component }}
           mv tmp/${{ inputs.component }}-${{ inputs.version }}-*.whl dist/
-          mv tmp/${{ inputs.component }}-${{ inputs.version }}.tar.gz dist/
+          mv tmp/${COMPONENT/_/-}-${{ inputs.version }}.tar.gz dist/
           ls ./dist
       # - name: Publish package to PyPI
       #   uses: pypa/gh-action-pypi-publish@v1.5.0
