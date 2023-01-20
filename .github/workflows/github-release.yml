@@ -13,9 +13,9 @@ jobs:
       - run: |
           ls ./tmp
           mkdir -p ./dist
-          mv dist/node/blobtoolkit-api-* ./dist/
-          mv dist/node/blobtoolkit-viewer-* ./dist/
-          mv dist/node/blobtoolkit-viewer.tgz* ./dist/
+          mv tmp/node/blobtoolkit-api-* ./dist/
+          mv tmp/node/blobtoolkit-viewer-* ./dist/
+          mv tmp/node/blobtoolkit-viewer.tgz* ./dist/
           ls ./dist
       # - name: create release
       #   uses: "marvinpinto/action-automatic-releases@v1.2.1"
