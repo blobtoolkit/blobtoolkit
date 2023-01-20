@@ -123,3 +123,18 @@ jobs:
     with:
       container-version: ${{ needs.changes.outputs.container-version }}
       docker-tags: ${{ needs.changes.outputs.blobtoolkit-tag }}
+
+  create-github-release:
+    needs:
+      - package-api
+      - package-ui
+      - release-blobtools
+    if: |
+      always() &&
+      (
+        needs.changes.outputs.is-api-release == 'true' ||
+        needs.changes.outputs.is-ui-release == 'true' ||
+        needs.changes.outputs.is-blobtools-release == 'true' ||
+        'true' == 'true'
+      )
+    uses: ./.github/workflows/github-release.yml
