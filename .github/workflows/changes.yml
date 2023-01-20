@@ -118,22 +118,22 @@ jobs:
     steps:
       - id: release
         run: |
-          if [ ${{ needs.detect-changes.outputs.api == 'true' }} ];
+          if ${{ needs.detect-changes.outputs.api == 'true' }};
             echo "api='true'" >> $GITHUB_OUTPUT
           fi
-          if [ ${{ needs.detect-changes.outputs.ui == 'true' }} ];
+          if ${{ needs.detect-changes.outputs.ui == 'true' }};
             echo "ui='true'" >> $GITHUB_OUTPUT
           fi
-          if [ ${{ needs.detect-changes.outputs.node == 'true' }} ];
+          if ${{ needs.detect-changes.outputs.node == 'true' }};
             echo "node='true'" >> $GITHUB_OUTPUT
           fi
-          if [ ${{ needs.detect-changes.outputs.host == 'true' }} ];
+          if ${{ needs.detect-changes.outputs.host == 'true' }};
             echo "host='true'" >> $GITHUB_OUTPUT
           fi
-          if [ ${{ needs.detect-changes.outputs.pipeline == 'true' }} ];
+          if ${{ needs.detect-changes.outputs.pipeline == 'true' }};
             echo "pipeline='true'" >> $GITHUB_OUTPUT
           fi
-          if [ ${{ needs.detect-changes.outputs.blobtools == 'true' }} ];
+          if ${{ needs.detect-changes.outputs.blobtools == 'true' }};
             echo "blobtools='true'" >> $GITHUB_OUTPUT
           fi
 
