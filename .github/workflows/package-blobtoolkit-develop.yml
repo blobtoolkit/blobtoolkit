@@ -61,7 +61,7 @@ jobs:
     needs:
       - changes
       - package-host
-    if: needs.changes.outputs.is-host-release == 'true'
+    # if: needs.changes.outputs.is-host-release == 'true'
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
       component: blobtoolkit-host
