@@ -53,7 +53,11 @@ jobs:
       matrix:
         python-version: ${{ fromJSON(needs.changes.outputs.host-matrix) }}
         platform: ${{ fromJSON(needs.changes.outputs.platform-matrix) }}
-    if: always() && needs.changes.outputs.host == 'true'
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.changes.outputs.host == 'true'
     uses: ./.github/workflows/package-host.yml
     with:
       python-version: ${{ matrix.python-version }}
@@ -63,7 +67,7 @@ jobs:
     needs:
       - changes
       - package-host
-    # if: needs.changes.outputs.is-host-release == 'true'
+    if: needs.changes.outputs.is-host-release == 'true'
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
       component: blobtoolkit_host
@@ -85,7 +89,7 @@ jobs:
     needs:
       - changes
       - package-pipeline
-    # if: needs.changes.outputs.is-pipeline-release == 'true'
+    if: needs.changes.outputs.is-pipeline-release == 'true'
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
       component: blobtoolkit_pipeline
@@ -109,7 +113,11 @@ jobs:
       - package-blobtools
       - release-host
       - release-pipeline
-    # if: always() && needs.changes.outputs.is-host-release == 'true'
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.changes.outputs.is-host-release == 'true'
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
       component: blobtoolkit
@@ -137,10 +145,11 @@ jobs:
       - release-blobtools
     if: |
       always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
       (
         needs.changes.outputs.is-api-release == 'true' ||
         needs.changes.outputs.is-ui-release == 'true' ||
-        needs.changes.outputs.is-blobtools-release == 'true' ||
-        'true' == 'true'
+        needs.changes.outputs.is-blobtools-release == 'true'
       )
     uses: ./.github/workflows/github-release.yml
