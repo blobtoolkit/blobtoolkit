@@ -17,12 +17,12 @@ jobs:
           mv tmp/node/blobtoolkit-viewer-* ./dist/
           mv tmp/node/blobtoolkit-viewer.tgz* ./dist/
           ls ./dist
-      # - name: create release
-      #   uses: "marvinpinto/action-automatic-releases@v1.2.1"
-      #   with:
-      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
-      #     draft: false
-      #     prerelease: false
-      #     title: "v${{github.ref_name}}"
-      #     files: |
-      #       dist/*
+      - name: create release
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          draft: false
+          prerelease: false
+          title: "v${{github.ref_name}}"
+          files: |
+            dist/*

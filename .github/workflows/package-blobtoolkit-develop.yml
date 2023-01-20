@@ -68,6 +68,7 @@ jobs:
       - changes
       - package-host
     if: needs.changes.outputs.is-host-release == 'true'
+    secrets: inherit
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
       component: blobtoolkit_host
@@ -90,6 +91,7 @@ jobs:
       - changes
       - package-pipeline
     if: needs.changes.outputs.is-pipeline-release == 'true'
+    secrets: inherit
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
       component: blobtoolkit_pipeline
@@ -119,6 +121,7 @@ jobs:
       !contains(needs.*.result, 'cancelled') &&
       needs.changes.outputs.is-host-release == 'true'
     uses: ./.github/workflows/upload-to-pypi.yml
+    secrets: inherit
     with:
       component: blobtoolkit
       version: ${{ needs.changes.outputs.container-version }}
@@ -152,4 +155,5 @@ jobs:
         needs.changes.outputs.is-ui-release == 'true' ||
         needs.changes.outputs.is-blobtools-release == 'true'
       )
+    secrets: inherit
     uses: ./.github/workflows/github-release.yml
