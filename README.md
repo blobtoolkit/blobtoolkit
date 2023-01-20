@@ -1,4 +1,4 @@
-# BlobToolKit (v3.5.5)
+# BlobToolKit (v4.0.0)
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/150091036.svg)](https://zenodo.org/badge/latestdoi/150091036)
