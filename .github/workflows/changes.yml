@@ -3,6 +3,8 @@ name: detect-changes
 env:
   DEFAULT_PYTHON: '["3.9"]'
   MATRIX_PYTHON: '["3.8","3.9","3.10","3.11"]'
+  DEFAULT_PLATFORM: '["linux"]'
+  MATRIX_PLATFORM: '["linux", "macos"]'
   BASE_TAG: "genomehubs/blobtoolkit"
   VERSION: 3.5.5
 
@@ -39,6 +41,8 @@ on:
         value: ${{ jobs.is-release.outputs.host }}
       requires-node:
         value: ${{ jobs.release-dependent.outputs.node }}
+      platform-matrix:
+        value: ${{ jobs.release-dependent.outputs.platform-matrix }}
       host-matrix:
         value: ${{ jobs.release-dependent.outputs.host-matrix }}
       pipeline-matrix:
@@ -140,6 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       node: ${{ steps.needs-node.outputs.node || 'false' }}
+      platform-matrix: ${{ steps.platform-matrix.outputs.matrix }}
       host-matrix: ${{ steps.host-matrix.outputs.matrix }}
       pipeline-matrix: ${{ steps.pipeline-matrix.outputs.matrix }}
       blobtools-matrix: ${{ steps.blobtools-matrix.outputs.matrix }}
@@ -153,6 +158,13 @@ jobs:
         run: |
           if [[ "${{ needs.detect-changes.outputs.node == 'true' }}" == "true" || "${{ needs.is-release.outputs.host == 'true' }}" == "true" ]]; then
             echo "node='true'" >> $GITHUB_OUTPUT
+          fi
+      - id: platform-matrix
+        run: |
+          if ${{ needs.is-release.outputs.blobtools == 'true' }}; then
+            echo "matrix=${MATRIX_PLATFORM}" >> $GITHUB_OUTPUT
+          else
+            echo "matrix=${DEFAULT_PLATFORM}" >> $GITHUB_OUTPUT
           fi
       - id: host-matrix
         run: |

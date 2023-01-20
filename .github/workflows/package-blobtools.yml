@@ -2,6 +2,9 @@ name: package-pipeline
 on:
   workflow_call:
     inputs:
+      platform:
+        required: true
+        type: string
       python-version:
         required: true
         type: string
@@ -9,6 +12,7 @@ on:
 jobs:
   package-python-blobtoolkit:
     runs-on: ubuntu-latest
+    if: inputs.platform == 'linux'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4

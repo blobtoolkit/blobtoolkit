@@ -52,10 +52,12 @@ jobs:
     strategy:
       matrix:
         python-version: ${{ fromJSON(needs.changes.outputs.host-matrix) }}
+        platform: ${{ fromJSON(needs.changes.outputs.platform-matrix) }}
     if: always() && needs.changes.outputs.host == 'true'
     uses: ./.github/workflows/package-host.yml
     with:
       python-version: ${{ matrix.python-version }}
+      platform: ${{ matrix.platform }}
 
   release-host:
     needs:
@@ -72,10 +74,12 @@ jobs:
     strategy:
       matrix:
         python-version: ${{ fromJSON(needs.changes.outputs.pipeline-matrix) }}
+        platform: ${{ fromJSON(needs.changes.outputs.platform-matrix) }}
     if: needs.changes.outputs.pipeline == 'true'
     uses: ./.github/workflows/package-pipeline.yml
     with:
       python-version: ${{ matrix.python-version }}
+      platform: ${{ matrix.platform }}
 
   release-pipeline:
     needs:
@@ -92,10 +96,12 @@ jobs:
     strategy:
       matrix:
         python-version: ${{ fromJSON(needs.changes.outputs.blobtools-matrix) }}
+        platform: ${{ fromJSON(needs.changes.outputs.platform-matrix) }}
     if: needs.changes.outputs.blobtools == 'true'
     uses: ./.github/workflows/package-blobtools.yml
     with:
       python-version: ${{ matrix.python-version }}
+      platform: ${{ matrix.platform }}
 
   release-blobtools:
     needs:
