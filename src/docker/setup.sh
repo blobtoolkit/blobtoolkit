@@ -1,24 +1,17 @@
 #!/bin/bash
 
-ls /tmp/*.whl | while read WHEEL; do
+ls /tmp/*-${VERSION}-*.whl | while read WHEEL; do
     $CONDA_DIR/envs/btk_env/bin/pip install $WHEEL
 done
 
-# touch /tmp/build_env.t$BUILD_ENV
+if [ -s /blobtoolkit/blobtoolkit-api-linux ]; then
+    mv /blobtoolkit/blobtoolkit-api-linux /blobtoolkit/blobtoolkit-api
+    chmod 755 /blobtoolkit/blobtoolkit-api
+fi
 
-# # if [ "${BUILD_ENV}" == "dev" ]; then
-#   cd /tmp/blobtoolkit
-#   git fetch origin feature/split-packaging
-#   git checkout feature/split-packaging
+if [ -s /blobtoolkit/blobtoolkit-viewer-linux ]; then
+    mv /blobtoolkit/blobtoolkit-viewer-linux /blobtoolkit/blobtoolkit-viewer
+    chmod 755 /blobtoolkit/blobtoolkit-viewer
+fi
 
-#   pip install setuptools wheel twine
-
-#   cd /tmp/blobtoolkit/src/blobtoolkit-pipeline
-#   ./pip_install_latest.sh manylinux2014_x86_64
-
-#   cd /tmp/blobtoolkit/src/blobtoolkit-host
-#   ./pip_install_latest.sh manylinux2014_x86_64
-
-#   cd /tmp/blobtoolkit
-#   ./pip_install_latest.sh manylinux2014_x86_64
-# # fi
+chown blobtoolkit:blobtoolkit /blobtoolkit/blobtoolkit-{api,viewer}
