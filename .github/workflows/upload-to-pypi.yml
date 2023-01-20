@@ -17,10 +17,11 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: pip
-          path: ./dist
+          path: ./tmp
       - run: |
-          mv dist/pip/${{ inputs.component }}-${{ inputs.version }}-*.whl dist/
-          mv dist/pip/${{ inputs.component }}-${{ inputs.version }}.tar.gz dist/
+          ls ./tmp
+          mv tmp/${{ inputs.component }}-${{ inputs.version }}-*.whl dist/
+          mv tmp/${{ inputs.component }}-${{ inputs.version }}.tar.gz dist/
           ls ./dist
       # - name: Publish package to PyPI
       #   uses: pypa/gh-action-pypi-publish@v1.5.0
