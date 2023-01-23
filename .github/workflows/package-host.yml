@@ -30,7 +30,7 @@ jobs:
       - name: Move viewer
         run: |
           mkdir -p ./src/blobtoolkit-host/src/data/bin
-          mv ./dist/*-linux ./src/blobtoolkit-host/src/data/bin/ || exit 0
+          mv ./dist/*-linux ./src/blobtoolkit-host/src/data/bin/ && chmod 755 ./src/blobtoolkit-host/src/data/bin/*-linux || exit 0
       - name: Build pip package
         working-directory: ./src/blobtoolkit-host
         run: |
@@ -62,7 +62,7 @@ jobs:
       - name: Move viewer
         run: |
           mkdir -p ./src/blobtoolkit-host/src/data/bin
-          mv ./dist/*-macos ./src/blobtoolkit-host/src/data/bin/ || exit 0
+          mv ./dist/*-macos ./src/blobtoolkit-host/src/data/bin/ && chmod 755 ./src/blobtoolkit-host/src/data/bin/*-macos || exit 0
       - name: Build pip package
         working-directory: ./src/blobtoolkit-host
         run: |

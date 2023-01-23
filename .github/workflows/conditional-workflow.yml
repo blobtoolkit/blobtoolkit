@@ -89,8 +89,13 @@ jobs:
   release-pipeline:
     needs:
       - changes
+      - package-host
       - package-pipeline
-    if: needs.changes.outputs.is-pipeline-release == 'true'
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.changes.outputs.is-pipeline-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/upload-to-pypi.yml
     with:

@@ -7,84 +7,11 @@ https://github.com/pypa/sampleproject
 """
 
 import io
-
-# import platform
-# import re
-from os import makedirs
-from os import remove
-from os.path import abspath
 from os.path import dirname
-from os.path import isfile
 from os.path import join
 
 from setuptools import find_namespace_packages
 from setuptools import setup
-
-# from setuptools.command.install import install
-
-# system = platform.system()
-# # arch, _ = platform.architecture()
-# if system == "Linux":
-#     blobtoolkit_api = "bin/blobtoolkit-api-linux"
-#     blobtoolkit_viewer = "bin/blobtoolkit-viewer-linux"
-# if system == "Windows":
-#     blobtoolkit_api = "bin/blobtoolkit-api-win.exe"
-#     blobtoolkit_viewer = "bin/blobtoolkit-viewer-win.exe"
-# if system == "Darwin":
-#     blobtoolkit_api = "bin/blobtoolkit-api-macos"
-#     blobtoolkit_viewer = "bin/blobtoolkit-viewer-macos"
-
-# from https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it # noqa
-# try:
-#     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-#     class bdist_wheel(_bdist_wheel):
-#         def finalize_options(self):
-#             _bdist_wheel.finalize_options(self)
-#             # Mark us as not a pure python package (we have platform specific rust code)
-#             self.root_is_pure = False
-
-#         def get_tag(self):
-#             # this set's us up to build generic wheels.
-#             # note: we're only doing this for windows right now (causes packaging issues
-#             # with osx)
-#             tag = _bdist_wheel.get_tag(self)
-#             print(tag)
-#             repl = "macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64"
-#             if tag[2] == "macosx_10_9_x86_64":
-#                 tag = (tag[0], tag[1], repl)
-#                 return tag
-
-#             if not system == "Windows":
-#                 return _bdist_wheel.get_tag(self)
-
-#             python, abi, plat = _bdist_wheel.get_tag(self)
-#             python, abi = "py3", "none"
-#             return python, abi, plat
-
-
-# except ImportError:
-#     print("Error happens")
-#     bdist_wheel = None
-
-
-# class PostInstallCommand(install):
-#     """Post-installation for installation mode."""
-
-#     def run(self):
-#         source_dir = dirname(abspath(__file__))
-#         makedirs(self.install_scripts, exist_ok=True)
-
-#         self.copy_file(source_dir, blobtoolkit_api, "blobtoolkit-api")
-#         self.copy_file(source_dir, blobtoolkit_viewer, "blobtoolkit-viewer")
-
-#     def copy_file(self, source_dir, file_name, executable_name):
-#         source = join(source_dir, file_name)
-#         target = join(self.install_scripts, executable_name)
-#         if isfile(target):
-#             remove(target)
-
-#         self.move_file(source, target)
 
 
 def read(*names, **kwargs):
@@ -101,14 +28,6 @@ setup(
     description="blobtoolkit-pipeline",  # Optional
     long_description="blobtoolkit-pipeline",  # Optional
     long_description_content_type="text/markdown",
-    # long_description="%s\n%s"
-    # % (
-    #     re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
-    #         "", read("README.rst")
-    #     ),
-    #     re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst")),
-    # ),
-    # long_description_content_type="text/x-rst",  # Optional (see note above)
     url="https://github.com/blobtoolkit/blobtoolkit",  # Optional
     # This should be your name or the name of the organization which owns the
     # project.
