@@ -25,9 +25,10 @@ jobs:
       - name: Build pip package
         run: |
           mkdir -p artifacts
-          PY_VERSION=${{ inputs.python-version }/./}
-          python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_x86_64
-          if [ "${{ inputs.python-version }/./}" == "3.9" ]; then
+          PY_VERSION=${{ inputs.python-version }}
+          PY_VERSION=${PY_VERSION/./}
+          python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name linux_x86_64
+          if [ "${{ inputs.python-version }}" == "3.9" ]; then
             pip3 install dist/blobtoolkit-*-py${PY_VERSION}-none-$PLATFORM.whl &&
             blobtools -v
             mv dist/blobtoolkit*.tar.gz artifacts/
@@ -54,7 +55,8 @@ jobs:
       - name: Build pip package
         run: |
           mkdir -p artifacts
-          PY_VERSION=${{ inputs.python-version }/./}
+          PY_VERSION=${{ inputs.python-version }}
+          PY_VERSION=${PY_VERSION/./}
           python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_arm64
           mv dist/*.whl artifacts/
