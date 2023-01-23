@@ -50,7 +50,6 @@ jobs:
       - package-ui
       - package-api
     strategy:
-      max-parallel: 1
       matrix:
         python-version: ${{ fromJSON(needs.changes.outputs.host-matrix) }}
         platform: ${{ fromJSON(needs.changes.outputs.platform-matrix) }}
