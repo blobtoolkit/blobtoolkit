@@ -108,33 +108,45 @@ jobs:
     needs: detect-changes
     runs-on: ubuntu-latest
     outputs:
-      api: ${{ steps.release.outputs.api || 'false' }}
-      ui: ${{ steps.release.outputs.ui || 'false' }}
-      node: ${{ steps.release.outputs.node || 'false' }}
-      host: ${{ steps.release.outputs.host || 'false' }}
-      pipeline: ${{ steps.release.outputs.pipeline || 'false' }}
-      blobtools: ${{ steps.release.outputs.blobtools || 'false' }}
+      api: ${{ steps.release.outputs.api }}
+      ui: ${{ steps.release.outputs.ui }}
+      node: ${{ steps.release.outputs.node }}
+      host: ${{ steps.release.outputs.host }}
+      pipeline: ${{ steps.release.outputs.pipeline }}
+      blobtools: ${{ steps.release.outputs.blobtools }}
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - id: release
         run: |
-          if ${{ needs.detect-changes.outputs.api == 'true' }}; then
+          if [[ "${{ needs.detect-changes.outputs.api == 'true' }}" == "true" ]]; then
             echo "api='true'" >> $GITHUB_OUTPUT
+          else
+            echo "api='false'" >> $GITHUB_OUTPUT
           fi
-          if ${{ needs.detect-changes.outputs.ui == 'true' }}; then
+          if [[ "${{ needs.detect-changes.outputs.ui == 'true' }}" == "true" ]]; then
             echo "ui='true'" >> $GITHUB_OUTPUT
+          else
+            echo "ui='false'" >> $GITHUB_OUTPUT
           fi
-          if ${{ needs.detect-changes.outputs.node == 'true' }}; then
+          if [[ "${{ needs.detect-changes.outputs.node == 'true' }}" == "true" ]]; then
             echo "node='true'" >> $GITHUB_OUTPUT
+          else
+            echo "node='false'" >> $GITHUB_OUTPUT
           fi
-          if ${{ needs.detect-changes.outputs.host == 'true' }}; then
+          if [[ "${{ needs.detect-changes.outputs.host == 'true' }}" == "true" ]]; then
             echo "host='true'" >> $GITHUB_OUTPUT
+          else
+            echo "host='false'" >> $GITHUB_OUTPUT
           fi
-          if ${{ needs.detect-changes.outputs.pipeline == 'true' }}; then
+          if [[ "${{ needs.detect-changes.outputs.pipeline == 'true' }}" == "true" ]]; then
             echo "pipeline='true'" >> $GITHUB_OUTPUT
+          else
+            echo "pipeline='false'" >> $GITHUB_OUTPUT
           fi
-          if ${{ needs.detect-changes.outputs.blobtools == 'true' }}; then
+          if [[ "${{ needs.detect-changes.outputs.blobtools == 'true' }}" == "true" ]]; then
             echo "blobtools='true'" >> $GITHUB_OUTPUT
+          else
+            echo "blobtools='false'" >> $GITHUB_OUTPUT
           fi
 
   release-dependent:
@@ -147,7 +159,7 @@ jobs:
       !contains(needs.*.result, 'cancelled')
     runs-on: ubuntu-latest
     outputs:
-      node: ${{ steps.needs-node.outputs.node || 'false' }}
+      node: ${{ steps.needs-node.outputs.node }}
       platform-matrix: ${{ steps.platform-matrix.outputs.matrix }}
       host-matrix: ${{ steps.host-matrix.outputs.matrix }}
       pipeline-matrix: ${{ steps.pipeline-matrix.outputs.matrix }}
@@ -162,6 +174,8 @@ jobs:
         run: |
           if [[ "${{ needs.detect-changes.outputs.node == 'true' }}" == "true" || "${{ needs.is-release.outputs.host == 'true' }}" == "true" ]]; then
             echo "node='true'" >> $GITHUB_OUTPUT
+          else
+            echo "node='false'" >> $GITHUB_OUTPUT
           fi
       - id: platform-matrix
         run: |

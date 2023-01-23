@@ -18,7 +18,7 @@ jobs:
     needs:
       - changes
       - package-api
-    if: needs.changes.outputs.is-api-release == 'true'
+    # if: needs.changes.outputs.is-api-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/build-api.yml
     with:
@@ -37,7 +37,7 @@ jobs:
     needs:
       - changes
       - package-ui
-    if: needs.changes.outputs.is-ui-release == 'true'
+    # if: needs.changes.outputs.is-ui-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/build-ui.yml
     with:
@@ -134,7 +134,7 @@ jobs:
       - package-host
       - package-pipeline
       - package-blobtools
-    if: needs.changes.outputs.is-blobtools-release == 'true'
+    # if: needs.changes.outputs.is-blobtools-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/build-blobtoolkit.yml
     with:
