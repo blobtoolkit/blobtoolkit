@@ -83,7 +83,7 @@ if [ "$BLOBTOOLS_UPDATE" == 1 ]; then
     bump2version --allow-dirty --config-file .pipelinebumpversion.cfg $LEVEL
     sed -i ".bak" 's/blobtoolkit-pipeline=='$LATEST_TAG'/blobtoolkit-pipeline=='$VERSION'/' setup.py
     rm setup.py.bak
-    sed -i ".bak" 's/blobtoolkit-pipeline v'$LATEST_TAG'/blobtoolkit-pipeline v'$VERSION'/' setup.py
+    sed -i ".bak" 's/blobtoolkit-pipeline v'$LATEST_TAG'/blobtoolkit-pipeline v'$VERSION'/' src/blobtoolkit-pipeline/src/lib/version.py
     rm src/blobtoolkit-pipeline/src/lib/version.py.bak
   fi
   ./bump_full_version.sh $LEVEL $VERSION $NPM_UPDATE
