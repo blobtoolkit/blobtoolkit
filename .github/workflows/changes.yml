@@ -114,8 +114,10 @@ jobs:
       host: ${{ steps.release.outputs.host }}
       pipeline: ${{ steps.release.outputs.pipeline }}
       blobtools: ${{ steps.release.outputs.blobtools }}
-    if: startsWith(github.ref, 'refs/tags/')
+    # if: startsWith(github.ref, 'refs/tags/')
     steps:
+      - id: tmp
+        run: echo ${{ needs.detect-changes.outputs.ui }}
       - id: release
         run: |
           if [[ "${{ needs.detect-changes.outputs.api == 'true' }}" == "true" ]]; then
