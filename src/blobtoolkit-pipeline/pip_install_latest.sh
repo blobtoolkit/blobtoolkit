@@ -11,7 +11,7 @@ if [ -z $PLATFORM ]; then
 fi
 
 BTK_VERSION=$(
-    grep current_version `dirname "$0"`/../../.bumpversion.cfg \
+    grep current_version `dirname "$0"`/../../.pipelinebumpversion.cfg \
     | head -n 1 \
     | awk '{print $3}')
 

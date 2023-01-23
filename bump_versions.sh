@@ -10,7 +10,7 @@ fi
 if output=$(git status --porcelain) && [ ! -z "$output" ]; then
   # Uncommitted changes
   echo "Unable to bump version. Git working directory is not clean."
-  #exit 1
+  exit 1
 fi
 
 LATEST_TAG=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
