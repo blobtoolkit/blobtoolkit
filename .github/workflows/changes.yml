@@ -172,6 +172,11 @@ jobs:
       ui-tag: ${{ steps.docker-tags.outputs.ui-tag }}
       container-version: ${{ steps.docker-tags.outputs.container-version }}
     steps:
+      - name: tmp
+        run: |
+          echo ${{ needs.is-release.outputs.blobtools }}
+          echo ${{ needs.is-release.outputs.blobtools == 'true' }}
+          echo [[ "${{ needs.is-release.outputs.blobtools == 'true' }}" == "true" ]]
       - id: needs-node
         run: |
           if [[ "${{ needs.detect-changes.outputs.node == 'true' }}" == "true" || "${{ needs.is-release.outputs.host == 'true' }}" == "true" ]]; then
