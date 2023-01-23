@@ -7,7 +7,7 @@ if [ -z "$LEVEL" ]; then
   exit 1;
 fi
 
-CURRENT_VERSION=$(grep '"version":' src/viewer/package.json | cut -d'"' -f 4)
+CURRENT_VERSION=$(grep '"version":' src/viewer/package.json | head -n 1 | cut -d'"' -f 4)
 
 if [[ "$LEVEL" == pre* ]]; then
   LEVEL="-preid rc $LEVEL"
@@ -31,7 +31,7 @@ npm version --no-git-tag-version $LEVEL &&
 
 cd -
 
-NEW_VERSION=$(grep '"version":' src/viewer/package.json | cut -d'"' -f 4)
+NEW_VERSION=$(grep '"version":' src/viewer/package.json | head -n 1 | cut -d'"' -f 4)
 
 git commit -a -m "bump UI/API version: ${CURRENT_VERSION} → ${NEW_VERSION}"
 git tag -a $NEW_VERSION -m "Bump version: ${CURRENT_VERSION} → ${NEW_VERSION}"

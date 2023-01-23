@@ -13,7 +13,7 @@ if output=$(git status --porcelain) && [ ! -z "$output" ]; then
   exit 1
 fi
 
-LATEST_TAG=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
+LATEST_TAG=$(grep current_version .prebumpversion.cfg | head -n 1 | cut -d' ' -f 3)
 NPM_UPDATE=0
 HOST_UPDATE=0
 PIPELINE_UPDATE=0
