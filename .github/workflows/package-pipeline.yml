@@ -57,7 +57,8 @@ jobs:
         working-directory: ./src/blobtoolkit-pipeline
         run: |
           mkdir -p artifacts
-          PY_VERSION=${{ inputs.python-version }/./}
+          PY_VERSION=${{ inputs.python-version }}
+          PY_VERSION=${PY_VERSION/./}
           python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_arm64
           mv dist/*.whl artifacts/
