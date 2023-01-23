@@ -97,7 +97,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit-pipeline",  # Required
-    version="3.5.5",
+    version="4.0.0",
     description="blobtoolkit-pipeline",  # Optional
     long_description="blobtoolkit-pipeline",  # Optional
     long_description_content_type="text/markdown",
