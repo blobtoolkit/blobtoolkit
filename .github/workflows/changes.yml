@@ -2,12 +2,12 @@ name: detect-changes
 
 env:
   DEFAULT_PYTHON: '["3.9"]'
-  MATRIX_PYTHON: '["3.9"]'
-  #MATRIX_PYTHON: '["3.8","3.9","3.10","3.11"]'
+  #MATRIX_PYTHON: '["3.9"]'
+  MATRIX_PYTHON: '["3.8","3.9","3.10","3.11"]'
   DEFAULT_PLATFORM: '["linux"]'
   MATRIX_PLATFORM: '["linux", "macos"]'
   BASE_TAG: "genomehubs/blobtoolkit"
-  VERSION: 3.5.5
+  VERSION: 4.0.2
 
 on:
   workflow_call:
@@ -119,22 +119,22 @@ jobs:
       - id: release
         run: |
           if ${{ needs.detect-changes.outputs.api == 'true' }}; then
-            echo "api='true'" >> $GITHUB_OUTPUT
+            echo "api=true" >> $GITHUB_OUTPUT
           fi
           if ${{ needs.detect-changes.outputs.ui == 'true' }}; then
-            echo "ui='true'" >> $GITHUB_OUTPUT
+            echo "ui=true" >> $GITHUB_OUTPUT
           fi
           if ${{ needs.detect-changes.outputs.node == 'true' }}; then
-            echo "node='true'" >> $GITHUB_OUTPUT
+            echo "node=true" >> $GITHUB_OUTPUT
           fi
           if ${{ needs.detect-changes.outputs.host == 'true' }}; then
-            echo "host='true'" >> $GITHUB_OUTPUT
+            echo "host=true" >> $GITHUB_OUTPUT
           fi
           if ${{ needs.detect-changes.outputs.pipeline == 'true' }}; then
-            echo "pipeline='true'" >> $GITHUB_OUTPUT
+            echo "pipeline=true" >> $GITHUB_OUTPUT
           fi
           if ${{ needs.detect-changes.outputs.blobtools == 'true' }}; then
-            echo "blobtools='true'" >> $GITHUB_OUTPUT
+            echo "blobtools=true" >> $GITHUB_OUTPUT
           fi
 
   release-dependent:
@@ -161,7 +161,7 @@ jobs:
       - id: needs-node
         run: |
           if [[ "${{ needs.detect-changes.outputs.node == 'true' }}" == "true" || "${{ needs.is-release.outputs.host == 'true' }}" == "true" ]]; then
-            echo "node='true'" >> $GITHUB_OUTPUT
+            echo "node=true" >> $GITHUB_OUTPUT
           fi
       - id: platform-matrix
         run: |

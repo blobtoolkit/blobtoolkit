@@ -13,7 +13,7 @@ if output=$(git status --porcelain) && [ ! -z "$output" ]; then
   exit 1
 fi
 
-LATEST_TAG=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
+LATEST_TAG=$(grep current_version .prebumpversion.cfg | head -n 1 | cut -d' ' -f 3)
 NPM_UPDATE=0
 HOST_UPDATE=0
 PIPELINE_UPDATE=0
@@ -76,11 +76,15 @@ if [ "$BLOBTOOLS_UPDATE" == 1 ]; then
     bump2version --allow-dirty --config-file .hostbumpversion.cfg $LEVEL
     sed -i ".bak" 's/blobtoolkit-host=='$LATEST_TAG'/blobtoolkit-host=='$VERSION'/' setup.py
     rm setup.py.bak
+    sed -i ".bak" 's/blobtoolkit-host v'$LATEST_TAG'/blobtoolkit-host v'$VERSION'/' src/blobtoolkit-host/src/lib/version.py
+    rm src/blobtoolkit-host/src/lib/version.py.bak
   fi
   if [ "$PIPELINE_UPDATE" == 1 ]; then
     bump2version --allow-dirty --config-file .pipelinebumpversion.cfg $LEVEL
     sed -i ".bak" 's/blobtoolkit-pipeline=='$LATEST_TAG'/blobtoolkit-pipeline=='$VERSION'/' setup.py
     rm setup.py.bak
+    sed -i ".bak" 's/blobtoolkit-pipeline v'$LATEST_TAG'/blobtoolkit-pipeline v'$VERSION'/' src/blobtoolkit-pipeline/src/lib/version.py
+    rm src/blobtoolkit-pipeline/src/lib/version.py.bak
   fi
   ./bump_full_version.sh $LEVEL $VERSION $NPM_UPDATE
 elif [ "$NPM_UPDATE" == 1 ]; then

@@ -97,7 +97,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit",  # Required
-    version="3.5.5",
+    version="4.0.2",
     description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
@@ -215,9 +215,9 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
-        "full": ["blobtoolkit-host==3.5.5", "blobtoolkit-pipeline==3.5.5"],
-        "host": ["blobtoolkit-host==3.5.5"],
-        "pipeline": ["blobtoolkit-pipeline==3.5.5"],
+        "full": ["blobtoolkit-host==4.0.2", "blobtoolkit-pipeline==4.0.2"],
+        "host": ["blobtoolkit-host==4.0.2"],
+        "pipeline": ["blobtoolkit-pipeline==4.0.2"],
     },
     entry_points={
         "console_scripts": [
@@ -236,7 +236,6 @@ setup(
         ],
         "btk.subcmd": [
             "pipeline = btk.lib.pipeline:main",
-            # "blobtools = blobtools:cli",
         ],
     },
     project_urls={
