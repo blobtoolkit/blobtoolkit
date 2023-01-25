@@ -6,6 +6,7 @@ import {
   getScatterPlotData,
 } from "./plotData";
 import { getBinsForCat, getBinsForFieldId } from "./field";
+import { getCatAxis, getMainPlot } from "./plot";
 import { getDetailsForFieldId, getRawDataForFieldId } from "./field";
 import {
   getPlotResolution,
@@ -19,7 +20,6 @@ import { byIdSelectorCreator } from "./selectorCreators";
 import { createSelector } from "reselect";
 import { getColorPalette } from "./color";
 import { getFilteredDataForFieldId } from "./preview";
-import { getMainPlot } from "./plot";
 import { getSelectedRecordsAsObject } from "./select";
 import immutableUpdate from "immutable-update";
 
@@ -214,6 +214,7 @@ export const getScatterPlotDataBySquareBinByCategory = createSelector(
   getZReducer,
   getZScale,
   getPlotScale,
+  getCatAxis,
   (
     grid = {},
     scatterData,
@@ -222,7 +223,8 @@ export const getScatterPlotDataBySquareBinByCategory = createSelector(
     palette,
     reducer,
     scale,
-    plotScale
+    plotScale,
+    catAxis
   ) => {
     if (!scatterData) return undefined;
     let zScale = d3[scale]().domain(grid.range).range([0, grid.width]);
@@ -241,17 +243,29 @@ export const getScatterPlotDataBySquareBinByCategory = createSelector(
     scatterData.data.forEach((square) => {
       let squareData = [];
       bins.forEach((bin, i) => {
-        squareData[i] = {
-          id: square.id + "_" + i,
-          cellId: square.id,
-          index: i,
-          i: square.i,
-          j: square.j,
-          color: palette.colors[i],
-          ids: [],
-          zs: [],
-          indices: [],
-        };
+        if (i == 0 || isNaN(catAxis)) {
+          squareData[i] = {
+            id: square.id + "_" + i,
+            cellId: square.id,
+            index: i,
+            i: square.i,
+            j: square.j,
+            color: palette.colors[i],
+            ids: [],
+            zs: [],
+            indices: [],
+          };
+        } else {
+          squareData[i] = {
+            ...squareData[i - 1],
+            id: square.id + "_" + i,
+            cellId: square.id,
+            index: i,
+            i: square.i,
+            j: square.j,
+            color: palette.colors[i],
+          };
+        }
       });
       square.indices.forEach((index, i) => {
         let currentCell = squareData[keys[categories.values[index]]];
@@ -308,31 +322,22 @@ export const getBinnedDataByCategoryByAxis = createSelector(
       if (!iBinned[d.index][d.i]) iBinned[d.index][d.i] = { zs: [], ids: [] };
       if (!jBinned[d.index][d.j]) jBinned[d.index][d.j] = { zs: [], ids: [] };
       iBinned[d.index][d.i].zs = iBinned[d.index][d.i].zs.concat(d.zs);
-      //iBinned[d.index][d.i].ids = iBinned[d.index][d.i].ids.concat(d.ids)
-      //iBinned[d.index][d.i].indices = iBinned[d.index][d.i].indices.concat(d.indices)
       jBinned[d.index][d.j].zs = jBinned[d.index][d.j].zs.concat(d.zs);
-      //jBinned[d.index][d.j].ids = jBinned[d.index][d.j].ids.concat(d.ids)
-      //jBinned[d.index][d.j].indices = jBinned[d.index][d.j].indices.concat(d.indices)
     });
     let data = [];
     for (let index = 0; index < Math.max(bins.length, 1); index++) {
       Object.keys(iBinned[index]).forEach((i) => {
         let obj = { axis: "x", bin: i, index: index };
         obj.zs = iBinned[index][i].zs;
-        //obj.ids = iBinned[index][i].ids
-        //obj.indices = iBinned[index][i].indices
         data.push(obj);
       });
       Object.keys(jBinned[index]).forEach((j) => {
         let obj = { axis: "y", bin: j, index: index };
         obj.zs = jBinned[index][j].zs;
-        //obj.ids = jBinned[index][j].ids
-        //obj.indices = jBinned[index][j].indices
         data.push(obj);
       });
     }
     let grid = binnedData.grid;
-    console.log(data);
     return { data, grid };
   }
 );
@@ -346,7 +351,8 @@ export const getBinnedLinesByCategoryForAxis = createSelector(
   getSideMax,
   getZReducer,
   getZScale,
-  (axis, binnedData, categories, palette, side, reducer, scale) => {
+  getCatAxis,
+  (axis, binnedData, categories, palette, side, reducer, scale, catAxis) => {
     if (!binnedData) return undefined;
     let min = 0;
     let max = side;
@@ -359,7 +365,6 @@ export const getBinnedLinesByCategoryForAxis = createSelector(
       let z = reducer.func(d.zs);
       max = Math.max(max, z);
     });
-
     let zScale = d3.scaleLinear().domain([0, max]).range([0, 300]);
     // zScale = d3.scaleSqrt().clamp(1).domain([1,max]).range([0,300])
     let paths = [{ name: "all", color: "#999999", path: "M0 300" }];
@@ -367,7 +372,7 @@ export const getBinnedLinesByCategoryForAxis = createSelector(
       for (let i = 0; i < categories.keys.length; i++) {
         paths[i] = {
           name: categories.keys[i],
-          color: palette.colors[i],
+          color: isNaN(catAxis) ? palette.colors[i] : palette.colors[catAxis],
           path: "M0 300",
         };
       }

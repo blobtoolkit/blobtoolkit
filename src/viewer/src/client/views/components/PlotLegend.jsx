@@ -127,6 +127,7 @@ const Legend = ({
   };
   let commaFormat = d3format(",");
   if (bins) {
+    let activeBins = bins.filter((bin) => isNaN(bin.id) && bin.id != "all");
     let offset = 20;
     let w = 19;
     let h = 19;
@@ -169,11 +170,17 @@ const Legend = ({
     );
     let title = "total";
     let color = "#999";
+    if (activeBins.length == 0) {
+      color = palette.colors[bins.map((bin) => bin.id).indexOf("all")] || color;
+    }
     let numbers = [];
     let count = values.counts.all > 0;
     let legendRows = 0;
     // numbers.push(commaFormat(values.counts.all))
     if (shape == "grid" || shape == "lines") {
+      if (activeBins.length == 0) {
+        return null;
+      }
       offset = 0;
       let visibleBins = bins.filter((b) =>
         visibleCats ? visibleCats.has(b.id) : true
@@ -303,97 +310,99 @@ const Legend = ({
       );
       offset += h + gap;
     }
-    bins.forEach((bin, i) => {
-      let title = bin.id;
-      if (
-        title == "no-hit" &&
-        values.counts.all > circleLimit &&
-        view == "blob" &&
-        shape == "circle"
-      ) {
-        title += " (not shown)";
-      }
-      let color = palette.colors[i];
-      let numbers = [];
-      let count = values.counts.binned[i] > 0;
-      // numbers.push(commaFormat(values.counts.binned[i]))
-      numbers.push(format(values.counts.binned[i]));
-      if (reducer != "count") {
-        numbers.push(format(values.reduced.binned[i]));
-      }
-      if (zAxis == "length") {
-        numbers.push(format(values.n50.binned[i]));
-      }
-      if (count || shape == "lines") {
-        items.push(
-          <g
-            key={i}
-            transform={
-              "translate(" + (largeFonts ? 101 : 0) + "," + offset + ")"
-            }
-          >
-            {(largeFonts && (
-              <g>
-                <rect
-                  x={-155}
-                  y={-gap}
-                  width={325}
-                  height={h + gap}
-                  style={{ fill: "white", stroke: "none" }}
-                />
-                <text
-                  style={Object.assign({}, plotText.legend, {
-                    textAnchor: "end",
-                  })}
-                  transform={"translate(" + -gap * 2 + "," + (h - gap) + ")"}
-                >
-                  {title}
-                </text>
-                {count && (
-                  <text
-                    style={plotText.legend}
-                    transform={
-                      "translate(" + (w + gap * 2) + "," + (h - gap) + ")"
-                    }
-                  >
-                    [{numbers.join("; ")}]
-                  </text>
-                )}
-              </g>
-            )) || (
-              <g>
-                <text
-                  style={plotText.legend}
-                  transform={"translate(" + (w + gap) + "," + (h - gap) + ")"}
-                >
-                  {title}
-                </text>
-                {count && (
+    if (activeBins.length > 0) {
+      bins.forEach((bin, i) => {
+        let title = bin.id;
+        if (
+          title == "no-hit" &&
+          values.counts.all > circleLimit &&
+          view == "blob" &&
+          shape == "circle"
+        ) {
+          title += " (not shown)";
+        }
+        let color = palette.colors[i];
+        let numbers = [];
+        let count = values.counts.binned[i] > 0;
+        // numbers.push(commaFormat(values.counts.binned[i]))
+        numbers.push(format(values.counts.binned[i]));
+        if (reducer != "count") {
+          numbers.push(format(values.reduced.binned[i]));
+        }
+        if (zAxis == "length") {
+          numbers.push(format(values.n50.binned[i]));
+        }
+        if (count || shape == "lines") {
+          items.push(
+            <g
+              key={i}
+              transform={
+                "translate(" + (largeFonts ? 101 : 0) + "," + offset + ")"
+              }
+            >
+              {(largeFonts && (
+                <g>
+                  <rect
+                    x={-155}
+                    y={-gap}
+                    width={325}
+                    height={h + gap}
+                    style={{ fill: "white", stroke: "none" }}
+                  />
                   <text
                     style={Object.assign({}, plotText.legend, {
                       textAnchor: "end",
                     })}
-                    transform={
-                      "translate(" + (w + gap + 260) + "," + (h - gap) + ")"
-                    }
+                    transform={"translate(" + -gap * 2 + "," + (h - gap) + ")"}
                   >
-                    [{numbers.join("; ")}]
+                    {title}
                   </text>
-                )}
-              </g>
-            )}
-            <rect
-              x={0}
-              y={0}
-              width={w}
-              height={h}
-              style={{ fill: color, stroke: "black" }}
-            />
-          </g>
-        );
-        offset += h + gap;
-      }
-    });
+                  {count && (
+                    <text
+                      style={plotText.legend}
+                      transform={
+                        "translate(" + (w + gap * 2) + "," + (h - gap) + ")"
+                      }
+                    >
+                      [{numbers.join("; ")}]
+                    </text>
+                  )}
+                </g>
+              )) || (
+                <g>
+                  <text
+                    style={plotText.legend}
+                    transform={"translate(" + (w + gap) + "," + (h - gap) + ")"}
+                  >
+                    {title}
+                  </text>
+                  {count && (
+                    <text
+                      style={Object.assign({}, plotText.legend, {
+                        textAnchor: "end",
+                      })}
+                      transform={
+                        "translate(" + (w + gap + 260) + "," + (h - gap) + ")"
+                      }
+                    >
+                      [{numbers.join("; ")}]
+                    </text>
+                  )}
+                </g>
+              )}
+              <rect
+                x={0}
+                y={0}
+                width={w}
+                height={h}
+                style={{ fill: color, stroke: "black" }}
+              />
+            </g>
+          );
+          offset += h + gap;
+        }
+      });
+    }
   }
   return (
     <g>

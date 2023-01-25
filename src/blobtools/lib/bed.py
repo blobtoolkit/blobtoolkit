@@ -19,12 +19,10 @@ from pathlib import Path
 from tolkein import tofile
 from tqdm import tqdm
 
-from ..lib import file_io
 from .field import Array
 from .field import Identifier
 from .field import MultiArray
 from .field import Variable
-from .run_external import seqtk_subseq
 
 
 def field_settings():

@@ -60,7 +60,7 @@ Options:
 
 Examples:
     # 1. Add BUSCO scores to BlobDir
-    ./blobtools add --busco busco.full_table.tsv BlobDir
+    blobtools add --busco busco.full_table.tsv BlobDir
 
 """
 

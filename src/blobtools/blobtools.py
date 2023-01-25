@@ -20,25 +20,25 @@ See 'blobtools <command> --help' for more information on a specific command.
 
 examples:
     # 1. Create a new BlobDir from a FASTA file:
-    ./blobtools create --fasta examples/assembly.fasta BlobDir
+    blobtools create --fasta examples/assembly.fasta BlobDir
 
     # 2. Create a new BlobDir from a BlobDB:
-    ./blobtools create --blobdb examples/blobDB.json BlobDir
+    blobtools create --blobdb examples/blobDB.json BlobDir
 
     # 3. Add Coverage data from a BAM file:
-    ./blobtools add --cov examples/assembly.reads.bam BlobDir
+    blobtools add --cov examples/assembly.reads.bam BlobDir
 
     # 4. Assign taxonomy from BLAST hits:
-    ./blobtools add add --hits examples/blast.out --taxdump ../taxdump BlobDir
+    blobtools add add --hits examples/blast.out --taxdump ../taxdump BlobDir
 
     # 5. Add BUSCO results:
-    ./blobtools add --busco examples/busco.tsv BlobDir
+    blobtools add --busco examples/busco.tsv BlobDir
 
     # 6. Host an interactive viewer:
-    ./blobtools host BlobDir
+    blobtools host BlobDir
 
     # 7. Filter a BlobDir:
-    ./blobtools filter --param length--Min=5000 --output BlobDir_len_gt_5000 BlobDir
+    blobtools filter --param length--Min=5000 --output BlobDir_len_gt_5000 BlobDir
 """
 
 
@@ -53,6 +53,22 @@ from tolkein import tolog
 from .lib.version import __version__
 
 LOGGER = tolog.logger(__name__)
+
+
+def suggest_option(command):
+    options = {
+        "host": ["view"],
+    }
+    options_list = options.get(command, [])
+    options_list.append("full")
+    LOGGER.error(
+        f"The `blobtools {command}` command is not available, to enable this option use{' one of' if len(options_list)>1 else ''}:"
+    )
+    for option in options_list:
+        print(
+            f"                                - pip install blobtoolkit[{option}]",
+            file=sys.stderr,
+        )
 
 
 def cli():
@@ -84,8 +100,12 @@ def cli():
             sys.argv[command_index] = "add"
         for entry_point in working_set.iter_entry_points("%s.subcmd" % args["<tool>"]):
             if entry_point.name == args["<command>"]:
-                subcommand = entry_point.load()
-                sys.exit(subcommand())
+                try:
+                    subcommand = entry_point.load()
+                    sys.exit(subcommand())
+                except ModuleNotFoundError:
+                    suggest_option(args["<command>"])
+                    exit(1)
         LOGGER.error(
             "'%s %s' is not a valid command", args["<tool>"], args["<command>"]
         )

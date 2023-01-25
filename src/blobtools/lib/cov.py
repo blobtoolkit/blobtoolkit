@@ -13,11 +13,11 @@ from multiprocessing import Pool
 from pathlib import Path
 
 import pysam
+from blobtoolkit_core import filter
 from tqdm import tqdm
 
 from .field import Variable
 from .file_io import load_yaml
-from .run_external import seqtk_subseq
 
 
 def check_mapped_read(read):
@@ -132,24 +132,19 @@ def apply_filter(ids, fastq_files, **kwargs):
     """Filter FASTQ file based on read alignment file."""
     suffix = kwargs["--suffix"]
     bam_file = kwargs["--cov"]
-    read_ids = set()
-    filetype_letter = Path(bam_file).suffix[1]
-    index_file = Path("%s.csi" % bam_file)
-    if not index_file.is_file():
-        pysam.index(bam_file)
+    options = {"list": ids, "suffix": suffix, "fastq_out": True}
+    filetype = Path(bam_file).suffix
+    if filetype == ".bam":
+        options["bam"] = bam_file
+    elif filetype == ".cram":
+        options["cram"] = bam_file
     else:
-        index_file = False
-    samfile = pysam.AlignmentFile(bam_file, "r%s" % filetype_letter)
-    for seq_id in tqdm(ids):
-        for read in samfile.fetch(seq_id):
-            read_ids.add(read.query_name)
-    samfile.close()
-    if index_file:
-        os.remove(index_file)
-    for fastq_file in fastq_files:
-        path = Path(fastq_file)
-        outfile = path.parent / (path.stem + "." + suffix + path.suffix)
-        seqtk_subseq(fastq_file, "\n".join(list(read_ids)), outfile)
+        print("ERROR: Alignment file suffix %s is not suported", filetype)
+        sys.exit(1)
+    options["fastq1"] = fastq_files[0]
+    if len(fastq_files) > 1:
+        options["fastq2"] = fastq_files[1]
+    filter.fastx(options)
 
 
 def parse_json_cov(json_file, **kwargs):
@@ -276,7 +271,7 @@ def weighted_mean(values, weights, log=False):
                 for value, weight in zip(values, weights)
             ]
         ) / sum(weights)
-        mean = 10 ** mean - 0.01
+        mean = 10**mean - 0.01
     else:
         mean = sum([value * weight for value, weight in zip(values, weights)]) / sum(
             weights

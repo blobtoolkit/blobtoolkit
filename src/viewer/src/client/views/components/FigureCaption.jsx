@@ -98,7 +98,7 @@ class Caption extends Component {
     let caption = "";
     let histograms;
     let equation;
-    let record = this.props.meta.record_type || "contig";
+    let record = "sequence";
     let z = labels[this.props.plot.axes.z];
     let taxrule, cat;
     if (this.props.plot.axes.cat) {
@@ -132,12 +132,14 @@ class Caption extends Component {
       }
       title = `${plot} plot of ${yaxis} against ${xaxis} for ${record}s in assembly ${this.props.datasetName}. `;
       if (this.props.windowSize) {
-        caption = `${this.windowStr(
-          this.props.windowSize
-        )} are coloured by ${cat}`;
-      } else {
+        caption = `${this.windowStr(this.props.windowSize)}`;
+        if (cat) {
+          caption += ` are coloured by ${cat}`;
+        }
+      } else if (cat) {
         caption = `${this.capitalise(record)}s are coloured by ${cat}`;
       }
+
       if (this.props.plotShape != "kite") {
         if (
           this.props.plotShape == "circle" ||

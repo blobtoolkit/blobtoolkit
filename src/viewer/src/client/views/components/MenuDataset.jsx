@@ -61,7 +61,7 @@ class Dataset extends React.Component {
           </span>
         </a>
         <span className={styles.menu_count}>
-          {records.toLocaleString() + " " + record_type}
+          {records.toLocaleString() + " " + "sequences"}
         </span>
         <div
           data-tip

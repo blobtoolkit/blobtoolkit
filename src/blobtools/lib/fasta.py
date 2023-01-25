@@ -8,12 +8,12 @@ import statistics
 from collections import Counter
 from collections import OrderedDict
 
+from blobtoolkit_core import filter
 from tqdm import tqdm
 
 from ..lib import file_io
 from .field import Identifier
 from .field import Variable
-from .run_external import seqtk_subseq
 
 
 def base_composition(seq_str):
@@ -36,9 +36,9 @@ def base_composition(seq_str):
 def apply_filter(ids, fasta_file, **kwargs):
     """Filter FASTA format assembly."""
     suffix = kwargs["--suffix"]
-    path = pathlib.Path(fasta_file)
-    outfile = path.parent / (path.stem + "." + suffix + path.suffix)
-    seqtk_subseq(fasta_file, "\n".join(ids), outfile)
+    filter.fastx(
+        {"list": ids, "fasta": fasta_file, "suffix": suffix, "fasta_out": True}
+    )
 
 
 def parse(file, **kwargs):

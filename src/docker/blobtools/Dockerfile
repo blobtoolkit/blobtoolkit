@@ -1,8 +1,8 @@
 FROM ubuntu:20.04
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION=3.4.0
 LABEL version=$VERSION
+ARG VERSION
 ENV CONTAINER_VERSION=$VERSION
 
 RUN apt-get update \

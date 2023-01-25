@@ -97,7 +97,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit",  # Required
-    version="3.4.0",
+    version="4.0.2",
     description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
@@ -109,7 +109,7 @@ setup(
     #     re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst")),
     # ),
     # long_description_content_type="text/x-rst",  # Optional (see note above)
-    url="https://github.com/blobtoolkit/blobtools2",  # Optional
+    url="https://github.com/blobtoolkit/blobtoolkit",  # Optional
     # This should be your name or the name of the organization which owns the
     # project.
     author="blobtoolkit",  # Optional
@@ -138,6 +138,8 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3 :: Only",
     ],
     # This field adds keywords for your project which will appear on the
@@ -172,7 +174,7 @@ setup(
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
     # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-    python_requires=">=3.7, <3.11",
+    python_requires=">=3.7, <3.12",
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
     # installed, so they must be valid existing projects.
@@ -180,22 +182,19 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "chromedriver-binary-auto==0.1.1",
+        "blobtoolkit-core>=0.1.0",
+        "chromedriver-binary-auto==0.2.3",
         "docopt>=0.6.2",
         "fastjsonschema==2.15.3",
         "geckodriver-autoinstaller==0.1.0",
-        "psutil==5.9.0",
+        "psutil==5.9.4",
         "pysam==0.19.1",
         "pyvirtualdisplay==3.0",
         "pyyaml",
-        "selenium==4.3.0",
-        "tolkein>=0.4.0",
-        "tqdm==4.64.0",
-        "ujson>=3.0.0",
-        # Additional pipeline dependencies
-        "defusedxml==0.7.1",
-        "requests==2.28.1",
-        "snakemake==7.16.1",
+        "selenium==4.7.2",
+        "tolkein>=0.5.0",
+        "tqdm==4.64.1",
+        "ujson>=5.7.0",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
@@ -216,6 +215,9 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
+        "full": ["blobtoolkit-host==4.0.2", "blobtoolkit-pipeline==4.0.2"],
+        "host": ["blobtoolkit-host==4.0.2"],
+        "pipeline": ["blobtoolkit-pipeline==4.0.2"],
     },
     entry_points={
         "console_scripts": [
@@ -233,27 +235,12 @@ setup(
             "view = blobtools.lib.view:cli",
         ],
         "btk.subcmd": [
-            "pipeline = pipeline:main",
-            # "blobtools = blobtools:cli",
-        ],
-        "pipeline.subcmd": [
-            "data = pipeline.lib.data:main",
-            "run = pipeline.lib.run:main",
-            "add-summary-to-metadata = pipeline.lib.add_summary_to_metadata:main",
-            "chunk-fasta = pipeline.lib.chunk_fasta:main",
-            "count-busco-genes = pipeline.lib.count_busco_genes:main",
-            "extract-busco-genes = pipeline.lib.extract_busco_genes:main",
-            "generate-config = pipeline.lib.generate_config:main",
-            "generate-static-images = pipeline.lib.generate_static_images:main",
-            "resume-pipeline = pipeline.lib.resume_pipeline:main",
-            "transfer-completed = pipeline.lib.transfer_completed:main",
-            "unchunk-blast = pipeline.lib.unchunk_blast:main",
-            "window-stats = pipeline.lib.window_stats:main",
+            "pipeline = btk.lib.pipeline:main",
         ],
     },
     project_urls={
-        "Bug Reports": "https://github.com/blobtoolkit/blobtools2/issues",
-        "Source": "https://github.com/blobtoolkit/blobtools2",
+        "Bug Reports": "https://github.com/blobtoolkit/blobtoolkit/issues",
+        "Source": "https://github.com/blobtoolkit/blobtoolkit",
     },
     include_package_data=True,
     zip_safe=False,

@@ -1,0 +1,28 @@
+name: github-release
+on:
+  workflow_call:
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          path: ./tmp
+      - run: |
+          ls ./tmp
+          mkdir -p ./dist
+          mv tmp/node/blobtoolkit-api-* ./dist/
+          mv tmp/node/blobtoolkit-viewer-* ./dist/
+          mv tmp/node/blobtoolkit-viewer.tgz* ./dist/
+          ls ./dist
+      - name: create release
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          draft: false
+          prerelease: false
+          title: "v${{github.ref_name}}"
+          files: |
+            dist/*

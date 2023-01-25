@@ -1,75 +1,28 @@
-FROM ubuntu:20.04
+FROM genomehubs/blobtoolkit-dependencies:latest
+
 LABEL maintainer="blobtoolkit@genomehubs.org"
 LABEL license="MIT"
-ARG VERSION=3.4.0
 LABEL version=$VERSION
+ARG VERSION
 ENV CONTAINER_VERSION=$VERSION
+ENV CONDA_DIR=/opt/conda
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND="noninteractive" apt-get -y --no-install-recommends install \
-    aria2 \
-    build-essential \
-    dbus-x11 \
-    firefox \
-    firefox-geckodriver \
-    rsync \
-    ttf-mscorefonts-installer \
-    wget \
-    xvfb \
-    x11-utils
+USER root
 
-RUN mkdir -p /blobtoolkit/conf \
-    && mkdir -p /blobtoolkit/data/assembly \
-    && mkdir -p /blobtoolkit/data/reads \
-    && mkdir -p /blobtoolkit/data/other \
-    && mkdir -p /blobtoolkit/databases/busco \
-    && mkdir -p /blobtoolkit/databases/ncbi_db \
-    && mkdir -p /blobtoolkit/databases/ncbi_taxdump \
-    && mkdir -p /blobtoolkit/databases/uniprot_db \
-    && mkdir -p /blobtoolkit/datasets \
-    && mkdir -p /blobtoolkit/output \
-    && mkdir -p /nfs \
-    && mkdir -p /lustre
+COPY *-linux /blobtoolkit/
+COPY *.whl /tmp
+COPY setup.sh /blobtoolkit
 
-RUN useradd -m blobtoolkit \
-    && chown -R blobtoolkit:blobtoolkit /blobtoolkit \
-    && chown -R blobtoolkit:blobtoolkit /nfs \
-    && chown -R blobtoolkit:blobtoolkit /lustre
+RUN /blobtoolkit/setup.sh \
+    && rm /blobtoolkit/setup.sh \
+    && rm -r /tmp/*
+
+WORKDIR /blobtoolkit
 
 USER blobtoolkit
 
-WORKDIR /tmp
-
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-
-RUN printf '\nyes\n\n' | bash Miniconda3-latest-Linux-x86_64.sh
-
-ARG CONDA_DIR=/home/blobtoolkit/miniconda3
-
-RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.bashrc
-
-RUN $CONDA_DIR/bin/conda install mamba -n base -c conda-forge
-
-RUN mkdir -p /blobtoolkit/.conda
-
-WORKDIR /blobtoolkit
-
-COPY env.yaml /tmp/env.yaml
-
-RUN $CONDA_DIR/bin/mamba env create -f /tmp/env.yaml
-
-RUN $CONDA_DIR/bin/conda clean --all --yes
-
-ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/btk_env
-
-ENV PATH $CONDA_DEFAULT_ENV/bin:$PATH
-
-ENV PYTHONPATH $CONDA_DEFAULT_ENV/lib/python3.9/site-packages:$PYTHONPATH
-
-WORKDIR /blobtoolkit
-
 COPY startup.sh /blobtoolkit
 
-EXPOSE 8000 8080
+EXPOSE 8000 8001 8080
 
 CMD /blobtoolkit/startup.sh

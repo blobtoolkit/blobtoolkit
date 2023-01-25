@@ -106,7 +106,7 @@ const SegmentStats = ({
 };
 
 const SnailSegment = ({ path }) => (
-  <path d={path} fill={"rgba(225,225,225,0.4)"} stroke={"none"} />
+  <path d={path} fill={"rgb(225,225,225)"} fillOpacity={0.4} stroke={"none"} />
 );
 
 class Snail extends React.Component {
@@ -185,6 +185,7 @@ class Snail extends React.Component {
     let viewbox = "0 0 " + side + " " + side;
     let pathProps = this.props.circular.pathProps;
     let paths = [];
+    let labels = [];
     let legend = this.props.circular.legend;
     let bottomLeft = (
       <SnailPlotScale
@@ -331,7 +332,9 @@ class Snail extends React.Component {
           d={d}
           key={k}
           fill={pathProps[k].fill}
+          fillOpacity={pathProps[k].fillOpacity || 1}
           stroke={pathProps[k].stroke}
+          strokeOpacity={pathProps[k].strokeOpacity || 1}
           strokeWidth={pathProps[k].strokeWidth || 2}
           strokeDasharray={pathProps[k].strokeDasharray || null}
           strokeLinecap="round"
@@ -341,7 +344,7 @@ class Snail extends React.Component {
     let axes = this.props.circular.axes;
     Object.keys(axes).forEach((k, i) => {
       let axis = axes[k];
-      paths.push(
+      labels.push(
         <path
           style={this.props.plotPaths.axis}
           d={axis.path}
@@ -353,7 +356,7 @@ class Snail extends React.Component {
       );
       if (axis.ticks) {
         axis.ticks.major.forEach((d, idx) => {
-          paths.push(
+          labels.push(
             <path
               style={this.props.plotPaths.axis}
               d={d}
@@ -365,7 +368,7 @@ class Snail extends React.Component {
           );
         });
         axis.ticks.minor.forEach((d, idx) => {
-          paths.push(
+          labels.push(
             <path
               style={this.props.plotPaths.fine}
               d={d}
@@ -389,7 +392,7 @@ class Snail extends React.Component {
               textAnchor = "end";
               startOffset = "100%";
             }
-            paths.push(
+            labels.push(
               <path
                 style={this.props.plotPaths.axis}
                 d={d.path}
@@ -399,7 +402,7 @@ class Snail extends React.Component {
                 stroke="none"
               />
             );
-            paths.push(
+            labels.push(
               <text
                 key={k + "_text_" + idx}
                 style={Object.assign({}, this.props.plotText.axisLabel, {
@@ -469,8 +472,10 @@ class Snail extends React.Component {
             </g>
             <g transform={"translate(525,550)"}>
               {paths}
+              {labels}
               {segment}
             </g>
+
             <Pointable
               tagName="g"
               onPointerMove={(e) => {
@@ -510,7 +515,8 @@ class Snail extends React.Component {
                 r={450}
                 cx={520}
                 cy={550}
-                fill="rgba(255,255,255,0)"
+                fill="rgb(255,255,255)"
+                fillOpacity={0}
                 stroke="none"
                 style={{
                   pointerEvents: "auto",

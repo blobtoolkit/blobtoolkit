@@ -896,16 +896,16 @@ export const circularCurves = createSelector(
         )
     );
     pathProps.meanGC = { fill: palette.colors[1], stroke: "none" };
-    // paths.maxNupper = d3RadialLine()(ns.map((n,i)=>[cScale(i),oScale(n.max/2)]))
-    // pathProps.maxNupper = {fill:'none',stroke:'rgba(255,255,255,0.9)',strokeWidth:1}
     paths.maxNlower = d3RadialLine()(
       [[cScale(0), oScale(1)]]
         .concat(ns.map((n, i) => [cScale(i), oScale(1 - n.max / 2)]))
         .concat(ns.map((n, i) => [cScale(999 - i), oScale(1)]))
     );
     pathProps.maxNlower = {
-      fill: "rgba(255,255,255,0.2)",
-      stroke: "rgba(255,255,255,0.4)",
+      fill: "rgb(255,255,255)",
+      fillOpacity: 0.2,
+      stroke: "rgb(255,255,255)",
+      strokeOpacity: 0.4,
       strokeWidth: 0.5,
     };
     paths.maxNupper = d3RadialLine()(
@@ -914,8 +914,10 @@ export const circularCurves = createSelector(
         .concat(ns.map((n, i) => [cScale(999 - i), oScale(0)]))
     );
     pathProps.maxNupper = {
-      fill: "rgba(255,255,255,0.2)",
-      stroke: "rgba(255,255,255,0.4)",
+      fill: "rgb(255,255,255)",
+      fillOpacity: 0.2,
+      stroke: "rgb(255,255,255)",
+      strokeOpacity: 0.4,
       strokeWidth: 0.5,
     };
     paths.maxGC = d3RadialLine()(
@@ -923,21 +925,25 @@ export const circularCurves = createSelector(
         .concat(gc.map((n, i) => [cScale(i), oScale(n.max)]))
         .concat(gc.map((n, i) => [cScale(999 - i), oScale(gc[999 - i].mean)]))
     );
-    let stroke1 = palette.colors[1]
-      .replace("rgb", "rgba")
-      .replace(")", ",0.6)");
-    let fill1 = palette.colors[1].replace("rgb", "rgba").replace(")", ",0.4)");
-    pathProps.maxGC = { fill: fill1, stroke: stroke1, strokeWidth: 1 };
+    pathProps.maxGC = {
+      fill: palette.colors[1],
+      fillOpacity: 0.4,
+      stroke: palette.colors[1],
+      strokeOpacity: 0.6,
+      strokeWidth: 1,
+    };
     paths.minGC = d3RadialLine()(
       [[cScale(0), oScale(0)]]
         .concat(gc.map((n, i) => [cScale(i), oScale(n.min)]))
         .concat(gc.map((n, i) => [cScale(999 - i), oScale(gc[999 - i].mean)]))
     );
-    let stroke0 = palette.colors[0]
-      .replace("rgb", "rgba")
-      .replace(")", ",0.6)");
-    let fill0 = palette.colors[0].replace("rgb", "rgba").replace(")", ",0.4)");
-    pathProps.minGC = { fill: fill0, stroke: stroke0, strokeWidth: 1 };
+    pathProps.minGC = {
+      fill: palette.colors[0],
+      fillOpacity: 0.4,
+      stroke: palette.colors[0],
+      strokeOpacity: 0.6,
+      strokeWidth: 1,
+    };
     paths.meanGCstroke = d3RadialLine()(
       gc.map((n, i) => [cScale(i), oScale(n.mean)])
     );

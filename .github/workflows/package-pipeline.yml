@@ -1,0 +1,68 @@
+name: package-pipeline
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      python-version:
+        required: true
+        type: string
+
+jobs:
+  package-python-pipeline:
+    runs-on: ubuntu-latest
+    if: inputs.platform == 'linux'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install setuptools wheel twine
+      - name: Build pip package
+        working-directory: ./src/blobtoolkit-pipeline
+        run: |
+          mkdir -p artifacts
+          PY_VERSION=${{ inputs.python-version }}
+          PY_VERSION=${PY_VERSION/./}
+          python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name manylinux2014_x86_64
+          if [ "${{ inputs.python-version }}" == "3.9" ]; then
+            pip3 install dist/blobtoolkit_pipeline-*-py${PY_VERSION}-none-$PLATFORM.whl &&
+            blobtoolkit-pipeline -v
+            mv dist/blobtoolkit*.tar.gz artifacts/
+          fi
+          mv dist/*.whl artifacts/
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pip
+          path: ./src/blobtoolkit-pipeline/artifacts/*
+
+  package-python-pipeline-macos:
+    runs-on: macos-11
+    if: inputs.platform == 'macos'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install setuptools wheel twine
+          pip3 install --upgrade cython
+      - name: Build pip package
+        working-directory: ./src/blobtoolkit-pipeline
+        run: |
+          mkdir -p artifacts
+          PY_VERSION=${{ inputs.python-version }}
+          PY_VERSION=${PY_VERSION/./}
+          python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_x86_64
+          python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_arm64
+          mv dist/*.whl artifacts/
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pip
+          path: ./src/blobtoolkit-pipeline/artifacts/*

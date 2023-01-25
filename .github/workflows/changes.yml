@@ -1,0 +1,213 @@
+name: detect-changes
+
+env:
+  DEFAULT_PYTHON: '["3.9"]'
+  #MATRIX_PYTHON: '["3.9"]'
+  MATRIX_PYTHON: '["3.8","3.9","3.10","3.11"]'
+  DEFAULT_PLATFORM: '["linux"]'
+  MATRIX_PLATFORM: '["linux", "macos"]'
+  BASE_TAG: "genomehubs/blobtoolkit"
+  VERSION: 4.0.2
+
+on:
+  workflow_call:
+    outputs:
+      api:
+        value: ${{ jobs.detect-changes.outputs.api }}
+      ui:
+        value: ${{ jobs.detect-changes.outputs.ui }}
+      node:
+        value: ${{ jobs.detect-changes.outputs.node }}
+      host:
+        value: ${{ jobs.detect-changes.outputs.host }}
+      pipeline:
+        value: ${{ jobs.detect-changes.outputs.pipeline }}
+      blobtools:
+        value: ${{ jobs.detect-changes.outputs.blobtools }}
+      docker:
+        value: ${{ jobs.detect-changes.outputs.docker }}
+      all:
+        value: ${{ jobs.detect-changes.outputs.all }}
+      is-api-release:
+        value: ${{ jobs.is-release.outputs.host }}
+      is-ui-release:
+        value: ${{ jobs.is-release.outputs.host }}
+      is-node-release:
+        value: ${{ jobs.is-release.outputs.host }}
+      is-host-release:
+        value: ${{ jobs.is-release.outputs.host }}
+      is-pipeline-release:
+        value: ${{ jobs.is-release.outputs.host }}
+      is-blobtools-release:
+        value: ${{ jobs.is-release.outputs.host }}
+      requires-node:
+        value: ${{ jobs.release-dependent.outputs.node }}
+      platform-matrix:
+        value: ${{ jobs.release-dependent.outputs.platform-matrix }}
+      host-matrix:
+        value: ${{ jobs.release-dependent.outputs.host-matrix }}
+      pipeline-matrix:
+        value: ${{ jobs.release-dependent.outputs.pipeline-matrix }}
+      blobtools-matrix:
+        value: ${{ jobs.release-dependent.outputs.blobtools-matrix }}
+      container-version:
+        value: ${{ jobs.release-dependent.outputs.container-version }}
+      blobtoolkit-tag:
+        value: ${{ jobs.release-dependent.outputs.blobtoolkit-tag }}
+      blobtools-tag:
+        value: ${{ jobs.release-dependent.outputs.blobtools-tag }}
+      api-tag:
+        value: ${{ jobs.release-dependent.outputs.api-tag }}
+      ui-tag:
+        value: ${{ jobs.release-dependent.outputs.ui-tag }}
+
+jobs:
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      ui: ${{ steps.filter.outputs.ui }}
+      node: ${{ steps.filter.outputs.node }}
+      host: ${{ steps.filter.outputs.host }}
+      pipeline: ${{ steps.filter.outputs.pipeline }}
+      blobtools: ${{ steps.filter.outputs.blobtools }}
+      docker: ${{ steps.filter.outputs.docker }}
+      all: ${{ steps.filter.outputs.all }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          # base: develop
+          filters: |
+            api:
+              - 'src/api/**'
+            ui:
+              - 'src/viewer/**'
+              - 'src/packaged-viewer/**'
+            node:
+              - 'src/api/**'
+              - 'src/viewer/**'
+              - 'src/packaged-viewer/**'
+            host:
+              - 'src/blobtoolkit-host/**'
+            pipeline:
+              - 'src/blobtoolkit-pipeline/**'
+            blobtools:
+              - 'src/blobtoolkit-host/**'
+              - 'src/blobtoolkit-pipeline/**'
+              - 'src/blobtools/**'
+              - 'src/btk/**'
+            docker:
+              - 'src/docker/**'
+            blobtoolkit:
+              - 'src/**'
+
+  is-release:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.release.outputs.api || 'false' }}
+      ui: ${{ steps.release.outputs.ui || 'false' }}
+      node: ${{ steps.release.outputs.node || 'false' }}
+      host: ${{ steps.release.outputs.host || 'false' }}
+      pipeline: ${{ steps.release.outputs.pipeline || 'false' }}
+      blobtools: ${{ steps.release.outputs.blobtools || 'false' }}
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - id: release
+        run: |
+          if ${{ needs.detect-changes.outputs.api == 'true' }}; then
+            echo "api=true" >> $GITHUB_OUTPUT
+          fi
+          if ${{ needs.detect-changes.outputs.ui == 'true' }}; then
+            echo "ui=true" >> $GITHUB_OUTPUT
+          fi
+          if ${{ needs.detect-changes.outputs.node == 'true' }}; then
+            echo "node=true" >> $GITHUB_OUTPUT
+          fi
+          if ${{ needs.detect-changes.outputs.host == 'true' }}; then
+            echo "host=true" >> $GITHUB_OUTPUT
+          fi
+          if ${{ needs.detect-changes.outputs.pipeline == 'true' }}; then
+            echo "pipeline=true" >> $GITHUB_OUTPUT
+          fi
+          if ${{ needs.detect-changes.outputs.blobtools == 'true' }}; then
+            echo "blobtools=true" >> $GITHUB_OUTPUT
+          fi
+
+  release-dependent:
+    needs:
+      - detect-changes
+      - is-release
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    runs-on: ubuntu-latest
+    outputs:
+      node: ${{ steps.needs-node.outputs.node || 'false' }}
+      platform-matrix: ${{ steps.platform-matrix.outputs.matrix }}
+      host-matrix: ${{ steps.host-matrix.outputs.matrix }}
+      pipeline-matrix: ${{ steps.pipeline-matrix.outputs.matrix }}
+      blobtools-matrix: ${{ steps.blobtools-matrix.outputs.matrix }}
+      blobtoolkit-tag: ${{ steps.docker-tags.outputs.blobtoolkit-tag }}
+      blobtools-tag: ${{ steps.docker-tags.outputs.blobtools-tag }}
+      api-tag: ${{ steps.docker-tags.outputs.api-tag }}
+      ui-tag: ${{ steps.docker-tags.outputs.ui-tag }}
+      container-version: ${{ steps.docker-tags.outputs.container-version }}
+    steps:
+      - id: needs-node
+        run: |
+          if [[ "${{ needs.detect-changes.outputs.node == 'true' }}" == "true" || "${{ needs.is-release.outputs.host == 'true' }}" == "true" ]]; then
+            echo "node=true" >> $GITHUB_OUTPUT
+          fi
+      - id: platform-matrix
+        run: |
+          if ${{ needs.is-release.outputs.blobtools == 'true' }}; then
+            echo "matrix=${MATRIX_PLATFORM}" >> $GITHUB_OUTPUT
+          else
+            echo "matrix=${DEFAULT_PLATFORM}" >> $GITHUB_OUTPUT
+          fi
+      - id: host-matrix
+        run: |
+          if ${{ needs.is-release.outputs.host == 'true' }}; then
+            echo "matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
+          else
+            echo "matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
+          fi
+      - id: pipeline-matrix
+        run: |
+          if ${{ needs.is-release.outputs.pipeline == 'true' }}; then
+            echo "matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
+          else
+            echo "matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
+          fi
+      - id: blobtools-matrix
+        run: |
+          if ${{ needs.is-release.outputs.blobtools == 'true' }}; then
+            echo "matrix=${MATRIX_PYTHON}" >> $GITHUB_OUTPUT
+          else
+            echo "matrix=${DEFAULT_PYTHON}" >> $GITHUB_OUTPUT
+          fi
+      - id: docker-tags
+        run: |
+          echo "container-version=${VERSION}" >> $GITHUB_OUTPUT
+          if ${{ needs.is-release.outputs.blobtools == 'true' }}; then
+            echo "blobtoolkit-tag=${BASE_TAG}:${VERSION},${BASE_TAG}:latest" >> $GITHUB_OUTPUT
+            echo "blobtools-tag=${BASE_TAG}-blobtools:${VERSION},${BASE_TAG}-blobtools:latest" >> $GITHUB_OUTPUT
+          else
+            echo "blobtoolkit-tag=${BASE_TAG}:develop" >> $GITHUB_OUTPUT
+            echo "blobtools-tag=${BASE_TAG}-blobtools:develop" >> $GITHUB_OUTPUT
+          fi
+          if ${{ needs.is-release.outputs.api == 'true' }}; then
+            echo "api-tag=${BASE_TAG}-api:${VERSION},${BASE_TAG}-blobtools:latest" >> $GITHUB_OUTPUT
+          else
+            echo "api-tag=${BASE_TAG}-api:develop" >> $GITHUB_OUTPUT
+          fi
+          if ${{ needs.is-release.outputs.ui == 'true' }}; then
+            echo "ui-tag=${BASE_TAG}-viewer:${VERSION},${BASE_TAG}-viewer:latest" >> $GITHUB_OUTPUT
+          else
+            echo "ui-tag=${BASE_TAG}-viewer:develop" >> $GITHUB_OUTPUT
+          fi
