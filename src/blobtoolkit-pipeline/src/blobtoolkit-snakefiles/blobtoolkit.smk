@@ -28,7 +28,7 @@ License:
 
 import os
 
-include: 'lib/functions.py'
+include: '../lib/functions.py'
 
 working_dir = os.getcwd()
 parent_dir = os.path.dirname(working_dir)

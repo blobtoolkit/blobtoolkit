@@ -28,7 +28,7 @@ License:
   © 2022 Genome Research Limited, MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
 chunk_stats_path = "../chunk_stats"
 

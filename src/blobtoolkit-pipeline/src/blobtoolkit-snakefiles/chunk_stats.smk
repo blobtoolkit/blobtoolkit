@@ -28,7 +28,7 @@ License:
   © 2022 Genome Research Limited  % config["assembly"]["prefix"], MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
 minimap_path = "../minimap"
 windowmasker_path = "../windowmasker"

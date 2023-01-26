@@ -13,8 +13,6 @@ rule get_window_stats:
         "logs/{assembly}/get_window_stats.log"
     benchmark:
         "logs/{assembly}/get_window_stats.benchmark.txt"
-    # script:
-    #     "../lib/window_stats.py"
     shell:
         """(btk pipeline window-stats \
             --in {input.tsv} \

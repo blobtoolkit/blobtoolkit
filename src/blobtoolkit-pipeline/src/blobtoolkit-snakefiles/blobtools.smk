@@ -28,7 +28,7 @@ License:
   © 2022 Genome Research Limited, MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
 busco_path = "../busco"
 minimap_path = "../minimap"

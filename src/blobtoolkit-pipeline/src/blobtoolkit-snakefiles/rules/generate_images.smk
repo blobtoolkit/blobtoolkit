@@ -18,8 +18,6 @@ rule generate_images:
         "logs/{blobdir}/generate_images.log"
     benchmark:
         "logs/{blobdir}/generate_images.benchmark.txt"
-    # script:
-    #     """../lib/generate_static_images.py"""
     shell:
         """(btk pipeline generate-static-images \
             --blobdir {params.blobdir} {params.cov} \

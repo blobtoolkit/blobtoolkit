@@ -28,7 +28,7 @@ License:
   © 2022 Genome Research Limited  % config["assembly"]["prefix"], MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
 cov_stats_path = "../cov_stats"
 
