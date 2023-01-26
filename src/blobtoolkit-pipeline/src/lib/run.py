@@ -45,7 +45,7 @@ def run_command(cmd):
 def unlock_working_directory(workdir):
     """Unlock Snakemake working directory after a failed run."""
     script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    snakefile = os.path.join(script_dir, "blobtoolkit.smk")
+    snakefile = os.path.join(script_dir, "blobtoolkit-snakefiles", "blobtoolkit.smk")
     cmd = """
     snakemake -p \
           -j 1 \
@@ -64,7 +64,9 @@ def unlock_working_directory(workdir):
 def run_pipeline(workdir, args):
     """Run Snakemake pipeline."""
     script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    snakefile = os.path.join(script_dir, "%s.smk" % args["--tool"])
+    snakefile = os.path.join(
+        script_dir, "blobtoolkit-snakefiles", "%s.smk" % args["--tool"]
+    )
     if "--dry-run" in args and args["--dry-run"] is True:
         dry_run = "-n"
     else:
