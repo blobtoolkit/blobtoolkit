@@ -37,6 +37,8 @@ rule all:
     input:
         "%s.windowmasker.fasta" % config["assembly"]["prefix"]
 
-
-include: "rules/run_windowmasker.smk"
+if skip_windowmasker(config):
+    include: "rules/skip_windowmasker.smk"
+else:
+    include: "rules/run_windowmasker.smk"
 include: "rules/unzip_assembly_fasta.smk"
