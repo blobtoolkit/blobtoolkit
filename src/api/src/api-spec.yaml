@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: BlobToolKit API
   description: A RESTful API for BlobToolKit
-  version: v3.0.0
+  version: v4.0.0
 servers:
   - url: //blobtoolkit.genomehubs.org/
 tags:
@@ -10,6 +10,8 @@ tags:
     description: Fetch dataset metadata
   - name: Fields
     description: Fetch individual fields from a dataset
+  - name: Table
+    description: Fetch multiple fields from a dataset
   - name: Identifiers
     description: Fetch the ordered list of sequence identifiers for a dataset
   - name: Images
@@ -88,6 +90,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/datasetIdParam"
         - $ref: "#/components/parameters/fieldIdParam"
+        - $ref: "#/components/parameters/windowSizeParam"
       responses:
         200:
           description: An object containing an array of variable values
@@ -106,6 +109,7 @@ paths:
         - $ref: "#/components/parameters/datasetIdParam"
         - $ref: "#/components/parameters/fieldIdParam"
         - $ref: "#/components/parameters/indexParam"
+        - $ref: "#/components/parameters/windowSizeParam"
       responses:
         200:
           description: An object containing an array of variable values
@@ -117,6 +121,24 @@ paths:
                   - type: array
                   - type: object
       x-eov-operation-handler: routes/field
+  /table/{dataset_id}/{field_ids}:
+    get:
+      tags:
+        - Table
+      description: Returns all values for a set of fields
+      operationId: getTable
+      parameters:
+        - $ref: "#/components/parameters/datasetIdParam"
+        - $ref: "#/components/parameters/fieldIdsParam"
+        - $ref: "#/components/parameters/windowSizeParam"
+      responses:
+        200:
+          description: An object containing an array of arrays of variable values
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+      x-eov-operation-handler: routes/table
   /status:
     get:
       tags:
@@ -506,6 +528,20 @@ components:
       required: true
       schema:
         type: string
+    fieldIdsParam:
+      in: path
+      name: field_ids
+      required: true
+      explode: true
+      description: Comma separated list of field identifiers
+      examples:
+        gc_length:
+          value: [gc, length]
+          summary: GC and length fields
+      schema:
+        type: array
+        items:
+          type: string
     indexParam:
       name: index
       in: path
@@ -549,6 +585,29 @@ components:
           - cumulative
           - kite
           - snail
+    windowSizeParam:
+      name: window_size
+      in: query
+      description: window size (proportional or absolute value)
+      examples:
+        none:
+          value: null
+          summary: no window
+        ten_percent:
+          value: 0.1
+          summary: 10% sequence length
+        one_percent:
+          value: 0.01
+          summary: 1% sequence length
+        one_mb:
+          value: 1000000
+          summary: 1 Mb
+        one_hundred_kb:
+          value: 100000
+          summary: 100 kb
+      required: false
+      schema:
+        type: number
     typeParam:
       name: type
       in: path
