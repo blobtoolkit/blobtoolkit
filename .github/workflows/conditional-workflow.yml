@@ -124,7 +124,7 @@ jobs:
       always() &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled') &&
-      needs.changes.outputs.is-host-release == 'true'
+      needs.changes.outputs.is-blobtools-release == 'true'
     uses: ./.github/workflows/upload-to-pypi.yml
     secrets: inherit
     with:
@@ -139,6 +139,10 @@ jobs:
       - package-host
       - package-pipeline
       - package-blobtools
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     # if: needs.changes.outputs.is-blobtools-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/build-blobtoolkit.yml
