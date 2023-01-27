@@ -109,7 +109,6 @@ paths:
         - $ref: "#/components/parameters/datasetIdParam"
         - $ref: "#/components/parameters/fieldIdParam"
         - $ref: "#/components/parameters/indexParam"
-        - $ref: "#/components/parameters/windowSizeParam"
       responses:
         200:
           description: An object containing an array of variable values
