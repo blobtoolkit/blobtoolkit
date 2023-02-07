@@ -16,6 +16,7 @@ Options:
 
 import logging
 import math
+import os
 import re
 import statistics
 from collections import defaultdict
@@ -185,11 +186,14 @@ def main(rename=None):
                     for key in header[2:]:
                         row.append(entry[key])
                     rows.append("\t".join(row) + "\n")
-            filetag = ""
-            if window != 1:
-                filetag = ".%s" % re.sub(r"\.0$", "", str(window))
-            with open("%s%s%s" % (filename, filetag, suffix), "w") as fh:
-                fh.writelines(rows)
+            if rows:
+                filetag = ""
+                if window != 1:
+                    filetag = ".%s" % re.sub(r"\.0$", "", str(window))
+                if not os.path.exists(os.path.dirname(filename)):
+                    os.makedirs(os.path.dirname(filename))
+                with open("%s%s%s" % (filename, filetag, suffix), "w") as fh:
+                    fh.writelines(rows)
     except Exception as err:
         logger.error(err)
         exit(1)
