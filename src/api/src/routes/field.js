@@ -5,6 +5,7 @@ const getFieldById = async (req, res) => {
   res.setHeader("content-type", "application/json");
   //res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
   let windowSize = req.query.window_size;
+  let data;
   if (windowSize) {
     let field = new Field(
       `${req.params.field_id}_windows${
