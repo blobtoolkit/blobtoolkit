@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LEVEL=$1
+LEVEL=$@
 
 if [ -z "$LEVEL" ]; then
   echo "Usage: ./bump_version.sh major|minor|patch"
