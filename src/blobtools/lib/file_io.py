@@ -66,7 +66,7 @@ def stream_fasta(filename):
     Automatically detect gzipped files based on suffix.
     """
     if ".gz" in pathlib.Path(filename).suffixes:
-        cmd = ["pigz", "-dc", filename]
+        cmd = ["gunzip", "-c", filename]
     else:
         cmd = ["cat", filename]
     with Popen(cmd, stdout=PIPE, encoding="utf-8", bufsize=4096) as proc:
