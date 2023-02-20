@@ -22,7 +22,7 @@ from .file_io import load_yaml
 def get_coverage(bam_file):
     """Get base coverage."""
     binned_covs = depth.bam_to_depth(bam=bam_file)
-    return {cov.seq_name(): cov.bins()[0] for cov in binned_covs}
+    return {cov.seq_name: cov.bins[0] for cov in binned_covs}
 
 
 def parse_bam(bam_file, **kwargs):
