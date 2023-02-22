@@ -11,8 +11,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from blobtoolkit_core import depth
-from blobtoolkit_core import filter
+from blobtk import depth
+from blobtk import filter
 from tqdm import tqdm
 
 from .field import Variable
