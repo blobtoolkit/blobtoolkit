@@ -182,13 +182,12 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "blobtoolkit-core>=0.1.0",
+        "blobtk>=0.2.3",
         "chromedriver-binary-auto==0.2.3",
         "docopt>=0.6.2",
         "fastjsonschema==2.15.3",
         "geckodriver-autoinstaller==0.1.0",
         "psutil==5.9.4",
-        "pysam==0.19.1",
         "pyvirtualdisplay==3.0",
         "pyyaml",
         "selenium==4.7.2",

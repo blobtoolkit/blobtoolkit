@@ -3,12 +3,10 @@
 
 """Parse FASTA sequence into Fields."""
 
-import pathlib
-import statistics
 from collections import Counter
 from collections import OrderedDict
 
-from blobtoolkit_core import filter
+from blobtk import filter
 from tqdm import tqdm
 
 from ..lib import file_io
@@ -50,10 +48,10 @@ def parse(file, **kwargs):
     lengths = []
     gc_portions = []
     n_counts = []
-    print("Loading sequences from %s" % file)
+    print(f"Loading sequences from {file}")
     pbar = tqdm(file_io.stream_fasta(file))
     for seq_id, seq_str in pbar:
-        pbar.set_description(" - processing %s" % seq_id)
+        pbar.set_description(f" - processing {seq_id}")
         _lengths[seq_id] = len(seq_str)
         _gc_portions[seq_id], _n_counts[seq_id] = base_composition(seq_str)
     identifiers = kwargs["dependencies"]["identifiers"]
