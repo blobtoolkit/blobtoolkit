@@ -185,7 +185,7 @@ setup(
         "blobtk>=0.2.3",
         "chromedriver-binary-auto==0.2.3",
         "docopt>=0.6.2",
-        "fastjsonschema==2.15.3",
+        "fastjsonschema==2.16.2",
         "geckodriver-autoinstaller==0.1.0",
         "psutil==5.9.4",
         "pyvirtualdisplay==3.0",
