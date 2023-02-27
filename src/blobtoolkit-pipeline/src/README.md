@@ -1,4 +1,4 @@
-# BTK Pipeline v3.0.0
+# BTK Pipeline v4.1.0
 
 Splits original pipeline into sub-pipelines that can be run independently or using the `blobtoolkit.smk` meta pipeline.
 
@@ -12,7 +12,7 @@ Splits original pipeline into sub-pipelines that can be run independently or usi
 
 1. `busco.smk` - run BUSCO using specific and basal lineages. Count BUSCOs in 1kb windows for each contig
 
-1. `cov_stats` - calculate coverage in 1kb windows using mosdepth.
+1. `cov_stats` - calculate coverage in 1kb windows using blobtk depth.
 
 1. `window_stats` - aggregate 1kb values into windows of fixed proportion (10%, 1% of contig length) and fixed length (100kb, 1Mb)
 
@@ -62,7 +62,7 @@ Alternatively create the environment by specifying individual packages:
 mamba create -y -n btk_env -c conda-forge -c bioconda -c tolkit \
     python=3.8 snakemake docopt defusedxml psutil pyyaml tqdm ujson urllib3 \
     entrez-direct minimap2=2.17 seqtk diamond=2 busco=5 \
-    samtools=1.10 pysam=0.16 mosdepth=0.2.9 tolkein
+    samtools=1.10 pysam=0.16 blobtk=0.2.4 tolkein
 ```
 
 Activate this environment:

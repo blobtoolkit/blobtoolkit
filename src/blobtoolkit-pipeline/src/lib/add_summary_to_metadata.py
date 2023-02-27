@@ -51,7 +51,7 @@ def add_software_versions(meta):
         "busco": {"regex": r"\s+(\S+)$"},
         "diamond": {"regex": r"version\s*(\S+)$"},
         "minimap2": {"regex": r"(\S+)"},
-        "mosdepth": {"regex": r"\s+(\S+)$"},
+        "blobtk": {"regex": r"\s+(\S+)$"},
         "python": {"regex": r"\s+(\S+)$"},
         "samtools": {"regex": r"\s+(\S+)$"},
         "seqtk": {"flag": "", "line": 2, "status": 1, "regex": r":\s*(\S+)$"},
