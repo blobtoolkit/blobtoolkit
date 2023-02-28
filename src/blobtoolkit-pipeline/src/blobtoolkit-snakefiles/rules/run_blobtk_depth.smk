@@ -16,4 +16,4 @@ rule run_blobtk_depth:
         "logs/{assembly}/run_blobtk_depth/{sra}.benchmark.txt"
     shell:
         """blobtk depth -b {input.bam} \
-                 -s 1000 > {output.bed} 2> {log}"""
+                 -s 1000 -O {output.bed} 2> {log}"""
