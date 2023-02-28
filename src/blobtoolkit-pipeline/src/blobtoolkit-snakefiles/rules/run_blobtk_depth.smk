@@ -6,7 +6,7 @@ rule run_blobtk_depth:
         bam = "%s/{assembly}.{sra}.bam" % minimap_path,
         csi = "%s/{assembly}.{sra}.bam.csi" % minimap_path,
     output:
-        gz = "{assembly}.{sra}.regions.bed.gz"
+        bed = "{assembly}.{sra}.regions.bed.gz"
     params:
         prefix = lambda wc: "%s.%s" % (wc.assembly, wc.sra)
     threads: 4
