@@ -53,9 +53,9 @@ on:
       container-version:
         value: ${{ jobs.release-dependent.outputs.container-version }}
       blobtoolkit-tag:
-        value: ${{ jobs.release-dependent.outputs.blobtoolkit-tag }}
+        value: ${BASE_TAG}:${VERSION},${BASE_TAG}:latest # ${{ jobs.release-dependent.outputs.blobtoolkit-tag }}
       blobtools-tag:
-        value: ${{ jobs.release-dependent.outputs.blobtools-tag }}
+        value: ${BASE_TAG}-blobtools:${VERSION},${BASE_TAG}-blobtools:latest # ${{ jobs.release-dependent.outputs.blobtools-tag }}
       api-tag:
         value: ${{ jobs.release-dependent.outputs.api-tag }}
       ui-tag:
