@@ -26,6 +26,8 @@ Splits original pipeline into sub-pipelines that can be run independently or usi
 
 1. `view.smk` - BlobDir validation and static image generation
 
+# OLD VERSION
+
 ## Dependencies
 
 ### BlobToolKit components
