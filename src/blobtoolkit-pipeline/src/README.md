@@ -1,4 +1,4 @@
-# BTK Pipeline v4.1.0
+# BTK Pipeline vversion="4.1.1"
 
 Splits original pipeline into sub-pipelines that can be run independently or using the `blobtoolkit.smk` meta pipeline.
 
