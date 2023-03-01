@@ -4,7 +4,7 @@ import os
 https://github.com/blobtoolkit/insdc-pipeline
 https://blobtoolkit.genomehubs.org/pipeline/
 
-Pipeline to run Diamond blastx
+Pipeline to run BUSCO
 --------------------------------------------------
 
 Requirements:
@@ -15,7 +15,7 @@ Basic usage:
   snakemake -p \
     --directory ~/workdir \
     --configfile example.yaml \
-    -s diamond.smk
+    -s busco.smk
     -j 8
 
 Author:
@@ -28,17 +28,19 @@ License:
   © 2022 Genome Research Limited, MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
-busco_path = "../busco"
+chunk_stats_path = "../chunk_stats"
 
 rule all:
     """
-    Dummy rule to define output
+    Dummy rule to define all outputs
     """
     input:
-        "%s.diamond.busco_genes.out" % config["assembly"]["prefix"]
+        expand("%s.busco.{lineage}/full_table.tsv.gz" % config["assembly"]["prefix"], lineage=config["busco"]["lineages"]),
+        "%s.chunk_stats.tsv"  % config["assembly"]["prefix"],
 
 
-include: "rules/extract_busco_genes.smk"
-include: "rules/run_diamond_blastp.smk"
+include: "rules/run_busco5.smk"
+include: "rules/count_busco_genes.smk"
+include: "rules/unzip_assembly_fasta.smk"

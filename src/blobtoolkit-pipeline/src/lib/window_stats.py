@@ -16,6 +16,7 @@ Options:
 
 import logging
 import math
+import os
 import re
 import statistics
 from collections import defaultdict
@@ -99,16 +100,10 @@ def calculate_mean(arr, log):
         if not logged_arr:
             return 0, 0, n
         mean = math.pow(10, statistics.mean(logged_arr))
-        if len(logged_arr) > 1:
-            sd = math.pow(10, statistics.stdev(logged_arr))
-        else:
-            sd = 0
+        sd = math.pow(10, statistics.stdev(logged_arr)) if len(logged_arr) > 1 else 0
         return mean, sd, n
     mean = statistics.mean(arr)
-    if n > 1:
-        sd = statistics.stdev(arr)
-    else:
-        sd = 0
+    sd = statistics.stdev(arr) if n > 1 else 0
     return mean, sd, n
 
 
@@ -131,10 +126,7 @@ def calculate_window_stats(lengths, chunks, window, interval, args):
                     end_pos = min(start_pos + window_size, length)
                     mid_pos = start_pos + (end_pos - start_pos) / 2
                     end_i = round(end_pos / interval + 0.5) - 1
-                    if window == 1:
-                        proportion = "1"
-                    else:
-                        proportion = "%.3f" % (mid_pos / length)
+                    proportion = "1" if window == 1 else "%.3f" % (mid_pos / length)
                     if start_pos not in values[seqid]:
                         values[seqid][start_pos] = {
                             "end": str(end_pos),
@@ -143,12 +135,15 @@ def calculate_window_stats(lengths, chunks, window, interval, args):
                     if key.endswith("count"):
                         values[seqid][start_pos][key] = "%d" % sum(arr[start_i:end_i])
                     else:
-                        mean, sd, n = calculate_mean(
-                            arr[start_i : end_i + 1], key.endswith("_cov")
-                        )
-                        values[seqid][start_pos][key] = "%.3f" % mean
-                        values[seqid][start_pos]["%s_sd" % key] = "%.3f" % sd
-                        values[seqid][start_pos]["%s_n" % key] = "%d" % n
+                        try:
+                            mean, sd, n = calculate_mean(
+                                arr[start_i : end_i + 1], key.endswith("_cov")
+                            )
+                            values[seqid][start_pos][key] = "%.3f" % mean
+                            values[seqid][start_pos][f"{key}_sd"] = "%.3f" % sd
+                            values[seqid][start_pos][f"{key}_n"] = "%d" % n
+                        except statistics.StatisticsError:
+                            continue
                     start_pos = end_pos
                     start_i = end_i + 1
     return values
@@ -171,6 +166,9 @@ def main(rename=None):
         outfile = Path(outfile)
         suffix = outfile.suffix
         filename = outfile.stem
+        filepath = outfile.parent
+        if filepath:
+            filename = f"{filepath}/{filename}"
         for window in args["--window"]:
             window = float(window)
             values = calculate_window_stats(lengths, chunks, window, interval, args)
@@ -188,11 +186,14 @@ def main(rename=None):
                     for key in header[2:]:
                         row.append(entry[key])
                     rows.append("\t".join(row) + "\n")
-            filetag = ""
-            if window != 1:
-                filetag = ".%s" % re.sub(r"\.0$", "", str(window))
-            with open("%s%s%s" % (filename, filetag, suffix), "w") as fh:
-                fh.writelines(rows)
+            if rows:
+                filetag = ""
+                if window != 1:
+                    filetag = ".%s" % re.sub(r"\.0$", "", str(window))
+                if not os.path.exists(os.path.dirname(filename)):
+                    os.makedirs(os.path.dirname(filename))
+                with open("%s%s%s" % (filename, filetag, suffix), "w") as fh:
+                    fh.writelines(rows)
     except Exception as err:
         logger.error(err)
         exit(1)

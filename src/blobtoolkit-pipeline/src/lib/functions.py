@@ -118,6 +118,11 @@ def set_stats_chunk(config):
     return config["settings"].get("stats_chunk", 1000)
 
 
+def skip_windowmasker(config):
+    """Set flag to skip windowmasker step."""
+    return config["settings"].get("skip_windowmasker", False)
+
+
 def set_stats_windows(config):
     """Set window sizes for averaging stats."""
     windows = config["settings"].get("stats_windows", 0.1)

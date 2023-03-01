@@ -4,8 +4,8 @@ import os
 https://github.com/blobtoolkit/insdc-pipeline
 https://blobtoolkit.genomehubs.org/pipeline/
 
-Pipeline to generate sequence stats across various window sizes
----------------------------------------------------------------
+Pipeline to run blastn
+--------------------------------------------------
 
 Requirements:
  - Conda (https://conda.io/docs/commands/conda-install.html)
@@ -15,7 +15,7 @@ Basic usage:
   snakemake -p \
     --directory ~/workdir \
     --configfile example.yaml \
-    -s window_stats.smk
+    -s blastn.smk
     -j 8
 
 Author:
@@ -25,18 +25,22 @@ Contact:
   blobtoolkit@genomehubs.org
 
 License:
-  © 2022 Genome Research Limited  % config["assembly"]["prefix"], MIT License
+  © 2022 Genome Research Limited, MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
-cov_stats_path = "../cov_stats"
+diamond_path = "../diamond"
+windowmasker_path = "../windowmasker"
 
 rule all:
     """
     Dummy rule to define output
     """
     input:
-        "%s.window_stats.tsv" % config["assembly"]["prefix"],
+        "%s.blastn.nt.out" % config["assembly"]["prefix"]
 
-include: "rules/get_window_stats.smk"
+include: "rules/extract_nohit_fasta.smk"
+include: "rules/chunk_nohit_fasta.smk"
+include: "rules/run_blastn.smk"
+include: "rules/unchunk_blastn.smk"

@@ -4,7 +4,7 @@ import os
 https://github.com/blobtoolkit/insdc-pipeline
 https://blobtoolkit.genomehubs.org/pipeline/
 
-Pipeline to run Minimap
+Pipeline to run Windowmasker
 --------------------------------------------------
 
 Requirements:
@@ -15,7 +15,7 @@ Basic usage:
   snakemake -p \
     --directory ~/workdir \
     --configfile example.yaml \
-    -s minimap.smk
+    -s windowmasker.smk
     -j 8
 
 Author:
@@ -28,17 +28,17 @@ License:
   © 2022 Genome Research Limited, MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
 rule all:
     """
     Dummy rule to define all outputs
     """
     input:
-        expand("%s.{sra}.bam" % config["assembly"]["prefix"], sra=reads_by_prefix(config).keys()),
-        expand("%s.{sra}.bam.csi" % config["assembly"]["prefix"], sra=reads_by_prefix(config).keys())
+        "%s.windowmasker.fasta" % config["assembly"]["prefix"]
 
-
-
-include: "rules/run_minimap2_index.smk"
-include: "rules/run_minimap2_align.smk"
+if skip_windowmasker(config):
+    include: "rules/skip_windowmasker.smk"
+else:
+    include: "rules/run_windowmasker.smk"
+include: "rules/unzip_assembly_fasta.smk"

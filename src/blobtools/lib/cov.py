@@ -9,42 +9,20 @@ import math
 import os
 import sys
 from collections import defaultdict
-from multiprocessing import Pool
 from pathlib import Path
 
-import pysam
-from blobtoolkit_core import filter
+from blobtk import depth
+from blobtk import filter
 from tqdm import tqdm
 
 from .field import Variable
 from .file_io import load_yaml
 
 
-def check_mapped_read(read):
-    """Check read mapping flags."""
-    if read.is_unmapped or read.is_secondary or read.is_supplementary:
-        return False
-    return True
-
-
-def calculate_coverage(aln, reads_mapped):
-    """Calculate base and read coverage."""
-    _base_cov_dict = defaultdict(list)
-    read_cov_dict = defaultdict(lambda: 0)
-    allowed_operations = set([0, 7, 8])
-    with tqdm(total=reads_mapped, unit_scale=True) as pbar:
-        for read in aln.fetch(until_eof=True):
-            if not check_mapped_read(read):
-                continue
-            for operation, length in read.cigartuples:
-                if operation in allowed_operations:
-                    _base_cov_dict[read.reference_name].append(length)
-            read_cov_dict[read.reference_name] += 1
-            pbar.update()
-    base_cov_dict = {
-        ref_name: sum(_base_cov) for ref_name, _base_cov in _base_cov_dict.items()
-    }
-    return base_cov_dict, read_cov_dict
+def get_coverage(bam_file):
+    """Get base coverage."""
+    binned_covs = depth.bam_to_depth(bam=bam_file)
+    return {cov.seq_name: cov.bins[0] for cov in binned_covs}
 
 
 def parse_bam(bam_file, **kwargs):
@@ -56,36 +34,26 @@ def parse_bam(bam_file, **kwargs):
     parts = bam_file.split("=")
     base_name = parts[1]
     f_char = Path(parts[0]).suffix[1]
-    index_file = Path("%s.csi" % parts[0])
-    if not index_file.is_file():
-        pysam.index("-c", "-m", "14", parts[0])
-    else:
+    index_file = Path(f"{parts[0]}.csi")
+    if index_file.is_file():
         index_file = False
-    stats = {}
-    print("Loading mapping data from %s as %s" % (parts[0], parts[1]))
-    with pysam.AlignmentFile(parts[0], "r%s" % f_char) as aln:
-        stats = {"mapped": aln.mapped, "unmapped": aln.unmapped}
-        _covs, _read_covs = calculate_coverage(aln, aln.mapped)
+    print(f"Loading mapping data from {parts[0]} as {parts[1]}")
+    _covs = get_coverage(parts[0])
     if index_file:
         os.remove(index_file)
     if not identifiers.validate_list(list(_covs.keys())):
         raise UserWarning(
             "Contig names in the coverage file did not match dataset identifiers."
         )
-    covs = []
-    read_covs = []
-    for index, seq_id in enumerate(ids):
-        acgt_count = lengths[index] - ncounts[index]
-        covs.append(
-            float("%.4f" % (_covs[seq_id] / acgt_count)) if seq_id in _covs else 0
-        )
-        read_covs.append(_read_covs[seq_id] if seq_id in _read_covs else 0)
-    field_id = "%s_cov" % base_name
-    fields = {"cov_id": field_id}
-    fields["cov_range"] = [
-        min(covs + [kwargs["cov_range"][0]]),
-        max(covs + [kwargs["cov_range"][1]]),
-    ]
+    covs = [float("%.4f" % (_covs[seq_id]) if seq_id in _covs else 0) for seq_id in ids]
+    field_id = f"{base_name}_cov"
+    fields = {
+        "cov_id": field_id,
+        "cov_range": [
+            min(covs + [kwargs["cov_range"][0]]),
+            max(covs + [kwargs["cov_range"][1]]),
+        ],
+    }
     fields["cov"] = Variable(
         field_id,
         values=covs,
@@ -96,31 +64,6 @@ def parse_bam(bam_file, **kwargs):
                 "id": "base_coverage",
                 "clamp": 0.01 if fields["cov_range"][0] == 0 else False,
                 "range": fields["cov_range"],
-            },
-            "children",
-        ],
-    )
-    field_id = "%s_read_cov" % base_name
-    fields["read_cov_range"] = [
-        min(read_covs + [kwargs["read_cov_range"][0]]),
-        max(read_covs + [kwargs["read_cov_range"][1]]),
-    ]
-    fields["read_cov"] = Variable(
-        field_id,
-        values=read_covs,
-        meta={
-            "field_id": field_id,
-            "file": bam_file,
-            "reads_mapped": stats["mapped"],
-            "reads_unmapped": stats["unmapped"],
-        },
-        parents=[
-            "children",
-            {
-                "id": "read_coverage",
-                "datatype": "integer",
-                "clamp": 1 if fields["read_cov_range"][0] == 0 else False,
-                "range": fields["read_cov_range"],
             },
             "children",
         ],

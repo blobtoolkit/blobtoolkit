@@ -19,7 +19,6 @@ import logging
 import os
 import shlex
 import shutil
-import signal
 import subprocess
 
 from docopt import DocoptExit
@@ -45,7 +44,7 @@ def run_command(cmd):
 def unlock_working_directory(workdir):
     """Unlock Snakemake working directory after a failed run."""
     script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    snakefile = os.path.join(script_dir, "blobtoolkit.smk")
+    snakefile = os.path.join(script_dir, "blobtoolkit-snakefiles", "blobtoolkit.smk")
     cmd = """
     snakemake -p \
           -j 1 \
@@ -59,16 +58,16 @@ def unlock_working_directory(workdir):
         snakefile,
     )
     exit_code = run_command(cmd)
+    return exit_code
 
 
 def run_pipeline(workdir, args):
     """Run Snakemake pipeline."""
     script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    snakefile = os.path.join(script_dir, "%s.smk" % args["--tool"])
-    if "--dry-run" in args and args["--dry-run"] is True:
-        dry_run = "-n"
-    else:
-        dry_run = ""
+    snakefile = os.path.join(
+        script_dir, "blobtoolkit-snakefiles", f'{args["--tool"]}.smk'
+    )
+    dry_run = "-n" if "--dry-run" in args and args["--dry-run"] is True else ""
     cmd = """
     snakemake -p %s \
           -j %s \
@@ -83,6 +82,23 @@ def run_pipeline(workdir, args):
         snakefile,
     )
     exit_code = run_command(cmd)
+    return exit_code
+
+
+def run_snakemake_pipeline(args):
+    config = os.path.abspath(args["--config"])
+    workdir = (
+        os.path.abspath(args["--workdir"])
+        if args["--workdir"] is not None
+        else os.path.abspath(os.path.dirname(config))
+    )
+    if config != f"{workdir}/config.yaml":
+        shutil.copy2(config, f"{workdir}/config.yaml")
+    if args["--unlock"]:
+        exit_code = unlock_working_directory(workdir)
+        exit(exit_code)
+    exit_code = run_pipeline(workdir, args)
+    exit(exit_code)
 
 
 def main(rename=None):
@@ -95,19 +111,7 @@ def main(rename=None):
     except DocoptExit as e:
         raise DocoptExit from e
     try:
-        config = os.path.abspath(args["--config"])
-        if args["--workdir"] is not None:
-            workdir = os.path.abspath(args["--workdir"])
-        else:
-            workdir = os.path.abspath(os.path.dirname(config))
-        if config != "%s/config.yaml" % workdir:
-            shutil.copy2(config, "%s/config.yaml" % workdir)
-        if args["--unlock"]:
-            exit_code = unlock_working_directory(workdir)
-            exit(exit_code)
-        exit_code = run_pipeline(workdir, args)
-        exit(exit_code)
-
+        run_snakemake_pipeline(args)
     except Exception as err:
         logger.error(err)
         exit(1)

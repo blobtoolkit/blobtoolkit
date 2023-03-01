@@ -4,7 +4,6 @@ prune .cache
 prune .git
 prune build
 prune dist
-recursive-include src *.smk
-recursive-include src/rules *
+recursive-include src/blobtoolkit-snakefiles *
 recursive-include src/lib *
 recursive-exclude *.egg-info *

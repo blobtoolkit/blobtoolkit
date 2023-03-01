@@ -7,7 +7,7 @@ env:
   DEFAULT_PLATFORM: '["linux"]'
   MATRIX_PLATFORM: '["linux", "macos"]'
   BASE_TAG: "genomehubs/blobtoolkit"
-  VERSION: 4.0.2
+  VERSION: 4.1.0
 
 on:
   workflow_call:
@@ -29,17 +29,17 @@ on:
       all:
         value: ${{ jobs.detect-changes.outputs.all }}
       is-api-release:
-        value: ${{ jobs.is-release.outputs.host }}
+        value: ${{ jobs.is-release.outputs.api }}
       is-ui-release:
-        value: ${{ jobs.is-release.outputs.host }}
+        value: ${{ jobs.is-release.outputs.ui }}
       is-node-release:
-        value: ${{ jobs.is-release.outputs.host }}
+        value: ${{ jobs.is-release.outputs.node }}
       is-host-release:
         value: ${{ jobs.is-release.outputs.host }}
       is-pipeline-release:
-        value: ${{ jobs.is-release.outputs.host }}
+        value: ${{ jobs.is-release.outputs.pipeline }}
       is-blobtools-release:
-        value: ${{ jobs.is-release.outputs.host }}
+        value: ${{ jobs.is-release.outputs.blobtools }}
       requires-node:
         value: ${{ jobs.release-dependent.outputs.node }}
       platform-matrix:

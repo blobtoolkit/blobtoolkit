@@ -4,8 +4,8 @@ import os
 https://github.com/blobtoolkit/insdc-pipeline
 https://blobtoolkit.genomehubs.org/pipeline/
 
-Pipeline to generate coverage stats for sequence chunks
--------------------------------------------------------
+Pipeline to generate sequence stats across various window sizes
+---------------------------------------------------------------
 
 Requirements:
  - Conda (https://conda.io/docs/commands/conda-install.html)
@@ -15,7 +15,7 @@ Basic usage:
   snakemake -p \
     --directory ~/workdir \
     --configfile example.yaml \
-    -s cov_stats.smk
+    -s window_stats.smk
     -j 8
 
 Author:
@@ -28,19 +28,15 @@ License:
   © 2022 Genome Research Limited  % config["assembly"]["prefix"], MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
-minimap_path = "../minimap"
-busco_path = "../busco"
-chunk_stats_path = "../chunk_stats"
+cov_stats_path = "../cov_stats"
 
 rule all:
     """
     Dummy rule to define output
     """
     input:
-        "%s.chunk_stats.tsv" % config["assembly"]["prefix"],
-        
+        "%s.window_stats.tsv" % config["assembly"]["prefix"],
 
-include: "rules/run_mosdepth.smk"
-include: "rules/add_cov_to_tsv.smk"
+include: "rules/get_window_stats.smk"

@@ -13,8 +13,6 @@ rule unchunk_blastn:
         "logs/{assembly}/unchunk_blastn.log"
     benchmark:
         "logs/{assembly}/unchunk_blastn.benchmark.txt"
-    # script:
-    #     "../lib/unchunk_blast.py"
     shell:
         """(btk pipeline unchunk-blast \
             --in {input} \

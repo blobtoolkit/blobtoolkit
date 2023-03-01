@@ -37,9 +37,10 @@ jobs:
           mkdir -p artifacts
           PY_VERSION=${{ inputs.python-version }}
           PY_VERSION=${PY_VERSION/./}
-          python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name manylinux2014_x86_64
+          PLATFORM=manylinux2014_x86_64
+          python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name ${PLATFORM}
           if [ "${{ inputs.python-version }}" == "3.9" ]; then
-            pip3 install dist/blobtoolkit_host-*-py${PY_VERSION}-none-$PLATFORM.whl &&
+            pip3 install dist/blobtoolkit_host-*-py${PY_VERSION}-none-${PLATFORM}.whl &&
             blobtoolkit-host -v
             mv dist/blobtoolkit*.tar.gz artifacts/
           fi

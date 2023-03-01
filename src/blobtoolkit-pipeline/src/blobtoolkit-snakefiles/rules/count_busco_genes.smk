@@ -14,8 +14,6 @@ rule count_busco_genes:
         "logs/{assembly}/count_busco_genes.log"
     benchmark:
         "logs/{assembly}/count_busco_genes.benchmark.txt"
-    # script:
-    #     "../lib/count_busco_genes.py"
     shell:
         """(btk pipeline count-busco-genes \
             --in {params.busco} \

@@ -4,8 +4,8 @@ import os
 https://github.com/blobtoolkit/insdc-pipeline
 https://blobtoolkit.genomehubs.org/pipeline/
 
-Pipeline to run Diamond blastx
---------------------------------------------------
+Pipeline to generate coverage stats for sequence chunks
+-------------------------------------------------------
 
 Requirements:
  - Conda (https://conda.io/docs/commands/conda-install.html)
@@ -15,7 +15,7 @@ Basic usage:
   snakemake -p \
     --directory ~/workdir \
     --configfile example.yaml \
-    -s diamond.smk
+    -s cov_stats.smk
     -j 8
 
 Author:
@@ -25,22 +25,22 @@ Contact:
   blobtoolkit@genomehubs.org
 
 License:
-  © 2022 Genome Research Limited, MIT License
+  © 2022 Genome Research Limited  % config["assembly"]["prefix"], MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
+minimap_path = "../minimap"
 busco_path = "../busco"
-windowmasker_path = "../windowmasker"
+chunk_stats_path = "../chunk_stats"
 
 rule all:
     """
     Dummy rule to define output
     """
     input:
-        "%s.diamond.reference_proteomes.out" % config["assembly"]["prefix"]
+        "%s.chunk_stats.tsv" % config["assembly"]["prefix"],
+        
 
-
-include: "rules/chunk_fasta_by_busco.smk"
-include: "rules/run_diamond_blastx.smk"
-include: "rules/unchunk_blastx.smk"
+include: "rules/run_mosdepth.smk"
+include: "rules/add_cov_to_tsv.smk"

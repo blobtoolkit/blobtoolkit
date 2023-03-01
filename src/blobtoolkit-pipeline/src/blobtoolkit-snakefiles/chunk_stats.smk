@@ -4,8 +4,8 @@ import os
 https://github.com/blobtoolkit/insdc-pipeline
 https://blobtoolkit.genomehubs.org/pipeline/
 
-Pipeline to run BUSCO
---------------------------------------------------
+Pipeline to generate sequence stats for sequence chunks
+-------------------------------------------------------
 
 Requirements:
  - Conda (https://conda.io/docs/commands/conda-install.html)
@@ -15,7 +15,7 @@ Basic usage:
   snakemake -p \
     --directory ~/workdir \
     --configfile example.yaml \
-    -s busco.smk
+    -s chunk_stats.smk
     -j 8
 
 Author:
@@ -25,22 +25,20 @@ Contact:
   blobtoolkit@genomehubs.org
 
 License:
-  © 2022 Genome Research Limited, MIT License
+  © 2022 Genome Research Limited  % config["assembly"]["prefix"], MIT License
 """
 
-include: "lib/functions.py"
+include: "../lib/functions.py"
 
-chunk_stats_path = "../chunk_stats"
+minimap_path = "../minimap"
+windowmasker_path = "../windowmasker"
 
 rule all:
     """
-    Dummy rule to define all outputs
+    Dummy rule to define output
     """
     input:
-        expand("%s.busco.{lineage}/full_table.tsv.gz" % config["assembly"]["prefix"], lineage=config["busco"]["lineages"]),
+        "%s.chunk_stats.mask.bed"  % config["assembly"]["prefix"],
         "%s.chunk_stats.tsv"  % config["assembly"]["prefix"],
 
-
-include: "rules/run_busco5.smk"
-include: "rules/count_busco_genes.smk"
-include: "rules/unzip_assembly_fasta.smk"
+include: "rules/get_chunked_stats.smk"
