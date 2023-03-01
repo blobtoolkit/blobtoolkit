@@ -1211,7 +1211,7 @@ export const circularSelection = createSelector(
 );
 
 const funcFromPattern = (pattern) => {
-  return (def, re = ".") => {
+  return (def, re = ".+") => {
     if (typeof pattern != "string") {
       let ret = "";
       for (let i = 0; i < pattern.length; i++) {
@@ -1233,8 +1233,9 @@ const funcFromPattern = (pattern) => {
           url += parts[i];
         } else {
           let arr = String(def[parts[i]]).match(re);
+          console.log(arr);
           if (arr) {
-            url += arr[1];
+            url += arr[0].replace(".git", "");
           } else {
             return false;
           }
