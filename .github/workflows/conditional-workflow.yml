@@ -57,7 +57,7 @@ jobs:
       always() &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled') &&
-      needs.changes.outputs.host == 'true'
+      'true' == 'true'
     uses: ./.github/workflows/package-host.yml
     with:
       python-version: ${{ matrix.python-version }}
