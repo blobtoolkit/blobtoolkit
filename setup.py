@@ -97,7 +97,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit",  # Required
-    version="4.1.1",
+    version="4.1.2",
     description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
@@ -214,9 +214,9 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
-        "full": ["blobtoolkit-host==4.1.0", "blobtoolkit-pipeline==4.1.1"],
+        "full": ["blobtoolkit-host==4.1.0", "blobtoolkit-pipeline==4.1.2"],
         "host": ["blobtoolkit-host==4.1.0"],
-        "pipeline": ["blobtoolkit-pipeline==4.1.1"],
+        "pipeline": ["blobtoolkit-pipeline==4.1.2"],
     },
     entry_points={
         "console_scripts": [
