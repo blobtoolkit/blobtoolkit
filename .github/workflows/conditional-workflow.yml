@@ -131,23 +131,23 @@ jobs:
       component: blobtoolkit
       version: ${{ needs.changes.outputs.container-version }}
 
-  build-blobtoolkit-dependencies:
-    needs:
-      - changes
-      - package-ui
-      - package-api
-      - package-host
-      - package-pipeline
-      - package-blobtools
-    if: |
-      always() &&
-      !contains(needs.*.result, 'failure') &&
-      !contains(needs.*.result, 'cancelled')
-    secrets: inherit
-    uses: ./.github/workflows/build-blobtoolkit-dependencies.yml
-    with:
-      container-version: ${{ needs.changes.outputs.container-version }}
-      docker-tags: genomehubs/blobtoolkit-dependencies:latest
+  # build-blobtoolkit-dependencies:
+  #   needs:
+  #     - changes
+  #     - package-ui
+  #     - package-api
+  #     - package-host
+  #     - package-pipeline
+  #     - package-blobtools
+  #   if: |
+  #     always() &&
+  #     !contains(needs.*.result, 'failure') &&
+  #     !contains(needs.*.result, 'cancelled')
+  #   secrets: inherit
+  #   uses: ./.github/workflows/build-blobtoolkit-dependencies.yml
+  #   with:
+  #     container-version: ${{ needs.changes.outputs.container-version }}
+  #     docker-tags: genomehubs/blobtoolkit-dependencies:latest
 
   build-blobtoolkit:
     needs:
