@@ -160,9 +160,10 @@ jobs:
     steps:
       - id: needs-node
         run: |
-          if [[ "${{ needs.detect-changes.outputs.node == 'true' }}" == "true" || "${{ needs.is-release.outputs.host == 'true' }}" == "true" ]]; then
-            echo "node=true" >> $GITHUB_OUTPUT
-          fi
+          echo "node=true" >> $GITHUB_OUTPUT
+          # if [[ "${{ needs.detect-changes.outputs.node == 'true' }}" == "true" || "${{ needs.is-release.outputs.host == 'true' }}" == "true" ]]; then
+          #   echo "node=true" >> $GITHUB_OUTPUT
+          # fi
       - id: platform-matrix
         run: |
           if ${{ needs.is-release.outputs.blobtools == 'true' }}; then
