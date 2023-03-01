@@ -147,7 +147,7 @@ jobs:
     uses: ./.github/workflows/build-blobtoolkit-dependencies.yml
     with:
       container-version: ${{ needs.changes.outputs.container-version }}
-      docker-tags: latest
+      docker-tags: genomehubs/blobtoolkit-dependencies:latest
 
   build-blobtoolkit:
     needs:
