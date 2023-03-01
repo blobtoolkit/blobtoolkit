@@ -1233,7 +1233,6 @@ const funcFromPattern = (pattern) => {
           url += parts[i];
         } else {
           let arr = String(def[parts[i]]).match(re);
-          console.log(arr);
           if (arr) {
             url += arr[0].replace(".git", "");
           } else {
