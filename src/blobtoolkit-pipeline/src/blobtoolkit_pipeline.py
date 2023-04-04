@@ -35,7 +35,7 @@ def cli(rename=None):
     """Entry point."""
     # if sys.argv[1].match("-pipeline"):
     command = sys.argv[1]
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 2 and not sys.argv[2].startswith("-"):
         command = sys.argv[2]
     docs = __doc__
     if rename is not None:
