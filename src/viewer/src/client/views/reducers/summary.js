@@ -698,7 +698,8 @@ export const getCircular = createSelector(
   getFilteredDataForLength,
   getFilteredDataForNCount,
   getFilteredList,
-  (gc, length, ncount, list = []) => {
+  getSelectedDatasetMeta,
+  (gc, length, ncount, list = [], meta) => {
     if (!gc || !length) return undefined;
     let values = { nXlen: [], nXnum: [], gc: [], sum: [], n: [], index: [] };
     let xAxis = "gc";
@@ -770,6 +771,7 @@ export const circularCurves = createSelector(
   getSummary,
   getScaleTo,
   plotText,
+  getSelectedDatasetMeta,
   (
     circular,
     palette,
@@ -781,12 +783,14 @@ export const circularCurves = createSelector(
     busco,
     summary,
     scaleTo,
-    plotText
+    plotText,
+    meta
   ) => {
     if (!circular) return false;
     let invert = origin == "center";
     let values = circular.values;
     let composition = circular.composition;
+    let record_type = meta.record_type || "scaffold";
     let gc = values.gc;
     let ns = values.n;
     let nXlen = values.nXlen;
@@ -1108,17 +1112,19 @@ export const circularCurves = createSelector(
     let legend = {
       stats: [
         {
-          label: "Log10 scaffold count",
+          label: `Log10 ${record_type} count`,
           value: "total " + format(all.length),
           color: "#dddddd", // palette.colors[8]
         },
         {
-          label: "Scaffold length",
+          label: `${
+            record_type[0].toUpperCase() + record_type.slice(1)
+          } length`,
           value: "total " + format(sum[999]),
           color: "#999999",
         },
         {
-          label: "Longest scaffold",
+          label: `Longest ${record_type}`,
           value: format(all[0].z),
           color: palette.colors[5],
         },
