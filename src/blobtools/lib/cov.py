@@ -87,7 +87,7 @@ def apply_filter(ids, fastq_files, **kwargs):
     options["fastq1"] = fastq_files[0]
     if len(fastq_files) > 1:
         options["fastq2"] = fastq_files[1]
-    filter.fastx(options)
+    filter.fastx(**options)
 
 
 def parse_json_cov(json_file, **kwargs):
