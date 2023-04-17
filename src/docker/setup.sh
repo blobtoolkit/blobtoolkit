@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ls /tmp/*-${VERSION}-*.whl | while read WHEEL; do
+ls /tmp/*.whl | while read WHEEL; do
     $CONDA_DIR/envs/btk_env/bin/pip install $WHEEL
 done
 

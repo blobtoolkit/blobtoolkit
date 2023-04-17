@@ -42,5 +42,6 @@ rule all:
         "%s.chunk_stats.tsv" % config["assembly"]["prefix"],
         
 
-include: "rules/run_mosdepth.smk"
+#include: "rules/run_mosdepth.smk"
+include: "rules/run_blobtk_depth.smk"
 include: "rules/add_cov_to_tsv.smk"

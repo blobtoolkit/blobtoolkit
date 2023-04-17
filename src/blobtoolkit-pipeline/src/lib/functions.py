@@ -128,7 +128,7 @@ def set_stats_windows(config):
     windows = config["settings"].get("stats_windows", 0.1)
     if not isinstance(windows, list):
         windows = [windows]
-    if not 1 in windows:
+    if 1 not in windows:
         windows.append(1)
     return windows
 

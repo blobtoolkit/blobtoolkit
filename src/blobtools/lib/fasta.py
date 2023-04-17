@@ -34,9 +34,7 @@ def base_composition(seq_str):
 def apply_filter(ids, fasta_file, **kwargs):
     """Filter FASTA format assembly."""
     suffix = kwargs["--suffix"]
-    filter.fastx(
-        {"list": ids, "fasta": fasta_file, "suffix": suffix, "fasta_out": True}
-    )
+    filter.fastx(list=ids, fasta=fasta_file, suffix=suffix, fasta_out=True)
 
 
 def parse(file, **kwargs):

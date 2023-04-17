@@ -271,12 +271,9 @@ const loadMeta = async function () {
     if (!defaultMeta && config.use_default) defaultMeta = defaultLinks;
     this.meta = await io.readJSON(filePath + "/" + this.id + "/meta.json");
     if (!this.meta) this.meta = {};
-    if (
-      this.meta.record_type == "record" &&
-      this.meta.assembly &&
-      this.meta.assembly.level
-    ) {
-      this.meta.record_type = this.meta.assembly.level;
+    if (this.meta.assembly && this.meta.assembly.level) {
+      this.meta.record_type =
+        this.meta.assembly.level == "contig" ? "contig" : "scaffold";
     }
     if (!this.meta.hasOwnProperty("revision")) {
       this.meta.revision = 0;

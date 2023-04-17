@@ -178,6 +178,7 @@ class Snail extends React.Component {
 
   render() {
     if (!this.props.circular) return null;
+    let record_type = this.props.meta.record_type || "scaffold";
     let format = d3format(".3s");
     let pctFormat = d3format(".1%");
     let commaFormat = d3format(",");
@@ -254,7 +255,12 @@ class Snail extends React.Component {
     }
     if (legend.stats) {
       topLeft = (
-        <SnailPlotLegend title={"Scaffold statistics"} list={legend.stats} />
+        <SnailPlotLegend
+          title={`${
+            record_type[0].toUpperCase() + record_type.slice(1)
+          } statistics`}
+          list={legend.stats}
+        />
       );
     }
     if (this.props.buscoPaths) {

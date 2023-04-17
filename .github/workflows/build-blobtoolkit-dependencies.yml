@@ -1,4 +1,4 @@
-name: build-blobtoolkit
+name: build-blobtoolkit-dependencies
 
 on:
   workflow_call:
@@ -11,7 +11,7 @@ on:
         type: string
 
 jobs:
-  build-blobtoolkit:
+  build-blobtoolkit-dependencies:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,10 +22,10 @@ jobs:
           path: ./dist
       - name: Move artifacts
         run: |
-          mv dist/node/*-linux src/docker/ || true
+          mv dist/node/*-linux src/docker/dependencies/ || true
       - name: Move pip artifacts
         run: |
-          mv dist/pip/*-*-*linux*.whl src/docker/ || true
+          mv dist/pip/*-${{ inputs.container-version }}-*linux*.whl src/docker/dependencies/ || true
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -35,11 +35,11 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: genomehubs/blobtoolkit
+          images: genomehubs/blobtoolkit-dependencies
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: src/docker
+          context: src/docker/dependencies
           build-args: VERSION=${{ inputs.container-version }}
           push: true
           tags: ${{ inputs.docker-tags }}

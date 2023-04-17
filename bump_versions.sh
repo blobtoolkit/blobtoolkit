@@ -71,19 +71,21 @@ fi
 
 if [ "$BLOBTOOLS_UPDATE" == 1 ]; then
   bump2version --allow-dirty --config-file .prebumpversion.cfg $LEVEL
-  VERSION=$(grep current_version .prebumpversion.cfg | cut -d' ' -f 3)
+  VERSION=$(grep current_version .prebumpversion.cfg | head -n 1 | cut -d' ' -f 3)
   if [ "$HOST_UPDATE" == 1 ]; then
+    HOST_TAG=$(grep current_version .hostbumpversion.cfg | head -n 1 | cut -d' ' -f 3)
     bump2version --allow-dirty --config-file .hostbumpversion.cfg $LEVEL
-    sed -i ".bak" 's/blobtoolkit-host=='$LATEST_TAG'/blobtoolkit-host=='$VERSION'/' setup.py
+    sed -i ".bak" 's/blobtoolkit-host=='$HOST_TAG'/blobtoolkit-host=='$VERSION'/' setup.py
     rm setup.py.bak
-    sed -i ".bak" 's/blobtoolkit-host v'$LATEST_TAG'/blobtoolkit-host v'$VERSION'/' src/blobtoolkit-host/src/lib/version.py
+    sed -i ".bak" 's/blobtoolkit-host v'$HOST_TAG'/blobtoolkit-host v'$VERSION'/' src/blobtoolkit-host/src/lib/version.py
     rm src/blobtoolkit-host/src/lib/version.py.bak
   fi
   if [ "$PIPELINE_UPDATE" == 1 ]; then
+    PIPELINE_TAG=$(grep current_version .pipelinebumpversion.cfg | head -n 1 | cut -d' ' -f 3)
     bump2version --allow-dirty --config-file .pipelinebumpversion.cfg $LEVEL
-    sed -i ".bak" 's/blobtoolkit-pipeline=='$LATEST_TAG'/blobtoolkit-pipeline=='$VERSION'/' setup.py
+    sed -i ".bak" 's/blobtoolkit-pipeline=='$PIPELINE_TAG'/blobtoolkit-pipeline=='$VERSION'/' setup.py
     rm setup.py.bak
-    sed -i ".bak" 's/blobtoolkit-pipeline v'$LATEST_TAG'/blobtoolkit-pipeline v'$VERSION'/' src/blobtoolkit-pipeline/src/lib/version.py
+    sed -i ".bak" 's/blobtoolkit-pipeline v'$PIPELINE_TAG'/blobtoolkit-pipeline v'$VERSION'/' src/blobtoolkit-pipeline/src/lib/version.py
     rm src/blobtoolkit-pipeline/src/lib/version.py.bak
   fi
   ./bump_full_version.sh $LEVEL $VERSION $NPM_UPDATE
