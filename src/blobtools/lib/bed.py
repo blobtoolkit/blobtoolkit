@@ -469,6 +469,8 @@ def parse(files, **kwargs):
                             field[: field.rfind("_%s" % suffix)],
                             meta["name"],
                         )
+                if not meta:
+                    continue
                 parsed.append(
                     Variable(
                         field,
