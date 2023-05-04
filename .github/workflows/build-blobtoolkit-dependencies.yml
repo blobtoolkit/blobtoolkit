@@ -2,13 +2,6 @@ name: build-blobtoolkit-dependencies
 
 on:
   workflow_call:
-    inputs:
-      container-version:
-        required: true
-        type: string
-      docker-tags:
-        required: true
-        type: string
 
 jobs:
   build-blobtoolkit-dependencies:
@@ -25,7 +18,7 @@ jobs:
           mv dist/node/*-linux src/docker/dependencies/ || true
       - name: Move pip artifacts
         run: |
-          mv dist/pip/*-${{ inputs.container-version }}-*linux*.whl src/docker/dependencies/ || true
+          mv dist/pip/*-*-*linux*.whl src/docker/dependencies/ || true
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -36,11 +29,17 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: genomehubs/blobtoolkit-dependencies
+      - name: Set current date as env variable
+        id: date
+        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      - name: Set docker tags
+        id: tags
+        run: echo "docker=genomehubs/blobtoolkit-dependencies:${{ steps.date.outputs.today }},genomehubs/blobtoolkit-dependencies:latest" >> $GITHUB_OUTPUT
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: src/docker/dependencies
-          build-args: VERSION=${{ inputs.container-version }}
+          build-args: VERSION=${{ steps.date.outputs.today }}
           push: true
-          tags: ${{ inputs.docker-tags }}
+          tags: ${{ steps.tags.outputs.docker }}
           labels: ${{ steps.meta.outputs.labels }}
