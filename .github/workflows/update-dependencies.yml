@@ -1,0 +1,8 @@
+name: update-dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-docker-image:
+    uses: ./.github/workflows/build-blobtoolkit-dependencies.yml
