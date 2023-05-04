@@ -35,7 +35,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: src/docker/dependencies
-          build-args: VERSION=$TODAY
+          build-args: VERSION=${{TODAY}}
           push: true
-          tags: genomehubs/blobtoolkit-dependencies:$TODAY,genomehubs/blobtoolkit-dependencies:latest
+          tags: genomehubs/blobtoolkit-dependencies:${{TODAY}},genomehubs/blobtoolkit-dependencies:latest
           labels: ${{ steps.meta.outputs.labels }}
