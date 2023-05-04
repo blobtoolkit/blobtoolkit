@@ -35,12 +35,12 @@ jobs:
         run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       - name: Set docker tags
         id: tags
-        run: echo "docker=genomehubs/blobtoolkit-dependencies:${{ steps.date.outputs.labels }},genomehubs/blobtoolkit-dependencies:latest" >> $GITHUB_OUTPUT
+        run: echo "docker=genomehubs/blobtoolkit-dependencies:${{ steps.date.outputs.today }},genomehubs/blobtoolkit-dependencies:latest" >> $GITHUB_OUTPUT
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: src/docker/dependencies
-          build-args: VERSION=${{ steps.date.outputs.labels }}
+          build-args: VERSION=${{ steps.date.outputs.today }}
           push: true
           tags: ${{ steps.tags.outputs.docker }}
           labels: ${{ steps.meta.outputs.labels }}
