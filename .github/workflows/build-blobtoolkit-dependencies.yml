@@ -1,7 +1,6 @@
 name: build-blobtoolkit-dependencies
 
 on:
-  push:
   workflow_call:
 
 jobs:
