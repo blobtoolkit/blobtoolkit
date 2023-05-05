@@ -7,7 +7,7 @@ Usage:
   blobtoolkit-pipeline generate-config <ACCESSION> [--coverage 30] [--download]
     [--out /path/to/output/directory] [--db /path/to/database/directory]
     [--db-suffix STRING] [--reads STRING...] [--read-runs INT] [--api-key STRING]
-    [--platforms STRING] [--datasets] [--protocol STRING] 
+    [--platforms STRING] [--datasets] [--protocol STRING]
     [--download-client STRING] [--retry-times INT]
 
 Options:

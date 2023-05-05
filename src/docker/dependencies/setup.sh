@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ls /tmp/*.whl | while read WHEEL; do
+    echo y | $CONDA_DIR/envs/btk_env/bin/pip uninstall ${WHEEL%%-*}
     $CONDA_DIR/envs/btk_env/bin/pip install $WHEEL
 done
 
