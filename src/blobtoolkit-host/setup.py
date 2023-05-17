@@ -115,7 +115,6 @@ setup(
     entry_points={
         "console_scripts": [
             "blobtoolkit-host = lib.host:cli",
-            "blobtoolkit-view = lib.view:cli",
         ],
     },
     project_urls={
