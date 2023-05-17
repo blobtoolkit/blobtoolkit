@@ -59,8 +59,9 @@ def cli():
         except DocoptExit:
             args = {"<command>": sys.argv[1]}
     else:
+        args = {}
         print(__doc__)
-    if args["<command>"]:
+    if "<command>" in args and args["<command>"]:
         args.update({"<tool>": os.path.basename(sys.argv[0])})
         # load <command> from entry_points
         for entry_point in working_set.iter_entry_points("%s.subcmd" % args["<tool>"]):
