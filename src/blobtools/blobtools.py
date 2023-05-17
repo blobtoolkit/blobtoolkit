@@ -57,7 +57,7 @@ LOGGER = tolog.logger(__name__)
 
 def suggest_option(command):
     options = {
-        "host": ["view"],
+        "host": ["host"],
     }
     options_list = options.get(command, [])
     options_list.append("full")
