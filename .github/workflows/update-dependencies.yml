@@ -1,7 +1,6 @@
 name: update-dependencies
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:
