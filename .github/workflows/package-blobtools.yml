@@ -1,4 +1,4 @@
-name: package-pipeline
+name: package-blobtools
 on:
   workflow_call:
     inputs:

@@ -72,7 +72,7 @@ jobs:
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
       component: blobtoolkit_host
-      version: ${{ needs.changes.outputs.container-version }}
+      version: ${{ needs.changes.outputs.host-version }}
 
   package-pipeline:
     needs: changes
@@ -100,7 +100,7 @@ jobs:
     uses: ./.github/workflows/upload-to-pypi.yml
     with:
       component: blobtoolkit_pipeline
-      version: ${{ needs.changes.outputs.container-version }}
+      version: ${{ needs.changes.outputs.pipeline-version }}
 
   package-blobtools:
     needs: changes
@@ -129,7 +129,7 @@ jobs:
     secrets: inherit
     with:
       component: blobtoolkit
-      version: ${{ needs.changes.outputs.container-version }}
+      version: ${{ needs.changes.outputs.blobtools-version }}
 
   # build-blobtoolkit-dependencies:
   #   needs:
