@@ -235,6 +235,7 @@ setup(
         ],
         "btk.subcmd": [
             "pipeline = btk.lib.pipeline:main",
+            "blobtools = blobtools:cli",
         ],
     },
     project_urls={
