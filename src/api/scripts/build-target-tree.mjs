@@ -7,15 +7,13 @@ import fs from "fs";
 // TODO: replace hardcoded file paths with fetch commands
 
 // TODO: replace idFilePath with fetch from BlobToolKit
-const idFilePath =
-  "~/projects/blobtoolkit/blobtoolkit/src/api/scripts/validated_accession_id.tsv";
+const idFilePath = `${process.env.HOME}/projects/blobtoolkit/blobtoolkit/src/api/scripts/validated_accession_id.tsv`;
 
 // TODO: replace csvFilePath with fetch from https://goat.genomehubs.org/search?taxonomy=ncbi&query=tax_tree%282759%5BEukaryota%5D%29&result=assembly&includeEstimates=false&summaryValues=count&offset=0&fields=assembly_type&names=&ranks=subspecies%2Cspecies%2Cgenus%2Cfamily%2Corder%2Cclass%2Cphylum%2Ckingdom%2Csuperkingdom&size=100#tax_tree(2759%5BEukaryota%5D)
-const csvFilePath =
-  "~/projects/blobtoolkit/blobtoolkit/src/api/scripts/goat_assembly.tsv";
+const csvFilePath = `${process.env.HOME}/projects/blobtoolkit/blobtoolkit/src/api/scripts/goat_assembly.tsv`;
 
-const outFilePath =
-  "~/projects/blobtoolkit/blobtoolkit/src/api/scripts/targets.json";
+// TODO: replace path with command line option
+const outFilePath = `${process.env.HOME}/projects/blobtoolkit/blobtoolkit/src/api/scripts/targets.json`;
 
 const ranks = [
   "superkingdom",
@@ -75,7 +73,9 @@ for (let row of rows) {
     nodes[lineage].ta += 1;
     if (rank == "species") {
       let id =
-        ids[row.assembly_id] || ids[row.assembly_id.replace(/\.\d+/, "")];
+        ids[row.assembly_id] ||
+        ids[row.assembly_id.replace(/\.\d+/, "")] ||
+        row.assembly_id;
       nodes[lineage].d[id] = { n };
       n++;
     }
