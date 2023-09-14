@@ -241,24 +241,25 @@ def firefox_driver(args):
     outdir = os.path.abspath(args["--out"])
     os.makedirs(Path(outdir), exist_ok=True)
 
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference("browser.download.folderList", 2)
-    profile.set_preference("browser.download.manager.showWhenStarting", False)
-    profile.set_preference("browser.download.dir", outdir)
-    profile.set_preference("browser.download.lastDir", args["--out"])
-    profile.set_preference(
+    options = Options()
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.dir", outdir)
+    options.set_preference("browser.download.lastDir", args["--out"])
+    options.set_preference(
         "browser.helperApps.neverAsk.saveToDisk",
         "image/png, image/svg+xml, text/csv, text/plain, application/json",
     )
-    options = Options()
     options.headless = not args["--interactive"]
 
     display = start_display()
+    service = Service(
+        service_log_path=args["--driver-log"],
+    )
     try:
         driver = webdriver.Firefox(
             options=options,
-            firefox_profile=profile,
-            service_log_path=args["--driver-log"],
+            service=service,
         )
     except WebDriverException:
         LOGGER.error(
@@ -296,7 +297,6 @@ def chromium_driver(args):
         # service_object = Service(ChromeDriverManager().install())
         LOGGER.info("Successfully installed chromedriver")
     except Exception as err:
-        print(err)
         # if "LATEST_RELEASE_" in str(err):
         #     try:
         #         _, version = str(err).split("LATEST_RELEASE_")
@@ -337,13 +337,16 @@ def chromium_driver(args):
         chromedriver_path = os.path.join(
             getsitepackages()[0], "chromedriver_binary", "chromedriver"
         )
+    service = Service(
+        executable_path=chromedriver_path,
+        service_log_path=args["--driver-log"],
+    )
     try:
         driver = webdriver.Chrome(
-            chromedriver_path,
             options=options,
             # service=service_object,
             # executable_path=add option to set binary location,
-            service_log_path=args["--driver-log"],
+            service=service,
         )
     except WebDriverException:
         LOGGER.error(

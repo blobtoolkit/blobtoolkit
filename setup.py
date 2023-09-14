@@ -188,7 +188,7 @@ setup(
         "psutil==5.9.4",
         "pyvirtualdisplay==3.0",
         "pyyaml",
-        "selenium>=4.7.2",
+        "selenium>=4.10.0",
         "tolkein>=0.5.0",
         "tqdm==4.64.1",
         "ujson>=5.7.0",
