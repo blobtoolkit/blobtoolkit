@@ -136,7 +136,11 @@ def combine_chunks(window, interval, values, seqid, length, window_size, key, ar
                 values[seqid][start_pos][f"{key}_sd"] = "%.3f" % sd
                 values[seqid][start_pos][f"{key}_n"] = "%d" % n
             except statistics.StatisticsError:
-                continue
+                values[seqid][start_pos][key] = "None"
+                values[seqid][start_pos][f"{key}_sd"] = "None"
+                values[seqid][start_pos][f"{key}_n"] = "None"
+        if end_pos == start_pos:
+            break
         start_pos = end_pos
         start_i = end_i + 1
 
@@ -192,8 +196,9 @@ def process_files(args):
                 filetag = ".%s" % re.sub(r"\.0$", "", str(window))
             if not os.path.exists(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
-            with open(f"{filename}{filetag}{suffix}", "w") as fh:
-                fh.writelines(rows)
+            fh = open(f"{filename}{filetag}{suffix}", "w")
+            fh.writelines(rows)
+            fh.close()
 
 
 def main(rename=None):
@@ -209,6 +214,7 @@ def main(rename=None):
         process_files(args)
     except Exception as err:
         logger.error(err)
+        raise err
         exit(1)
 
 

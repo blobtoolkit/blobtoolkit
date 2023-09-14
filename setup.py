@@ -97,7 +97,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit",  # Required
-    version="4.1.7",
+    version="4.2.0",
     description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
@@ -134,9 +134,6 @@ setup(
         # that you indicate you support Python 3. These classifiers are *not*
         # checked by 'pip install'. See instead 'python_requires' below.
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
@@ -174,7 +171,7 @@ setup(
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
     # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-    python_requires=">=3.7, <3.12",
+    python_requires=">=3.9, <3.12",
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
     # installed, so they must be valid existing projects.
@@ -183,14 +180,15 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "blobtk>=0.2.3",
-        "chromedriver-binary-auto==0.2.3",
+        # "chromedriver-binary-auto>=0.3.1",
+        "chromedriver-autoinstaller>=0.6.2",
         "docopt>=0.6.2",
         "fastjsonschema==2.15.3",
-        "geckodriver-autoinstaller==0.1.0",
+        "geckodriver-autoinstaller>=0.1.0",
         "psutil==5.9.4",
         "pyvirtualdisplay==3.0",
         "pyyaml",
-        "selenium==4.7.2",
+        "selenium>=4.7.2",
         "tolkein>=0.5.0",
         "tqdm==4.64.1",
         "ujson>=5.7.0",
@@ -214,9 +212,9 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
-        "full": ["blobtoolkit-host==4.1.1", "blobtoolkit-pipeline==4.1.5"],
-        "host": ["blobtoolkit-host==4.1.1"],
-        "pipeline": ["blobtoolkit-pipeline==4.1.5"],
+        "full": ["blobtoolkit-host==4.2.0", "blobtoolkit-pipeline==4.2.0"],
+        "host": ["blobtoolkit-host==4.2.0"],
+        "pipeline": ["blobtoolkit-pipeline==4.2.0"],
     },
     entry_points={
         "console_scripts": [
