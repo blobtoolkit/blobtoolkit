@@ -40,6 +40,8 @@ def read_file(filename):
             return fh.read()
     except AttributeError:
         return None
+    except TypeError:
+        return None
 
 
 def stream_file(filename):
