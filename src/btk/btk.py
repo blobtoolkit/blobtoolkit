@@ -16,6 +16,7 @@ See 'btk <command> --help' for more information on a specific command.
 
 
 import os
+import subprocess
 import sys
 
 from docopt import DocoptExit
@@ -46,6 +47,13 @@ def suggest_option(command):
 
 def cli():
     """Entry point."""
+    if len(sys.argv) > 1 and sys.argv[1] == "blobtools":
+        try:
+            p = subprocess.run(sys.argv[1:])
+            sys.exit(p.returncode)
+        except ModuleNotFoundError:
+            suggest_option(" ".join(sys.argv[1:]))
+            exit(1)
     if len(sys.argv) > 2:
         try:
             args = docopt(__doc__, help=False, version=__version__)
@@ -59,8 +67,9 @@ def cli():
         except DocoptExit:
             args = {"<command>": sys.argv[1]}
     else:
+        args = {}
         print(__doc__)
-    if args["<command>"]:
+    if "<command>" in args and args["<command>"]:
         args.update({"<tool>": os.path.basename(sys.argv[0])})
         # load <command> from entry_points
         for entry_point in working_set.iter_entry_points("%s.subcmd" % args["<tool>"]):

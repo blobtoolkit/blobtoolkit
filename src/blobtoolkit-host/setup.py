@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit-host",  # Required
-    version="4.1.0",
+    version="4.1.1",
     description="blobtoolkit-host",  # Optional
     long_description="blobtoolkit-host",  # Optional
     long_description_content_type="text/markdown",
@@ -115,7 +115,6 @@ setup(
     entry_points={
         "console_scripts": [
             "blobtoolkit-host = lib.host:cli",
-            "blobtoolkit-view = lib.view:cli",
         ],
     },
     project_urls={

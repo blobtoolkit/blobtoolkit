@@ -7,7 +7,7 @@ env:
   DEFAULT_PLATFORM: '["linux"]'
   MATRIX_PLATFORM: '["linux", "macos"]'
   BASE_TAG: "genomehubs/blobtoolkit"
-  VERSION: 4.1.4
+  VERSION: 4.1.7
 
 on:
   workflow_call:
@@ -53,9 +53,9 @@ on:
       container-version:
         value: ${{ jobs.release-dependent.outputs.container-version }}
       blobtoolkit-tag:
-        value: genomehubs/blobtoolkit:4.1.2,genomehubs/blobtoolkit:latest # ${{ jobs.release-dependent.outputs.blobtoolkit-tag }}
+        value: ${{ jobs.release-dependent.outputs.blobtoolkit-tag }}
       blobtools-tag:
-        value: genomehubs/blobtoolkit-blobtools:4.1.2,genomehubs/blobtoolkit-blobtools:latest # ${{ jobs.release-dependent.outputs.blobtools-tag }}
+        value: ${{ jobs.release-dependent.outputs.blobtools-tag }}
       api-tag:
         value: ${{ jobs.release-dependent.outputs.api-tag }}
       ui-tag:

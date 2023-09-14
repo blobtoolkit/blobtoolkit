@@ -247,7 +247,7 @@ const defaultLinks = {
             title: "UniProt",
             template: "https://www.uniprot.org/uniprot/{subject}",
             regex:
-              "([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})",
+              "^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$",
           },
           {
             title: "ENA",

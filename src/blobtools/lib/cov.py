@@ -227,28 +227,39 @@ def summarise(indices, fields, **kwargs):
     summary = {}
     for library in fields["libraries"]:
         stats = {}
-        covs = [fields["%s_cov" % library].values[i] for i in indices]
+        covs = [fields[f"{library}_cov"].values[i] for i in indices]
         lengths = [fields["length"].values[i] for i in indices]
         coverage = weighted_mean(covs, lengths, log=True)
-        platform = kwargs["meta"].reads[library]["platform"]
-        strategy = "single"
-        if "strategy" in kwargs["meta"].reads[library]:
-            strategy = kwargs["meta"].reads[library]["strategy"]
-        elif (
-            "file" in kwargs["meta"].reads[library]
-            and ";" in kwargs["meta"].reads[library]["file"]
-        ):
-            strategy = "paired"
-        stats.update(
-            {
-                "coverage": float("%.3f" % coverage),
-                "platform": platform,
-                "strategy": strategy,
-            }
-        )
-        if "url" in kwargs["meta"].reads[library]:
-            stats.update({"url": kwargs["meta"].reads[library]["url"]})
-        summary.update({library: stats})
+        if library in kwargs["meta"].reads:
+            try:
+                platform = kwargs["meta"].reads[library]["platform"]
+            except KeyError:
+                platform = "unknown"
+            strategy = "single"
+            try:
+                if "strategy" in kwargs["meta"].reads[library]:
+                    strategy = kwargs["meta"].reads[library]["strategy"]
+                elif (
+                    "file" in kwargs["meta"].reads[library]
+                    and ";" in kwargs["meta"].reads[library]["file"]
+                ):
+                    strategy = "paired"
+            except KeyError:
+                continue
+            stats.update(
+                {
+                    "coverage": float("%.3f" % coverage),
+                    "platform": platform,
+                    "strategy": strategy,
+                }
+            )
+            if "file" in kwargs["meta"].reads[library]:
+                stats["file"] = kwargs["meta"].reads[library]["file"].split(";")
+            if "url" in kwargs["meta"].reads[library]:
+                stats["url"] = kwargs["meta"].reads[library]["url"]
+        else:
+            stats["coverage"] = float("%.3f" % coverage)
+        summary[library] = stats
     return summary
 
 

@@ -21,8 +21,8 @@ jobs:
       - run: |
           mkdir -p ./dist
           COMPONENT=${{ inputs.component }}
-          mv tmp/${{ inputs.component }}-${{ inputs.version }}-*.whl dist/
-          mv tmp/${COMPONENT/_/-}-${{ inputs.version }}.tar.gz dist/
+          mv tmp/${{ inputs.component }}-*-*.whl dist/
+          mv tmp/${COMPONENT/_/-}-*.tar.gz dist/
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@v1.5.0
         with:

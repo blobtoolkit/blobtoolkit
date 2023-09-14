@@ -7,7 +7,7 @@ Usage:
   blobtoolkit-pipeline generate-config <ACCESSION> [--coverage 30] [--download]
     [--out /path/to/output/directory] [--db /path/to/database/directory]
     [--db-suffix STRING] [--reads STRING...] [--read-runs INT] [--api-key STRING]
-    [--platforms STRING] [--datasets] [--protocol STRING] 
+    [--platforms STRING] [--datasets] [--protocol STRING]
     [--download-client STRING] [--retry-times INT]
 
 Options:
@@ -466,6 +466,15 @@ def fetch_read_info(accession, per_platform):
     portal = "https://www.ebi.ac.uk/ena/portal/api"
     url = f"{portal}/filereport?accession={accession}&result=read_run&fields=run_accession,fastq_bytes,base_count,library_strategy,library_selection,library_layout,instrument_platform,experiment_title,fastq_ftp"
 
+    si_suffix = {
+        "k": 3,
+        "M": 6,
+        "G": 9,
+        "T": 12,
+        "P": 15,
+        "E": 18,
+    }
+
     data = tofetch.fetch_url(url)
     if data is None:
         return
@@ -491,8 +500,19 @@ def fetch_read_info(accession, per_platform):
             values[header[i]] = value
         try:
             values["base_count"] = int(values["base_count"])
-        except (KeyError, ValueError):
-            continue
+        except ValueError:
+            if "base_count" in values and values["base_count"].endswith("b"):
+                values["base_count"] = values["base_count"].strip("b")
+                suffix = values["base_count"][-1]
+                try:
+                    exponent = si_suffix[suffix]
+                except KeyError:
+                    exponent = 0
+                values["base_count"] = int(values["base_count"].strip(suffix)) * pow(10, exponent)
+            else:
+                values["base_count"] = 0
+        except KeyError:
+            values["base_count"] = 0
         try:
             per_platform[platform].append(values)
         except KeyError:

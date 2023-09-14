@@ -1,0 +1,43 @@
+name: update-dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+  package-api:
+    uses: ./.github/workflows/package-api.yml
+
+  package-ui:
+    secrets: inherit
+    uses: ./.github/workflows/package-ui.yml
+
+  package-host:
+    needs:
+      - package-ui
+      - package-api
+    uses: ./.github/workflows/package-host.yml
+    with:
+      python-version: 3.9
+      platform: linux
+
+  package-pipeline:
+    uses: ./.github/workflows/package-pipeline.yml
+    with:
+      python-version: 3.9
+      platform: linux
+
+  package-blobtools:
+    uses: ./.github/workflows/package-blobtools.yml
+    with:
+      python-version: 3.9
+      platform: linux
+
+  update-docker-image:
+    needs:
+      - package-api
+      - package-ui
+      - package-host
+      - package-pipeline
+      - package-blobtools
+    secrets: inherit
+    uses: ./.github/workflows/build-blobtoolkit-dependencies.yml

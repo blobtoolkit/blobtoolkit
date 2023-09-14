@@ -1,8 +1,12 @@
-ARG BUILD_ENV=dev
-
 FROM ubuntu:20.04 as base_image
 
-ONBUILD RUN apt-get update \
+LABEL maintainer="blobtoolkit@genomehubs.org"
+LABEL license="MIT"
+LABEL version=$VERSION
+ARG VERSION
+ENV CONTAINER_VERSION=$VERSION
+
+RUN apt-get update \
     && DEBIAN_FRONTEND="noninteractive" apt-get -y --no-install-recommends install \
     aria2 \
     build-essential \
@@ -20,41 +24,28 @@ ONBUILD RUN apt-get update \
 
 WORKDIR /opt
 
-ONBUILD RUN wget -P /usr/local/src https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+RUN wget -P /usr/local/src https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && bash /usr/local/src/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
     && /opt/conda/bin/conda install -n base conda-libmamba-solver \
     && rm /usr/local/src/Miniconda3-latest-Linux-x86_64.sh
 
-ONBUILD RUN mkdir -p /blobtoolkit \
+RUN mkdir -p /blobtoolkit \
     && useradd -m blobtoolkit
 
-ONBUILD COPY env.yaml /tmp/env.yaml
+COPY env.yaml /tmp/env.yaml
 
-FROM base_image as build_dev
+COPY blobtoolkit-api-linux /blobtoolkit/blobtoolkit-api
+COPY blobtoolkit-viewer-linux /blobtoolkit/blobtoolkit-viewer
+COPY *-*-*.whl /tmp
 
-ONBUILD COPY blobtoolkit-api-linux /blobtoolkit/blobtoolkit-api
-ONBUILD COPY blobtoolkit-viewer-linux /blobtoolkit/blobtoolkit-viewer
-ONBUILD COPY *-${VERSION}-*.whl /tmp
+WORKDIR /tmp
 
-ONBUILD WORKDIR /tmp
-
-ONBUILD RUN chown -R blobtoolkit:blobtoolkit /blobtoolkit \
+RUN chown -R blobtoolkit:blobtoolkit /blobtoolkit \
     && chmod 755 /blobtoolkit/blobtoolkit-api /blobtoolkit/blobtoolkit-viewer \
     && sed -i '/- blobtoolkit/d' /tmp/env.yaml
 #    && git clone https://github.com/blobtoolkit/blobtoolkit \
 
-ONBUILD WORKDIR /blobtoolkit
-
-FROM base_image as build_prod
-
-ONBUILD WORKDIR /blobtoolkit
-
-FROM build_${BUILD_ENV}
-LABEL maintainer="blobtoolkit@genomehubs.org"
-LABEL license="MIT"
-LABEL version=$VERSION
-ARG VERSION
-ENV CONTAINER_VERSION=$VERSION
+WORKDIR /blobtoolkit
 
 RUN mkdir -p /blobtoolkit/conf \
     && mkdir -p /blobtoolkit/data/assembly \

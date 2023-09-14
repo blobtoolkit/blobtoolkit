@@ -7,6 +7,7 @@ PLATFORM=$1
 if [ -z $PLATFORM ]; then
     echo USAGE: ./pip_install_latest.sh linux_x86_64
     echo    OR: ./pip_install_latest.sh macosx_10_9_x86_64
+    echo    OR: ./pip_install_latest.sh macosx_11_0_arm64
     exit 1
 fi
 
