@@ -149,6 +149,7 @@ def filter_by_params(meta, directory, indices, params, invert_all):
         invert = False
         if filters.get("Inv"):
             invert = True
+            filters["Keys"] = filters["Inv"]
         if isinstance(field, Category):
             keys = field.keys
             if filters.get("Keys"):
