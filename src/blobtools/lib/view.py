@@ -30,6 +30,7 @@ Options:
 
 import contextlib
 import os
+import platform
 import shlex
 import signal
 import socket
@@ -37,6 +38,7 @@ import sys
 import time
 from pathlib import Path
 from shutil import which
+from site import getsitepackages
 from subprocess import PIPE
 from subprocess import Popen
 from traceback import format_exc
@@ -44,7 +46,9 @@ from traceback import format_exc
 import psutil
 from docopt import docopt
 from pyvirtualdisplay import Display
+from pyvirtualdisplay.abstractdisplay import XStartError
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
@@ -174,6 +178,49 @@ def test_loc(args):
     return loc, process, port, api_port, level
 
 
+def check_permission(file_path):
+    """Check if current user has delete permission on a file."""
+    file_dirname = os.path.dirname(file_path)
+    if os.path.isfile(file_path):
+        if os.access(file_path, os.W_OK):
+            if os.access(file_dirname, os.W_OK | os.X_OK):
+                return True
+    return False
+
+
+def start_display():
+    """Start Xvfb display."""
+    try:
+        display = Display(visible=0, size=(800, 600))
+        display.start()
+    except XStartError:
+        LOGGER.error("Unable to start X server")
+        if platform.system() == "Darwin":
+            LOGGER.error(
+                "XQuartz (https://www.xquartz.org) must be installed and running to use this command"
+            )
+        sys.exit(1)
+    except FileNotFoundError as err:
+        if "Xvfb" in str(err):
+            if "/usr/X11/bin" not in os.environ["PATH"]:
+                try:
+                    os.environ["PATH"] += os.pathsep + os.path.join(
+                        "/usr", "x11", "bin"
+                    )
+                    LOGGER.info("Xvfb not found in PATH, trying /usr/X11/bin")
+                    display = Display(visible=0, size=(800, 600))
+                    display.start()
+                except Exception:
+                    LOGGER.error("Xvfb not found in PATH or /usr/X11/bin")
+                    sys.exit(1)
+            else:
+                LOGGER.error("Xvfb not found in PATH")
+                sys.exit(1)
+        else:
+            raise err
+    return display
+
+
 def firefox_driver(args):
     """Start firefox."""
     if not (which("firefox") or which("geckodriver")):
@@ -203,17 +250,34 @@ def firefox_driver(args):
         "browser.helperApps.neverAsk.saveToDisk",
         "image/png, image/svg+xml, text/csv, text/plain, application/json",
     )
-
     options = Options()
     options.headless = not args["--interactive"]
-    display = Display(visible=0, size=(800, 600))
-    display.start()
 
-    driver = webdriver.Firefox(
-        options=options,
-        firefox_profile=profile,
-        service_log_path=args["--driver-log"],
-    )
+    display = start_display()
+    try:
+        driver = webdriver.Firefox(
+            options=options,
+            firefox_profile=profile,
+            service_log_path=args["--driver-log"],
+        )
+    except WebDriverException:
+        LOGGER.error(
+            "Unable to start Firefox using geckodriver, possible version mismatch."
+        )
+        LOGGER.error(
+            "Try `conda install -c conda-forge firefox geckodriver` or use `blobtools view --driver chromium` to use chrome browser."
+        )
+        if check_permission(which("geckodriver")):
+            LOGGER.error(
+                "Or try deleting the existing geckodriver executable from %s then rerun this command to install a compatible version.",
+                which("geckodriver"),
+            )
+        else:
+            LOGGER.error(
+                "Or ask your administrator to ensure that the versions of Firefox and geckodriver are compatible"
+            )
+        display.stop()
+        sys.exit(1)
     time.sleep(2)
     return driver, display
 
@@ -224,11 +288,33 @@ def chromium_driver(args):
     try:
         LOGGER.info("Chrome and chromedriver must be available for blobtools view")
         LOGGER.info("Attempting to install the appropriate chromedriver version")
-        from webdriver_manager.chrome import ChromeDriverManager
+        import chromedriver_autoinstaller
 
-        service_object = Service(ChromeDriverManager().install())
+        chromedriver_autoinstaller.install()
+        # ChromeDriverManager()
+
+        # service_object = Service(ChromeDriverManager().install())
         LOGGER.info("Successfully installed chromedriver")
-    except Exception:
+    except Exception as err:
+        print(err)
+        # if "LATEST_RELEASE_" in str(err):
+        #     try:
+        #         _, version = str(err).split("LATEST_RELEASE_")
+        #         from selenium.webdriver.chrome.service import Service as ChromeService
+
+        #         service_object = ChromeService(
+        #             ChromeDriverManager(
+        #                 latest_release_url="https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json",
+        #                 version=version,
+        #             ).install()
+        #         )
+        #     except Exception as err:
+        #         print(str(err))
+        #         LOGGER.error(
+        #             "Unable to install automatically. Check Chrome is available or try `blobtools view --driver firefox` to use firefox browser."
+        #         )
+        #         sys.exit(1)
+        # else:
         LOGGER.error(
             "Unable to install automatically. Check Chrome is available or try `blobtools view --driver firefox` to use firefox browser."
         )
@@ -245,14 +331,36 @@ def chromium_driver(args):
     }
 
     options.add_experimental_option("prefs", prefs)
-    display = Display(visible=0, size=(800, 600))
-    display.start()
-    driver = webdriver.Chrome(
-        options=options,
-        service=service_object,
-        # executable_path=add option to set binary location,
-        service_log_path=args["--driver-log"],
-    )
+    display = start_display()
+    chromedriver_path = which("chromedriver")
+    if chromedriver_path is None:
+        chromedriver_path = os.path.join(
+            getsitepackages()[0], "chromedriver_binary", "chromedriver"
+        )
+    try:
+        driver = webdriver.Chrome(
+            chromedriver_path,
+            options=options,
+            # service=service_object,
+            # executable_path=add option to set binary location,
+            service_log_path=args["--driver-log"],
+        )
+    except WebDriverException:
+        LOGGER.error(
+            "Unable to start Chrome using chromedriver, possible version mismatch."
+        )
+        LOGGER.error("Try `blobtools view --driver firefox` to use firefox browser.")
+        if check_permission(which("chromedriver")):
+            LOGGER.error(
+                "Or try deleting the existing chromedriver executable from %s then rerun this command to install a compatible version.",
+                which("chromedriver"),
+            )
+        else:
+            LOGGER.error(
+                "Or ask your administrator to ensure that the versions of Chrome and chromedriver are compatible"
+            )
+        display.stop()
+        sys.exit(1)
     time.sleep(2)
     return driver, display
 
@@ -309,7 +417,7 @@ def static_view(args, loc, viewer):
         """View dataset in Chromium browser."""
         try:
             driver, display = chromium_driver(args)
-        except Exception as err:
+        except Exception:
             LOGGER.error(
                 "Unable to start Chrome. Try `blobtools view --driver firefox` to use Firefox browser."
             )
