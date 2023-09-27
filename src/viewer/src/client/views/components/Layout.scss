@@ -138,10 +138,11 @@
   }
 
   span.logo {
-    float: right;
     height: 2em;
     margin-top: 0.5em;
-    margin-right: 125px;
+    position: fixed;
+    right: 9em;
+    background-color: $darkColor;
     img {
       cursor: pointer;
       height: 2em;
