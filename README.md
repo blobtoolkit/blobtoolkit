@@ -85,7 +85,7 @@ docker run -it --rm --name blobtools -p 8000:8000 -p 8001:8001 genomehubs/blobto
 
 The BlobToolKit pipeline can be run by creating a YAML config file and environment variables to the `genomehubs/blobtoolkit` docker image.
 
-````sh
+```sh
 # Set name of directory in which config.yaml file can be found
 # The file should be available at /path/to/datasets/$ACCESSION/config.yaml
 ACCESSION=GCA_963082805.1
@@ -172,7 +172,7 @@ taxon:
   name: Hemicrepidius niger
   taxid: "869179"
 version: 1
-````
+```
 
 ## Contributing
 
