@@ -81,6 +81,99 @@ The example commands above can all be run using the `genomehubs/blobtoolkit-blob
 docker run -it --rm --name blobtools -p 8000:8000 -p 8001:8001 genomehubs/blobtoolkit-blobtools:latest blobtools view --local _
 ```
 
+## BlobToolKit pipeline
+
+The BlobToolKit pipeline can be run by creating a YAML config file and environment variables to the `genomehubs/blobtoolkit` docker image.
+
+````sh
+# Set name of directory in which config.yaml file can be found
+# The file should be available at /path/to/datasets/$ACCESSION/config.yaml
+ACCESSION=GCA_963082805.1
+# Set maximum number of threads to use
+THREADS=16
+# Set TRANSFER=true to remove intermediate files and place results in a separate directory
+# at /path/to/output/<PREFIX>, where PREFIX is taken from assembly.prefix in config.yaml
+# The final BlobDir will be available as /path/to/output/$PREFIX/PREFIX.tar
+TRANSFER=true
+docker run --rm \
+    --name btk-$ACCESSION \
+    -e ASSEMBLY=$ACCESSION \
+    -e THREADS=$THREADS \
+    -e TRANSFER=$TRANSFER \
+    -v /path/to/datasets:/blobtoolkit/datasets \
+    -v /path/to/databases:/blobtoolkit/databases \
+    -v /path/to/output:/blobtoolkit/output \
+    genomehubs/blobtoolkit:$RELEASE
+```
+
+Example config.yaml file:
+
+```yaml
+assembly:
+  accession: GCA_963082805.1
+  level: chromosome
+  prefix: CAUJBB01
+  scaffold-count: 197
+  span: 377570513
+busco:
+  basal_lineages:
+    - eukaryota_odb10
+    - bacteria_odb10
+    - archaea_odb10
+  download_dir: /blobtoolkit/databases/busco_2021_06
+  lineages:
+    - endopterygota_odb10
+    - insecta_odb10
+    - arthropoda_odb10
+    - metazoa_odb10
+    - eukaryota_odb10
+    - bacteria_odb10
+    - archaea_odb10
+reads:
+  coverage:
+    max: 30
+  paired: []
+  single:
+    - base_count: 25744115650
+      file: /blobtoolkit/datasets/GCA_963082805.1/reads/ERR11263500.fastq.gz
+      platform: PACBIO_SMRT
+      prefix: ERR11263500
+settings:
+  blast_chunk: 100000
+  blast_max_chunks: 10
+  blast_min_length: 1000
+  blast_overlap: 0
+  stats_chunk: 1000
+  stats_windows:
+    - 0.1
+    - 0.01
+    - 100000
+    - 1000000
+  taxdump: /blobtoolkit/databases/taxdump_2021_06
+  tmp: /tmp
+similarity:
+  blastn:
+    name: nt
+    path: /blobtoolkit/databases/nt_2021_06
+  defaults:
+    evalue: 1.0e-10
+    import_evalue: 1.0e-25
+    max_target_seqs: 10
+    taxrule: buscogenes
+  diamond_blastp:
+    import_max_target_seqs: 100000
+    name: reference_proteomes
+    path: /blobtoolkit/databases/uniprot_2021_06
+    taxrule: blastp=buscogenes
+  diamond_blastx:
+    name: reference_proteomes
+    path: /blobtoolkit/databases/uniprot_2021_06
+taxon:
+  name: Hemicrepidius niger
+  taxid: "869179"
+version: 1
+````
+
 ## Contributing
 
 If you find a problem or want to suggest a feature, please submit an issue.
