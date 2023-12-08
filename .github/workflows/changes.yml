@@ -3,7 +3,7 @@ name: detect-changes
 env:
   DEFAULT_PYTHON: '["3.9"]'
   #MATRIX_PYTHON: '["3.9"]'
-  MATRIX_PYTHON: '["3.9","3.10","3.11"]'
+  MATRIX_PYTHON: '["3.9","3.10","3.11","3.12"]'
   DEFAULT_PLATFORM: '["linux"]'
   MATRIX_PLATFORM: '["linux", "macos"]'
   BASE_TAG: "genomehubs/blobtoolkit"
