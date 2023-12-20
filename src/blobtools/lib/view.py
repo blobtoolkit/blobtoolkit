@@ -9,7 +9,7 @@ Usage:
   blobtools view [--format STRING...] [--host STRING] [--interactive]
   [--out PATH] [--param STRING...] [--ports RANGE] [--prefix STRING]
   [--preview STRING...] [--driver STRING] [--driver-log PATH]
-  [--local] [--remote] [--timeout INT] [--view STRING...] DIRECTORY
+  [--local] [--remote] [--plot] [--timeout INT] [--view STRING...] DIRECTORY
 
 Options:
       --format STRING         Image format (svg|png). [Default: png]
@@ -24,6 +24,7 @@ Options:
       --driver-log PATH       Path to driver logfile for debugging. [Default: /dev/null]
       --local                 Start viewer for local session. [Default: False]
       --remote                Start viewer for remote session. [Default: False]
+      --plot                  Use blobtk plot to generate plots. [Default: False]
       --timeout INT           Time to wait for page load in seconds. Default (0) is no timeout. [Default: 0]
       --view STRING           Plot type (blob|cumulative|snail). [Default: blob]
 """
@@ -43,7 +44,7 @@ from subprocess import PIPE
 from subprocess import Popen
 from traceback import format_exc
 
-import psutil
+from blobtk import plot
 from docopt import docopt
 from pyvirtualdisplay import Display
 from pyvirtualdisplay.abstractdisplay import XStartError
@@ -241,24 +242,25 @@ def firefox_driver(args):
     outdir = os.path.abspath(args["--out"])
     os.makedirs(Path(outdir), exist_ok=True)
 
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference("browser.download.folderList", 2)
-    profile.set_preference("browser.download.manager.showWhenStarting", False)
-    profile.set_preference("browser.download.dir", outdir)
-    profile.set_preference("browser.download.lastDir", args["--out"])
-    profile.set_preference(
+    options = Options()
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.dir", outdir)
+    options.set_preference("browser.download.lastDir", args["--out"])
+    options.set_preference(
         "browser.helperApps.neverAsk.saveToDisk",
         "image/png, image/svg+xml, text/csv, text/plain, application/json",
     )
-    options = Options()
     options.headless = not args["--interactive"]
 
     display = start_display()
+    service = Service(
+        service_log_path=args["--driver-log"],
+    )
     try:
         driver = webdriver.Firefox(
             options=options,
-            firefox_profile=profile,
-            service_log_path=args["--driver-log"],
+            service=service,
         )
     except WebDriverException:
         LOGGER.error(
@@ -296,7 +298,6 @@ def chromium_driver(args):
         # service_object = Service(ChromeDriverManager().install())
         LOGGER.info("Successfully installed chromedriver")
     except Exception as err:
-        print(err)
         # if "LATEST_RELEASE_" in str(err):
         #     try:
         #         _, version = str(err).split("LATEST_RELEASE_")
@@ -337,13 +338,16 @@ def chromium_driver(args):
         chromedriver_path = os.path.join(
             getsitepackages()[0], "chromedriver_binary", "chromedriver"
         )
+    service = Service(
+        executable_path=chromedriver_path,
+        service_log_path=args["--driver-log"],
+    )
     try:
         driver = webdriver.Chrome(
-            chromedriver_path,
             options=options,
             # service=service_object,
             # executable_path=add option to set binary location,
-            service_log_path=args["--driver-log"],
+            service=service,
         )
     except WebDriverException:
         LOGGER.error(
@@ -502,12 +506,82 @@ def static_view(args, loc, viewer):
         display.stop()
     except Exception as err:
         handle_error(err)
-        # print(err)
-        # if viewer is not None:
-        #     viewer.send_signal(signal.SIGINT)
-        # driver.quit()
-        # display.stop()
     return True
+
+
+def plot_view(args):
+    """Generate static images using blobtk plot."""
+    param_names = {
+        "segments": "segments",
+        "circumferenceScale": "max_span",
+        "radiusScale": "max_scaffold",
+        "maxSpan": "max_span",
+        "maxScaffold": "max_scaffold",
+        "xField": "x_field",
+        "yField": "y_field",
+        "zField": "z_field",
+        "catField": "cat_field",
+        "resolution": "resolution",
+        "histHeight": "hist_height",
+        "zReducer": "reducer_function",
+        "zScale": "scale_function",
+        "plotScale": "scale_factor",
+        "reducerFunction": "reducer_function",
+        "scaleFunction": "scale_function",
+        "scaleFactor": "scale_factor",
+        "xLimit": "x_limit",
+        "yLimit": "y_limit",
+        "catCount": "cat_count",
+        "showLegend": "show_legend",
+        "legend": "show_legend",
+        "catOrder": "cat_order",
+        "origin": "origin",
+        "palette": "palette",
+        # color,
+    }
+    file_stem = Path(args["DIRECTORY"]).name
+    outdir = os.path.abspath(args["--out"])
+    if args["--format"] == "svg":
+        qstr = "&svgThreshold=Infinity"
+    shape = "circle"
+    suffix = ["Min", "Max", "Inv", "Key", "Keys"]
+    filters = []
+    flags = {}
+    for param in args["--param"]:
+        key, value = param.split("=")
+        if key == "plotShape":
+            shape = value
+        parts = key.split("--")
+        if len(parts) == 2:
+            if any(parts[1] in s for s in suffix):
+                filters.append(param)
+            elif parts[1] == "Order":
+                flags["cat_order"] = value
+        elif key in param_names:
+            flags[param_names[key]] = value
+        elif key in param_names.values():
+            flags[key] = value
+        elif key.startswith("color"):
+            if "color" not in flags:
+                flags["color"] = []
+            flags["color"].append(f'{key.replace("color", "")}={value}')
+    for view in args["--view"]:
+        for image_format in args["--format"]:
+            if view == "blob":
+                # if shape != "circle":
+                outfile = f"{outdir}/{file_stem}.{view}.{shape}.{image_format}"
+            else:
+                outfile = f"{outdir}/{file_stem}.{view}.{image_format}"
+            print(outfile)
+
+            plot.plot(
+                blobdir=args["DIRECTORY"],
+                output=outfile,
+                view=view,
+                filter=filters,
+                **flags,
+            )
+    quit()
 
 
 def interactive_view(args, loc, viewer, level):
@@ -576,20 +650,22 @@ def remote_view(args, loc, viewer, port, api_port, level, remote):
 
 def main(args):
     """Entrypoint for blobtools view."""
-    loc, viewer, port, api_port, level = test_loc(args)
-    with contextlib.suppress(KeyboardInterrupt):
-        if args["--interactive"]:
-            interactive_view(args, loc, viewer, level)
-        elif args["--remote"]:
-            remote_view(args, loc, viewer, port, api_port, level, True)
-        elif args["--local"]:
-            remote_view(args, loc, viewer, port, api_port, level, False)
-        else:
+    if not args["--plot"]:
+        loc, viewer, port, api_port, level = test_loc(args)
+        with contextlib.suppress(KeyboardInterrupt):
+            if args["--interactive"]:
+                interactive_view(args, loc, viewer, level)
+            elif args["--remote"]:
+                remote_view(args, loc, viewer, port, api_port, level, True)
+            elif args["--local"]:
+                remote_view(args, loc, viewer, port, api_port, level, False)
             static_view(args, loc, viewer)
-    time.sleep(1)
-    if viewer is not None:
-        viewer.send_signal(signal.SIGINT)
         time.sleep(1)
+        if viewer is not None:
+            viewer.send_signal(signal.SIGINT)
+            time.sleep(1)
+    else:
+        plot_view(args)
 
 
 def cli():

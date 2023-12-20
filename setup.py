@@ -7,84 +7,11 @@ https://github.com/pypa/sampleproject
 """
 
 import io
-
-# import platform
-# import re
-from os import makedirs
-from os import remove
-from os.path import abspath
 from os.path import dirname
-from os.path import isfile
 from os.path import join
 
 from setuptools import find_namespace_packages
 from setuptools import setup
-
-# from setuptools.command.install import install
-
-# system = platform.system()
-# # arch, _ = platform.architecture()
-# if system == "Linux":
-#     blobtoolkit_api = "bin/blobtoolkit-api-linux"
-#     blobtoolkit_viewer = "bin/blobtoolkit-viewer-linux"
-# if system == "Windows":
-#     blobtoolkit_api = "bin/blobtoolkit-api-win.exe"
-#     blobtoolkit_viewer = "bin/blobtoolkit-viewer-win.exe"
-# if system == "Darwin":
-#     blobtoolkit_api = "bin/blobtoolkit-api-macos"
-#     blobtoolkit_viewer = "bin/blobtoolkit-viewer-macos"
-
-# from https://stackoverflow.com/questions/45150304/how-to-force-a-python-wheel-to-be-platform-specific-when-building-it # noqa
-# try:
-#     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-#     class bdist_wheel(_bdist_wheel):
-#         def finalize_options(self):
-#             _bdist_wheel.finalize_options(self)
-#             # Mark us as not a pure python package (we have platform specific rust code)
-#             self.root_is_pure = False
-
-#         def get_tag(self):
-#             # this set's us up to build generic wheels.
-#             # note: we're only doing this for windows right now (causes packaging issues
-#             # with osx)
-#             tag = _bdist_wheel.get_tag(self)
-#             print(tag)
-#             repl = "macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64"
-#             if tag[2] == "macosx_10_9_x86_64":
-#                 tag = (tag[0], tag[1], repl)
-#                 return tag
-
-#             if not system == "Windows":
-#                 return _bdist_wheel.get_tag(self)
-
-#             python, abi, plat = _bdist_wheel.get_tag(self)
-#             python, abi = "py3", "none"
-#             return python, abi, plat
-
-
-# except ImportError:
-#     print("Error happens")
-#     bdist_wheel = None
-
-
-# class PostInstallCommand(install):
-#     """Post-installation for installation mode."""
-
-#     def run(self):
-#         source_dir = dirname(abspath(__file__))
-#         makedirs(self.install_scripts, exist_ok=True)
-
-#         self.copy_file(source_dir, blobtoolkit_api, "blobtoolkit-api")
-#         self.copy_file(source_dir, blobtoolkit_viewer, "blobtoolkit-viewer")
-
-#     def copy_file(self, source_dir, file_name, executable_name):
-#         source = join(source_dir, file_name)
-#         target = join(self.install_scripts, executable_name)
-#         if isfile(target):
-#             remove(target)
-
-#         self.move_file(source, target)
 
 
 def read(*names, **kwargs):
@@ -97,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit",  # Required
-    version="4.2.0",
+    version="4.3.0",
     description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
@@ -179,7 +106,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "blobtk>=0.2.3",
+        "blobtk>=0.5.0",
         # "chromedriver-binary-auto>=0.3.1",
         "chromedriver-autoinstaller>=0.6.2",
         "docopt>=0.6.2",
@@ -188,7 +115,7 @@ setup(
         "psutil==5.9.4",
         "pyvirtualdisplay==3.0",
         "pyyaml",
-        "selenium>=4.7.2",
+        "selenium>=4.10.0",
         "tolkein>=0.5.0",
         "tqdm==4.64.1",
         "ujson>=5.7.0",
@@ -212,9 +139,9 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
-        "full": ["blobtoolkit-host==4.2.0", "blobtoolkit-pipeline==4.2.0"],
-        "host": ["blobtoolkit-host==4.2.0"],
-        "pipeline": ["blobtoolkit-pipeline==4.2.0"],
+        "full": ["blobtoolkit-host==4.3.0", "blobtoolkit-pipeline==4.3.0"],
+        "host": ["blobtoolkit-host==4.3.0"],
+        "pipeline": ["blobtoolkit-pipeline==4.3.0"],
     },
     entry_points={
         "console_scripts": [

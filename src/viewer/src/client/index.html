@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="simplecookie_policy" content="/policies/cookies/" />
   <title>
     <%= htmlWebpackPlugin.options.title %>
   </title>
@@ -84,6 +85,162 @@
         opacity: 0;
       }
     }
+
+    #cookie-policy {
+      position: fixed;
+      padding-bottom: 0.4em;
+      bottom: 0;
+      right: 0;
+      width: auto;
+      z-index: 1000000;
+      color: #fff;
+      font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    #cookie-policy.full {
+      width: 100%;
+      background-color: #31323f;
+      border-top: 2px solid #fff
+    }
+
+    #cookie-policy.full p {
+      margin: 1em
+    }
+
+    #cookie-options {
+      position: fixed;
+      bottom: 0;
+      top: 0;
+      right: 0;
+      color: #fff;
+      z-index: 1000000;
+      width: 40%;
+      /* max-width: 700px; */
+      background-color: #31323f;
+      border-left: 2px solid #fff;
+      text-align: left;
+      overflow-y: auto;
+      padding: 5px 2em 2em;
+      font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    #cookie-options blockquote {
+      text-align: center;
+      margin: 0
+    }
+
+    #cookie-options tr td {
+      width: 20%;
+      vertical-align: middle;
+      text-align: center
+    }
+
+    #cookie-options tr td:first-child {
+      width: 75%;
+      vertical-align: top;
+      text-align: left
+    }
+
+    #cookie-options tr.disabled td {
+      background-color: #31323f;
+      color: #fff;
+      text-decoration: line-through
+    }
+
+    #cookie-options table {
+      border-collapse: collapse;
+      width: 95%;
+      margin: auto
+    }
+
+    #cookie-options td,
+    #cookie-options th {
+      border: 2px solid #31323f;
+      padding: 4px;
+      line-height: 1.25em;
+      color: #fff;
+      background-color: rgb(65, 74, 81);
+    }
+
+    #cookie-options th {
+      /* background-color: #31323f;
+      color: #fff; */
+      text-align: center
+    }
+
+    #cookie-options h2 {
+      padding-top: 1em;
+      /* font-family: "Signika", "Helvetica Neue", Helvetica, Arial, sans-serif; */
+    }
+
+    #cookie-options h3 {
+      padding-top: 1em;
+      /* font-family: "Signika", "Helvetica Neue", Helvetica, Arial, sans-serif; */
+      border-top: 2px solid #fff;
+    }
+
+    #cookie-options a {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .cookie-settings {
+      cursor: pointer;
+      font-weight: bold;
+      border: 1px solid #000000;
+      border-radius: 4px;
+      padding: 04px;
+      background-color: #eeeeee
+    }
+
+    #cookie-options button,
+    #cookie-policy button {
+      background-color: #fff;
+      color: #31323f;
+      border: 0;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin: 3px
+    }
+
+    #cookie-options button {
+      font-size: 1.1em;
+      padding: 4px 1em
+    }
+
+    button#cookie-close {
+      display: block;
+      float: right;
+      font-size: 1em
+    }
+
+    @media print {
+      div#cookie-policy {
+        display: none
+      }
+    }
+
+    @media (max-width: 1600px) {
+      #cookie-options {
+        width: 40%
+      }
+    }
+
+    @media (max-width: 1280px) {
+      #cookie-options {
+        width: 60%;
+      }
+    }
+
+    @media (max-width: 900px) {
+      #cookie-options {
+        left: 0;
+        width: calc(100% - 2em);
+        border-left: 0;
+      }
+    }
   </style>
   <div id="app">
     <div id="preloader">
@@ -98,6 +255,8 @@
       </div>
     </div>
   </div>
+  <script type='text/javascript' src='/js/cookies-gcc.js' id='simple-cookie-js'></script>
+  <script src="/zxtm/piwik2.js"></script>
 </body>
 
 </html>

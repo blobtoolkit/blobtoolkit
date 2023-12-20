@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit-host",  # Required
-    version="4.2.0",
+    version="4.3.0",
     description="blobtoolkit-host",  # Optional
     long_description="blobtoolkit-host",  # Optional
     long_description_content_type="text/markdown",
