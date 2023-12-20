@@ -108,7 +108,13 @@ def parse_busco_full_summary(busco_file, chunk=100000):
                 continue
             parts = line.split("\t")
             if parts[1] in ("Complete", "Duplicated"):
-                locations[parts[2]].append((int(parts[3]), int(parts[4])))
+                if ":" in parts[2] and parts[5] == "-":
+                    start = int(parts[4])
+                    end = int(parts[3])
+                else:
+                    start = int(parts[3])
+                    end = int(parts[4])
+                locations[parts[2].split(":")[0]].append((start, end))
     windows = {}
     for title, tuples in locations.items():
         tuples.sort(key=lambda tup: tup[0])
@@ -135,7 +141,7 @@ def chunk_by_busco(seq, seqs, busco_windows, args):
                 has_busco = True
                 subseq = seq["seq"][window[0] - seq["start"] : window[1] - seq["start"]]
                 # check there are runs of unmasked bases
-                if check_for_masked_bases(subseq, 1000):
+                if check_for_unmasked_bases(subseq, 1000):
                     seq["seq"] = subseq
                     seq["start"] = window[0]
                     subseq_found = True
@@ -147,7 +153,7 @@ def chunk_by_busco(seq, seqs, busco_windows, args):
         if offset > 0:
             midseq = seq["seq"][offset:-offset]
             # check there are runs of unmasked bases
-            if check_for_masked_bases(midseq, 1000):
+            if check_for_unmasked_bases(midseq, 1000):
                 seq["seq"] = midseq
                 seq["start"] += offset
                 seq["end"] -= offset
@@ -157,14 +163,14 @@ def chunk_by_busco(seq, seqs, busco_windows, args):
                 while offset > chunk:
                     offset -= chunk
                     lseq = seq["seq"][offset : offset + chunk]
-                    if check_for_masked_bases(lseq, 1000):
+                    if check_for_unmasked_bases(lseq, 1000):
                         seq["seq"] = lseq
                         seq["start"] += offset
                         seq["end"] = seq["start"] + chunk
                         subseq_found = True
                         break
                     rseq = seq["seq"][-offset - chunk : -offset]
-                    if check_for_masked_bases(rseq, 1000):
+                    if check_for_unmasked_bases(rseq, 1000):
                         seq["seq"] = rseq
                         seq["start"] = seq["end"] - offset - chunk
                         seq["end"] -= offset
