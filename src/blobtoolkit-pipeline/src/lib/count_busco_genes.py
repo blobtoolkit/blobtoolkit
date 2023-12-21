@@ -5,13 +5,12 @@ Count BUSCO genes.
 Usage: blobtoolkit-pipeline count-busco-genes --in TSV... --mask TSV --out TSV
 
 Options:
-    --in TSV      chunked summary stats tsv file.
+    --in TSV      BUSCO full table tsv file.
     --mask TSV    BED or BED-like TSV format mask file to specify sequence chunks.
     --out TSV     output TSV filename or suffix.
 """
 
 import logging
-import sys
 from collections import defaultdict
 
 from docopt import DocoptExit
@@ -25,20 +24,6 @@ logger_config = {
 }
 logging.basicConfig(**logger_config)
 logger = logging.getLogger()
-
-
-# def parse_args():
-#     """Parse snakemake args if available."""
-#     args = {}
-#     try:
-#         args["--in"] = snakemake.input.busco
-#         args["--mask"] = snakemake.input.mask
-#         args["--out"] = snakemake.output.tsv
-#         for key, value in args.items:
-#             sys.argv.append(key)
-#             sys.argv.append(value)
-#     except NameError as err:
-#         pass
 
 
 def load_mask(filename):
@@ -67,13 +52,15 @@ def parse_busco_summary(filename, mask, header):
                 if line.startswith("# The lineage dataset is:"):
                     meta = line.split()
                     lineage = meta[5]
-                    header.append("%s_count" % lineage)
+                    header.append(f"{lineage}_count")
                 continue
-            busco, status, *rest = line.rstrip().split("\t")
+            _, status, *rest = line.rstrip().split("\t")
             if status in {"Fragmented", "Missing"}:
                 continue
-            seqid, start, *rest = rest
-            buscos[seqid].append(int(start))
+            seqid, start, end, strand, *rest = rest
+            if ":" in seqid and strand == "-":
+                start = end
+            buscos[seqid.split(":")[0]].append(int(start))
     if lineage is not None:
         for seqid in mask:
             starts = sorted(buscos[seqid])
@@ -85,7 +72,7 @@ def parse_busco_summary(filename, mask, header):
                         if starts[i] > obj["end"]:
                             break
                         ctr += 1
-                        i += 1
+                    i += 1
                 obj["cols"].append(ctr)
     return mask, header
 
