@@ -17,6 +17,8 @@ Options:
     --out TSV                output TSV filename or suffix.
 """
 
+
+import contextlib
 import logging
 import math
 import os
@@ -74,7 +76,8 @@ def parse_chunked_values(filename, args):
             lengths[seqid] += chunk_length
             for key, idx in header.items():
                 if key in header_keys:
-                    values[seqid][header_keys[key]].append(float(row[idx]))
+                    with contextlib.suppress(ValueError):
+                        values[seqid][header_keys[key]].append(float(row[idx]))
     return lengths, values, interval
 
 
@@ -196,9 +199,8 @@ def process_files(args):
                 filetag = ".%s" % re.sub(r"\.0$", "", str(window))
             if not os.path.exists(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
-            fh = open(f"{filename}{filetag}{suffix}", "w")
-            fh.writelines(rows)
-            fh.close()
+            with open(f"{filename}{filetag}{suffix}", "w") as fh:
+                fh.writelines(rows)
 
 
 def main(rename=None):
@@ -215,7 +217,6 @@ def main(rename=None):
     except Exception as err:
         logger.error(err)
         raise err
-        exit(1)
 
 
 if __name__ == "__main__":
