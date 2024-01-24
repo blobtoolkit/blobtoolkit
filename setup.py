@@ -106,7 +106,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "blobtk>=0.5.0",
+        "blobtk>=0.5.3",
         # "chromedriver-binary-auto>=0.3.1",
         "chromedriver-autoinstaller>=0.6.2",
         "docopt>=0.6.2",
