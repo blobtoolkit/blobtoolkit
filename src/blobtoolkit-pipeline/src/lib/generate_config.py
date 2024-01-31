@@ -396,7 +396,11 @@ def parse_assembly_meta(accession):
         "version": 1,
     }
     xml = fetch_assembly_meta_xml(accession)
-    root = ET.fromstring(xml)
+    try:
+        root = ET.fromstring(xml)
+    except TypeError:
+        LOGGER.error(f"Invalid accession: '{accession}'")
+        sys.exit(1)
     asm = root.find("ASSEMBLY")
     meta["assembly"]["bioproject"] = deep_find_text(
         asm, ("STUDY_REF", "IDENTIFIERS", "PRIMARY_ID")
@@ -508,7 +512,9 @@ def fetch_read_info(accession, per_platform):
                     exponent = si_suffix[suffix]
                 except KeyError:
                     exponent = 0
-                values["base_count"] = int(values["base_count"].strip(suffix)) * pow(10, exponent)
+                values["base_count"] = int(values["base_count"].strip(suffix)) * pow(
+                    10, exponent
+                )
             else:
                 values["base_count"] = 0
         except KeyError:
