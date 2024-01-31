@@ -7,7 +7,7 @@ env:
   DEFAULT_PLATFORM: '["linux"]'
   MATRIX_PLATFORM: '["linux", "macos"]'
   BASE_TAG: "genomehubs/blobtoolkit"
-  VERSION: 4.3.3
+  VERSION: 4.3.4
 
 on:
   workflow_call:
