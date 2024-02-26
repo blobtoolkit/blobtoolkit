@@ -47,7 +47,7 @@ def parse_busco(busco_file, identifiers):  # pylint: disable=too-many-locals
             if version < 4:
                 contig = row[contig_index]
             else:
-                contig = row[contig_index].split(":")[0]
+                contig = re.sub(r":\d+-\d+$", "", row[contig_index])
             results[contig].append([row[busco_index], row[status_index]])
     if not identifiers.validate_list(list(results.keys())):
         # try removing _\d+ suffix added by prokka-based busco
