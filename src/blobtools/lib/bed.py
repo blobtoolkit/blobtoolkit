@@ -6,8 +6,6 @@
 
 import math
 import sys
-from collections import Counter
-from collections import OrderedDict
 from collections import defaultdict
 from copy import deepcopy
 from glob import glob
@@ -17,7 +15,6 @@ from os import stat
 from pathlib import Path
 
 from tolkein import tofile
-from tqdm import tqdm
 
 from .field import Array
 from .field import Identifier
@@ -250,18 +247,21 @@ def parse_full_tsv(filename):
             values["length"][row[0]] = length
             values["position"][row[0]] = int(row[2])
             for key, idx in header.items():
-                if key.endswith("_sd"):
-                    sd[key[: key.rfind("_sd")]][row[0]] = float(row[idx])
-                elif key.endswith("_n"):
-                    n[key[: key.rfind("_n")]][row[0]] = float(row[idx])
-                elif key.endswith("_cpm"):
-                    values[key][row[0]] = float(
-                        "%.3g" % (float(row[idx]) / length * 1000000)
-                    )
-                elif key.endswith("_count"):
-                    values[key][row[0]] = int(row[idx])
-                else:
-                    values[key][row[0]] = float(row[idx])
+                try:
+                    if key.endswith("_sd"):
+                        sd[key[: key.rfind("_sd")]][row[0]] = float(row[idx])
+                    elif key.endswith("_n"):
+                        n[key[: key.rfind("_n")]][row[0]] = float(row[idx])
+                    elif key.endswith("_cpm"):
+                        values[key][row[0]] = float(
+                            "%.3g" % (float(row[idx]) / length * 1000000)
+                        )
+                    elif key.endswith("_count"):
+                        values[key][row[0]] = int(row[idx])
+                    else:
+                        values[key][row[0]] = float(row[idx])
+                except ValueError:
+                    values[key][row[0]] = None
     return values, sd, n
 
 
@@ -287,18 +287,21 @@ def parse_windowed_tsv(filename, window):
             values["length"][row[0]].append(length)
             values["position"][row[0]].append(round(int(row[1]) + length / 2))
             for key, idx in header.items():
-                if key.endswith("_sd"):
-                    sd[key[: key.rfind("_sd")]][row[0]].append(float(row[idx]))
-                elif key.endswith("_n"):
-                    n[key[: key.rfind("_n")]][row[0]].append(float(row[idx]))
-                elif key.endswith("_cpm"):
-                    values[key][row[0]].append(
-                        float("%.3g" % (float(row[idx]) / length * 1000000))
-                    )
-                elif key.endswith("_count"):
-                    values[key][row[0]].append(int(row[idx]))
-                else:
-                    values[key][row[0]].append(float(row[idx]))
+                try:
+                    if key.endswith("_sd"):
+                        sd[key[: key.rfind("_sd")]][row[0]].append(float(row[idx]))
+                    elif key.endswith("_n"):
+                        n[key[: key.rfind("_n")]][row[0]].append(float(row[idx]))
+                    elif key.endswith("_cpm"):
+                        values[key][row[0]].append(
+                            float("%.3g" % (float(row[idx]) / length * 1000000))
+                        )
+                    elif key.endswith("_count"):
+                        values[key][row[0]].append(int(row[idx]))
+                    else:
+                        values[key][row[0]].append(float(row[idx]))
+                except ValueError:
+                    values[key][row[0]].append(None)
     return values, sd, n
 
 
@@ -356,6 +359,16 @@ def validate_range(meta):
             mag = math.floor(math.log10(meta["range"][1]))
             meta["range"][1] += 10 ** (mag - 1)
     return True
+
+
+def get_range(values):
+    """Get range of values, filtering None."""
+    value_range = [math.inf, -math.inf]
+    for value in values:
+        if value is not None:
+            value_range[0] = min(value_range[0], value)
+            value_range[1] = max(value_range[1], value)
+    return value_range
 
 
 def parse(files, **kwargs):
@@ -429,7 +442,7 @@ def parse(files, **kwargs):
                     )
                     if meta["datatype"] == "integer":
                         values = [int(value) for value in values]
-                    value_range = [min(values), max(values)]
+                    value_range = get_range(values)
                     if "clamp" in meta and value_range[0] >= meta["clamp"]:
                         meta["clamp"] = False
                     parent_range = False
