@@ -6,7 +6,7 @@ LABEL version=$VERSION
 
 ENV CONTAINER_VERSION=$VERSION
 
-RUN apk add --no-cache curl gcompat libstdc++ libgcc
+RUN apk add --no-cache gcompat libstdc++ libgcc
 
 RUN mkdir -p /blobtoolkit/conf \
     && mkdir -p /blobtoolkit/datasets
@@ -19,8 +19,7 @@ USER blobtoolkit
 
 WORKDIR /blobtoolkit
 
-RUN curl -Ls https://github.com/blobtoolkit/blobtoolkit/releases/download/${VERSION}/blobtoolkit-api-linux > blobtoolkit-api \
-    && chmod 755 blobtoolkit-api
+COPY blobtoolkit-api-linux /blobtoolkit/blobtoolkit-api
 
 ENV PATH /blobtoolkit:$PATH
 
