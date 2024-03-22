@@ -537,6 +537,7 @@ def plot_view(args):
         "catOrder": "cat_order",
         "origin": "origin",
         "palette": "palette",
+        "shape": "shape",
         # color,
     }
     file_stem = Path(args["DIRECTORY"]).name
