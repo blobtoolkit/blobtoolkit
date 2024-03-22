@@ -23,7 +23,8 @@ jobs:
           path: ./dist
       - name: Move API
         run: |
-          mv ./dist/blobtoolkit-api-linux src/docker/viewer/
+          mv ./dist/blobtoolkit-api-linux src/docker/api/
+          chmod 755 src/docker/api/blobtoolkit-api-linux
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:

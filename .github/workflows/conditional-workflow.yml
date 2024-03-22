@@ -18,6 +18,7 @@ jobs:
     needs:
       - changes
       - package-api
+      - package-ui
     # if: needs.changes.outputs.is-api-release == 'true'
     secrets: inherit
     uses: ./.github/workflows/build-api.yml
@@ -36,6 +37,7 @@ jobs:
   build-ui:
     needs:
       - changes
+      - package-api
       - package-ui
     # if: needs.changes.outputs.is-ui-release == 'true'
     secrets: inherit
