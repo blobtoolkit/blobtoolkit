@@ -13,17 +13,17 @@ export const plotText = createSelector(
       axisTitle: {
         fontFamily,
         textAnchor,
-        fontSize: largeFonts ? "28px" : "24px",
+        fontSize: largeFonts ? "30px" : "24px",
       },
       axisTitleSmall: {
         fontFamily,
         textAnchor,
-        fontSize: largeFonts ? "22px" : "16px",
+        fontSize: largeFonts ? "24px" : "16px",
       },
       axisTick: {
         fontFamily,
         textAnchor,
-        fontSize: largeFonts ? "22px" : "16px",
+        fontSize: largeFonts ? "24px" : "16px",
       },
       plotTitle: {
         fontFamily,
@@ -37,15 +37,15 @@ export const plotText = createSelector(
       },
       legend: {
         fontFamily,
-        fontSize: largeFonts ? "18px" : "13px",
+        fontSize: largeFonts ? "20px" : "13px",
       },
       horizLegend: {
         fontFamily,
-        fontSize: largeFonts ? "16px" : "12px",
+        fontSize: largeFonts ? "18px" : "12px",
       },
       legendTitle: {
         fontFamily,
-        fontSize: largeFonts ? "24px" : "24px",
+        fontSize: largeFonts ? "26px" : "24px",
       },
       snailLegend: {
         fontFamily,
