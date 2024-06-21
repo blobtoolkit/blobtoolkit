@@ -626,6 +626,7 @@ components:
         type: string
         enum:
           - circle
+          - grid
           - hex
           - kite
           - none
