@@ -1,5 +1,4 @@
 FROM genomehubs/blobtk:0.5.3 AS builder
-
 FROM genomehubs/blobtoolkit-dependencies:latest
 
 LABEL maintainer="blobtoolkit@genomehubs.org"
@@ -26,7 +25,8 @@ COPY setup.sh /blobtoolkit
 
 RUN /blobtoolkit/setup.sh \
     && rm /blobtoolkit/setup.sh \
-    && rm -r /tmp/*
+    && rm -r /tmp/* \
+    && mv /opt/conda/envs/btk_env/bin/blobtk /opt/conda/envs/btk_env/bin/blobtk_0.2.4
 
 WORKDIR /blobtoolkit
 
