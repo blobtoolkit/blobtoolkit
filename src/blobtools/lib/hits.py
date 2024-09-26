@@ -55,8 +55,8 @@ def parse_blast(blast_file, cols, results=None, index=0, evalue=1, bitscore=1):
             hit = {
                 "subject": row[cols["sseqid"]],
                 "score": score,
-                "start": int(start),
-                "end": int(end),
+                "start": int(re.sub(r'\d', '', end)),
+                "end": int(re.sub(r'\d', '', end)),
                 "file": index,
                 "title": parts[1],
             }
