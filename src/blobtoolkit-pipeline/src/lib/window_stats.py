@@ -77,7 +77,7 @@ def parse_chunked_values(filename, args):
             for key, idx in header.items():
                 if key in header_keys:
                     with contextlib.suppress(ValueError):
-                        values[seqid][header_keys[key]].append(float(row[idx]))
+                        values[seqid][header_keys[key]].append(float(row[idx] or 0))
     return lengths, values, interval
 
 
