@@ -17,19 +17,19 @@ jobs:
       - package-api
     uses: ./.github/workflows/package-host.yml
     with:
-      python-version: 3.10
+      python-version: 3.9
       platform: linux
 
   package-pipeline:
     uses: ./.github/workflows/package-pipeline.yml
     with:
-      python-version: 3.10
+      python-version: 3.9
       platform: linux
 
   package-blobtools:
     uses: ./.github/workflows/package-blobtools.yml
     with:
-      python-version: 3.10
+      python-version: 3.9
       platform: linux
 
   update-docker-image:
