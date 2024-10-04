@@ -16,7 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        with: ${{ inputs.python-version }}
+        with:
+          python-version: ${{ inputs.python-version }}
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
