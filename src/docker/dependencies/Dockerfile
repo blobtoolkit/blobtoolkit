@@ -66,7 +66,7 @@ RUN chown -R blobtoolkit:blobtoolkit /blobtoolkit \
 
 ARG CONDA_DIR=/opt/conda
 
-RUN $CONDA_DIR/bin/conda env create --experimental-solver=libmamba -f /tmp/env.yaml \
+RUN $CONDA_DIR/bin/conda env create -f /tmp/env.yaml \
     && $CONDA_DIR/bin/conda clean --all --yes
 
 COPY setup.sh /blobtoolkit
