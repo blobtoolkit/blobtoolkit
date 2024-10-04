@@ -91,7 +91,7 @@ const readMeta = async (dir, md) => {
 };
 
 const listMeta = async (dir, { md, meta }) => {
-  md = md || meta.slice() || [];
+  md = md || meta?.slice() || [];
   versions = {};
   md.forEach((o, i) => {
     if (!versions[o.prefix]) {
@@ -259,16 +259,11 @@ let keys = {};
 let tree = {};
 let status = "LOADING";
 
-const loadIndex = async () => {
-  // TODO: support cancelling this indexing if called again before finished
-  // Load dataset IDs first to get an index ready quickly
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const loadFullIndex = async () => {
   try {
-    let newMeta = await listMeta(dataDirectory, { meta });
-    let newIndex = generateIndex(newMeta);
-    let newKeys = Object.keys(newIndex.values);
-    meta = newMeta;
-    index = newIndex;
-    keys = newKeys;
+    await sleep(10000);
     // Load metadata into full index
     status = "INDEXING";
     newMeta = await readMeta(dataDirectory);
@@ -282,6 +277,22 @@ const loadIndex = async () => {
     index = newIndex;
     keys = newKeys;
     status = "OK";
+  } catch (message) {
+    logError({ message });
+    status = "NOT OK";
+  }
+};
+
+const loadIndex = async () => {
+  try {
+    let newMeta = await listMeta(dataDirectory, {});
+    let newIndex = generateIndex(newMeta);
+    let newKeys = Object.keys(newIndex.values);
+    meta = newMeta;
+    index = newIndex;
+    keys = newKeys;
+    status = "INDEXING";
+    loadFullIndex();
   } catch (message) {
     logError({ message });
     status = "NOT OK";
