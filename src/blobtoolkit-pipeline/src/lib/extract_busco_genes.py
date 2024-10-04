@@ -48,7 +48,10 @@ def parse_busco_file(fh, ofh, status, busco_id):
         if line.startswith(">"):
             header = line.strip()
             title = ""
-            if header_pattern.match(header):
+            if header.startswith(f">{busco_id}"):
+                seq_id = header.split("|")[-1]
+                title = f">{seq_id}={busco_id}={status}"
+            elif header_pattern.match(header):
                 title = f"{header}={busco_id}={status}"
             else:
                 parts = header.split(" # ")

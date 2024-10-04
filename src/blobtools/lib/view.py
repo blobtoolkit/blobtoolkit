@@ -27,6 +27,17 @@ Options:
       --plot                  Use blobtk plot to generate plots. [Default: False]
       --timeout INT           Time to wait for page load in seconds. Default (0) is no timeout. [Default: 0]
       --view STRING           Plot type (blob|cumulative|snail). [Default: blob]
+
+Examples:
+    # 1. Create a snail plot:
+    blobtools view --plot --view snail /path/to/BlobDir
+
+    # 2. Start an interactive session:
+    blobtools view --interactive /path/to/BlobDir
+
+    # 3. Start an remote session:
+    blobtools view --remote /path/to/BlobDir
+
 """
 
 import contextlib
@@ -537,6 +548,7 @@ def plot_view(args):
         "catOrder": "cat_order",
         "origin": "origin",
         "palette": "palette",
+        "shape": "shape",
         # color,
     }
     file_stem = Path(args["DIRECTORY"]).name

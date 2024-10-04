@@ -42,5 +42,5 @@ jobs:
           context: src/docker
           build-args: VERSION=${{ inputs.container-version }}
           push: true
-          tags: ${{ inputs.docker-tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

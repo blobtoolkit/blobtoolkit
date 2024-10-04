@@ -250,6 +250,12 @@ const defaultLinks = {
               "^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$",
           },
           {
+            title: "UniProt",
+            template: "https://www.uniprot.org/uniprot/{subject}",
+            regex:
+              "^tr.+([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})",
+          },
+          {
             title: "ENA",
             template: "https://www.ebi.ac.uk/ena/browser/view/{subject}",
             regex: "^(.+)$",

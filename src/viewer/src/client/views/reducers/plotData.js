@@ -987,12 +987,21 @@ export const getGridPlotData = createSelector(
     ) {
       return { coords: [] };
     }
+    let indices = [];
+    let xValues = [];
+    plotData.axes.x.values.forEach((arr, i) => {
+      if (arr.length > 0) {
+        indices.push(i);
+        xValues.push(xData.values[i]);
+      }
+    });
 
-    let len = Math.max(
-      plotData.axes.x.values.length,
-      plotData.axes.y.values.length,
-      plotData.axes.z.values.length
-    );
+    // let len = Math.max(
+    //   plotData.axes.x.values.filter((arr) => arr.length > 0).length,
+    //   plotData.axes.y.values.filter((arr) => arr.length > 0).length,
+    //   plotData.axes.z.values.filter((arr) => arr.length > 0).length
+    // );
+    let len = indices.length;
 
     let nCols = Math.floor(Math.sqrt(len));
     let nRows = Math.ceil(len / nCols);
@@ -1003,14 +1012,15 @@ export const getGridPlotData = createSelector(
     let yField = plotData.meta.y.meta.id;
     if (xField == "position" || xField == "proportion") {
       for (let i = 0; i < len; i += nRows) {
-        colWidths.push(Math.max(...xData.values.slice(i, i + nRows)));
+        colWidths.push(Math.max(...xValues.slice(i, i + nRows)));
       }
     }
     let xDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
     let i = 0;
     let maxX = Number.NEGATIVE_INFINITY;
     let xMinNoZero = Number.POSITIVE_INFINITY;
-    for (let arr of plotData.axes.x.values) {
+    for (let index of indices) {
+      let arr = plotData.axes.x.values[index];
       for (let val of arr) {
         if (val < xDomain[0]) {
           xDomain[0] = val;
@@ -1051,7 +1061,8 @@ export const getGridPlotData = createSelector(
     }
     let yDomain = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
     let yMinNoZero = Number.POSITIVE_INFINITY;
-    for (let arr of plotData.axes.y.values) {
+    for (let index of indices) {
+      let arr = plotData.axes.y.values[index];
       for (let val of arr) {
         if (val > yDomain[1]) {
           yDomain[1] = val;
@@ -1121,9 +1132,10 @@ export const getGridPlotData = createSelector(
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
     let yClamp = Number.NEGATIVE_INFINITY;
+    let yMin;
     if (plotData.meta.y.meta) {
-      let yClamp = plotData.meta.y.meta.clamp || Number.NEGATIVE_INFINITY;
-      let yMin = plotData.meta.y.meta.limit[0];
+      yClamp = plotData.meta.y.meta.clamp || Number.NEGATIVE_INFINITY;
+      yMin = plotData.meta.y.meta.limit[0];
       if (yClamp < yMin) {
         yClamp = Number.NEGATIVE_INFINITY;
       }
@@ -1146,7 +1158,8 @@ export const getGridPlotData = createSelector(
     let visibleCats = new Set();
     let visibleFullCats = new Set();
     for (let i = 0; i < len; i++) {
-      visibleFullCats.add(bins[keys[mainData.axes.cat.values[i]]].id);
+      let index = indices[i];
+      visibleFullCats.add(bins[keys[mainData.axes.cat.values[index]]].id);
       if (plotShape == "grid") {
         if (i == 0) {
           offset = {
@@ -1173,33 +1186,35 @@ export const getGridPlotData = createSelector(
       let xsd = [];
       let ysd = [];
       let wins = Math.max(
-        plotData.axes.x.values[i].length,
-        plotData.axes.y.values[i].length,
-        plotData.axes.z.values[i].length
+        plotData.axes.x.values[index].length,
+        plotData.axes.y.values[index].length,
+        plotData.axes.z.values[index].length
         // plotData.axes.cat.values[i].length
       );
-      let zSize = -1;
       for (let j = 0; j < wins; j++) {
         let values = {};
         let sd = {};
         let valid = true;
         axes.forEach((axis) => {
           if (
-            plotData.axes[axis].values[i].length == wins ||
-            (axis == "cat" && plotData.axes[axis].values[i].length == wins + 1)
+            plotData.axes[axis].values[index].length == wins ||
+            (axis == "cat" &&
+              plotData.axes[axis].values[index].length == wins + 1)
           ) {
-            values[axis] = plotData.axes[axis].values[i][j];
+            values[axis] = plotData.axes[axis].values[index][j];
             if (plotData.axes[axis].sd) {
-              sd[axis] = plotData.axes[axis].sd[i][j];
+              sd[axis] = plotData.axes[axis].sd[index][j];
             }
           } else {
-            values[axis] = plotData.axes[axis].values[i][0];
+            values[axis] = plotData.axes[axis].values[index][0];
             if (plotData.axes[axis].sd) {
-              sd[axis] = plotData.axes[axis].sd[i][0];
+              sd[axis] = plotData.axes[axis].sd[index][0];
             }
           }
           if (isNaN(values[axis]) || values[axis] === undefined) {
-            valid = false;
+            if (axis != "cat") {
+              valid = false;
+            }
           }
         });
         if (!valid) {
