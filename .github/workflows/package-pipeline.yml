@@ -43,7 +43,7 @@ jobs:
 
   package-python-pipeline-macos:
     runs-on: macos-11
-    if: ( inputs.platform == 'macos' && inputs.python-version > '3.10' )
+    if: ( inputs.platform == 'macosx' && inputs.python-version > '3.10' )
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
