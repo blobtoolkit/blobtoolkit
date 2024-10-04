@@ -91,7 +91,7 @@ ENV CONDA_DEFAULT_ENV $CONDA_DIR/envs/btk_env
 
 ENV PATH /blobtoolkit:$CONDA_DEFAULT_ENV/bin:$PATH
 
-ENV PYTHONPATH $CONDA_DEFAULT_ENV/lib/python3.9/site-packages:$PYTHONPATH
+ENV PYTHONPATH $CONDA_DEFAULT_ENV/lib/python3.11/site-packages:$PYTHONPATH
 
 COPY startup.sh /blobtoolkit
 
