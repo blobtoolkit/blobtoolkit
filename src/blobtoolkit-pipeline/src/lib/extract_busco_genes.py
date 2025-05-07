@@ -47,7 +47,7 @@ def parse_busco_file(fh, ofh, status, busco_id):
     busco_id_pattern = re.compile(r"\d+at\d+")
     for line in fh:
         if line.startswith(">"):
-            header = line.strip()
+            header = line.strip().split(" ")[0]
             title = ""
             # remove trailing "|-" or "|+" from header if present
             header = re.sub(r"\|[\-+]+$", "", header)
