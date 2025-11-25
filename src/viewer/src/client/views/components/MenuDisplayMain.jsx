@@ -211,6 +211,25 @@ class DisplayMenu extends React.Component {
       onChangeAxisRange(values, remove);
       changeQueryParams(parsed);
     };
+    const scaleFunctionMenu = (
+      <MenuDisplaySimple name="scale function">
+        <SVGIcon
+          sprite={logIcon}
+          active={scale == "scaleLog"}
+          onIconClick={() => onSelectScale("scaleLog")}
+        />
+        <SVGIcon
+          sprite={linearIcon}
+          active={scale == "scaleLinear"}
+          onIconClick={() => onSelectScale("scaleLinear")}
+        />
+        <SVGIcon
+          sprite={sqrtIcon}
+          active={scale == "scaleSqrt"}
+          onIconClick={() => onSelectScale("scaleSqrt")}
+        />
+      </MenuDisplaySimple>
+    );
     let displayTotal = (
       <MenuDisplaySimple name="display total">
         <div className={styles.full_height}>
@@ -400,23 +419,7 @@ class DisplayMenu extends React.Component {
               onIconClick={() => onSelectReducer("mean")}
             />
           </MenuDisplaySimple>
-          <MenuDisplaySimple name="scale function">
-            <SVGIcon
-              sprite={logIcon}
-              active={scale == "scaleLog"}
-              onIconClick={() => onSelectScale("scaleLog")}
-            />
-            <SVGIcon
-              sprite={linearIcon}
-              active={scale == "scaleLinear"}
-              onIconClick={() => onSelectScale("scaleLinear")}
-            />
-            <SVGIcon
-              sprite={sqrtIcon}
-              active={scale == "scaleSqrt"}
-              onIconClick={() => onSelectScale("scaleSqrt")}
-            />
-          </MenuDisplaySimple>
+          {scaleFunctionMenu}
           {/* <MenuDisplaySimple name='adjust coverage'>
             <SVGIcon sprite={adjustIcon} active={adjustCoverage} onIconClick={()=>onToggleAdjustCoverage(!adjustCoverage)}/>
           </MenuDisplaySimple> */}
@@ -636,6 +639,7 @@ class DisplayMenu extends React.Component {
             }
           />
         </MenuDisplaySimple>
+        {scaleFunctionMenu}
       </span>
     );
     switch (view) {
