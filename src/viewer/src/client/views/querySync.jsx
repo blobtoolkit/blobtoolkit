@@ -179,6 +179,11 @@ const mapDispatchToQuery = {
     payload: (k, v) => v,
     default: 2000,
   },
+  snailScale: {
+    type: "SET_SNAIL_SCALE",
+    payload: (k, v) => v,
+    default: "scaleLinear",
+  },
   zScale: {
     type: "SET_Z_SCALE",
     payload: (k, v) => v,

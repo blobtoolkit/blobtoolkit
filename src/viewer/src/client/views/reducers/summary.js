@@ -19,6 +19,7 @@ import {
   getRadiusScale,
   getScaleTo,
   getSnailOrigin,
+  getSnailScale,
   getTablePage,
   getTablePageSize,
   getTableSortField,
@@ -781,7 +782,7 @@ export const circularCurves = createSelector(
   getDefaultPalette,
   getCircumferenceScale,
   getRadiusScale,
-  getZScale,
+  getSnailScale,
   getSnailOrigin,
   getSpan,
   getGreatestX,
@@ -795,7 +796,7 @@ export const circularCurves = createSelector(
     palette,
     circumference,
     radius,
-    zScale,
+    snailScale,
     origin,
     span,
     longest,
@@ -839,7 +840,7 @@ export const circularCurves = createSelector(
     let min = 0;
     let cScale = d3scaleLinear().range([0, maxAngle]).domain([0, 999]);
     let rScale = d3scaleSqrt().range(rRange).domain([min, radius]);
-    switch (zScale) {
+    switch (snailScale) {
       case "scaleLinear":
         rScale = d3scaleLinear().range(rRange).domain([min, radius]);
         break;
@@ -1056,7 +1057,7 @@ export const circularCurves = createSelector(
       [cScale(0), rScale(0)],
     ]);
     axes.radial.ticks = { major: [], minor: [], labels: [] };
-    if (zScale == "scaleLinear") {
+    if (snailScale == "scaleLinear") {
       let ticks = rScale.ticks(5);
       for (let t of ticks) {
         if (t == 0) {

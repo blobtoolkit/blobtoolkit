@@ -16,6 +16,7 @@ import {
   chooseShowTotal,
   chooseSideMax,
   chooseSnailOrigin,
+  chooseSnailScale,
   chooseWindowSize,
   chooseZReducer,
   chooseZScale,
@@ -36,6 +37,7 @@ import {
   getShowTotal,
   getSideMax,
   getSnailOrigin,
+  getSnailScale,
   getTransformFunctionParams,
   getWindowSize,
   getZReducer,
@@ -146,7 +148,9 @@ class DisplayMenu extends React.Component {
       scaleTo,
       onSelectScaleTo,
       snailOrigin,
+      snailScale,
       onSelectSnailOrigin,
+      onSelectSnailScale,
       transform,
       onChangeTransform,
       fields,
@@ -211,25 +215,6 @@ class DisplayMenu extends React.Component {
       onChangeAxisRange(values, remove);
       changeQueryParams(parsed);
     };
-    const scaleFunctionMenu = (
-      <MenuDisplaySimple name="scale function">
-        <SVGIcon
-          sprite={logIcon}
-          active={scale == "scaleLog"}
-          onIconClick={() => onSelectScale("scaleLog")}
-        />
-        <SVGIcon
-          sprite={linearIcon}
-          active={scale == "scaleLinear"}
-          onIconClick={() => onSelectScale("scaleLinear")}
-        />
-        <SVGIcon
-          sprite={sqrtIcon}
-          active={scale == "scaleSqrt"}
-          onIconClick={() => onSelectScale("scaleSqrt")}
-        />
-      </MenuDisplaySimple>
-    );
     let displayTotal = (
       <MenuDisplaySimple name="display total">
         <div className={styles.full_height}>
@@ -419,7 +404,23 @@ class DisplayMenu extends React.Component {
               onIconClick={() => onSelectReducer("mean")}
             />
           </MenuDisplaySimple>
-          {scaleFunctionMenu}
+          <MenuDisplaySimple name="scale function">
+            <SVGIcon
+              sprite={logIcon}
+              active={scale == "scaleLog"}
+              onIconClick={() => onSelectScale("scaleLog")}
+            />
+            <SVGIcon
+              sprite={linearIcon}
+              active={scale == "scaleLinear"}
+              onIconClick={() => onSelectScale("scaleLinear")}
+            />
+            <SVGIcon
+              sprite={sqrtIcon}
+              active={scale == "scaleSqrt"}
+              onIconClick={() => onSelectScale("scaleSqrt")}
+            />
+          </MenuDisplaySimple>
           {/* <MenuDisplaySimple name='adjust coverage'>
             <SVGIcon sprite={adjustIcon} active={adjustCoverage} onIconClick={()=>onToggleAdjustCoverage(!adjustCoverage)}/>
           </MenuDisplaySimple> */}
@@ -639,7 +640,18 @@ class DisplayMenu extends React.Component {
             }
           />
         </MenuDisplaySimple>
-        {scaleFunctionMenu}
+        <MenuDisplaySimple name="scale function">
+          <SVGIcon
+            sprite={linearIcon}
+            active={snailScale == "scaleLinear"}
+            onIconClick={() => onSelectSnailScale("scaleLinear")}
+          />
+          <SVGIcon
+            sprite={sqrtIcon}
+            active={snailScale == "scaleSqrt"}
+            onIconClick={() => onSelectSnailScale("scaleSqrt")}
+          />
+        </MenuDisplaySimple>
       </span>
     );
     switch (view) {
@@ -839,6 +851,8 @@ class MenuDisplayMain extends React.Component {
         },
         onSelectReducer: (reducer) => dispatch(chooseZReducer(reducer)),
         onSelectScale: (scale) => dispatch(chooseZScale(scale)),
+        onSelectSnailScale: (snailScale) =>
+          dispatch(chooseSnailScale(snailScale)),
         onChangePlotScale: (plotScale) => dispatch(choosePlotScale(plotScale)),
         onChangePlotStyle: (plotStyle) => dispatch(choosePlotStyle(plotStyle)),
         onSelectView: (view) => dispatch(chooseView(view)),
@@ -896,6 +910,7 @@ class MenuDisplayMain extends React.Component {
         circleLimit: getCircleLimit(state),
         reducer: getZReducer(state),
         scale: getZScale(state),
+        snailScale: getSnailScale(state),
         plotScale: getPlotScale(state),
         curveOrigin: getCurveOrigin(state),
         scaleTo: getScaleTo(state),
