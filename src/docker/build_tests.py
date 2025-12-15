@@ -32,9 +32,7 @@ commands = [
 
 def run_command(command):
     try:
-        subprocess.run(
-            command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
+        subprocess.run(command, check=True)
         print(f"Command {' '.join(command)}: SUCCESS")
     except subprocess.CalledProcessError:
         print(f"Command {' '.join(command)}: FAIL")
