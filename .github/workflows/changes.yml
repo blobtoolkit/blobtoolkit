@@ -1,9 +1,11 @@
 name: detect-changes
 
 env:
-  DEFAULT_PYTHON: '["3.9"]'
+  # DEFAULT_PYTHON: '["3.9"]'
+  DEFAULT_PYTHON: '["3.9","3.10","3.11","3.12","3.13"]'
   MATRIX_PYTHON: '["3.9","3.10","3.11","3.12","3.13"]'
-  DEFAULT_PLATFORM: '["linux"]'
+  # DEFAULT_PLATFORM: '["linux"]'
+  DEFAULT_PLATFORM: '["linux", "macos"]'
   MATRIX_PLATFORM: '["linux", "macos"]'
   BASE_TAG: "genomehubs/blobtoolkit"
   VERSION: 4.5.0
