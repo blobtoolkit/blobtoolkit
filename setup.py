@@ -112,7 +112,7 @@ setup(
         # "chromedriver-binary-auto>=0.3.1",
         "chromedriver-autoinstaller>=0.6.2",
         "docopt>=0.6.2",
-        "fastjsonschema==2.21.1",
+        "fastjsonschema>=2.21.1",
         "geckodriver-autoinstaller>=0.1.0",
         "psutil==5.9.4",
         "pyvirtualdisplay==3.0",
