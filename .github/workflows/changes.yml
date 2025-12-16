@@ -65,14 +65,14 @@ jobs:
     name: Detect changes
     runs-on: ubuntu-latest
     outputs:
-      api: ${{ steps.filter.outputs.api }}
-      ui: ${{ steps.filter.outputs.ui }}
-      node: ${{ steps.filter.outputs.node }}
-      host: ${{ steps.filter.outputs.host }}
-      pipeline: ${{ steps.filter.outputs.pipeline }}
-      blobtools: ${{ steps.filter.outputs.blobtools }}
-      docker: ${{ steps.filter.outputs.docker }}
-      all: ${{ steps.filter.outputs.all }}
+      api: "true" # ${{ steps.filter.outputs.api }}
+      ui: "true" # ${{ steps.filter.outputs.ui }}
+      node: "true" # ${{ steps.filter.outputs.node }}
+      host: "true" # ${{ steps.filter.outputs.host }}
+      pipeline: "true" # ${{ steps.filter.outputs.pipeline }}
+      blobtools: "true" # ${{ steps.filter.outputs.blobtools }}
+      docker: "true" # ${{ steps.filter.outputs.docker }}
+      all: "true" # ${{ steps.filter.outputs.all }}
     steps:
       - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
@@ -107,12 +107,12 @@ jobs:
     needs: detect-changes
     runs-on: ubuntu-latest
     outputs:
-      api: ${{ steps.release.outputs.api || 'false' }}
-      ui: ${{ steps.release.outputs.ui || 'false' }}
-      node: ${{ steps.release.outputs.node || 'false' }}
-      host: ${{ steps.release.outputs.host || 'false' }}
-      pipeline: ${{ steps.release.outputs.pipeline || 'false' }}
-      blobtools: ${{ steps.release.outputs.blobtools || 'false' }}
+      api: "true" # ${{ steps.release.outputs.api || 'false' }}
+      ui: "true" # ${{ steps.release.outputs.ui || 'false' }}
+      node: "true" # ${{ steps.release.outputs.node || 'false' }}
+      host: "true" # ${{ steps.release.outputs.host || 'false' }}
+      pipeline: "true" # ${{ steps.release.outputs.pipeline || 'false' }}
+      blobtools: "true" # ${{ steps.release.outputs.blobtools || 'false' }}
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - id: release
