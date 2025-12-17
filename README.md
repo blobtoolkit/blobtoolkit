@@ -7,16 +7,16 @@ BlobToolKit aims to help researchers ensure that a genome assembly represents a 
 
 ## Publications
 
-> _Main paper introducing BlobToolKit:_
->
-> <details><summary><b>BlobToolKit — Interactive quality assessment of genome assemblies.</large></b></summary>Challis R, Richards E, Rajan J, Cochrane G, Blaxter M. G3 (2020) 10(4):1361–1374.<br/>DOI: <a>https://doi.org/10.1534/g3.119.400908</a></details>
+### _Main paper introducing BlobToolKit_
 
+> <details><summary><b>BlobToolKit — Interactive quality assessment of genome assemblies.</large></b></summary>Challis R, Richards E, Rajan J, Cochrane G, Blaxter M. G3 (2020) 10(4):1361–1374.<br/>DOI: <a>https://doi.org/10.1534/g3.119.400908</a></details>
+>
 > [![BlobToolKit paper](https://img.shields.io/badge/G3-Challis_et_al._2020-9c528b.svg)](https://doi.org/10.1534/g3.119.400908) [![Endpoint Badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi.juleskreuer.eu%2Fcitation-badge.php%3Fshield%26doi%3D10.1534%2Fg3.119.400908&style=flat&color=9c528b&label=citations)](https://scholar.google.com/scholar?cites=4263476000213818150&as_sdt=2005&sciodt=0,5&hl=en)
 
-> _Formal description and analysis of snail plots:_
->
-> <details><summary><b>Snail plots are badges of genome assembly quality.</b></summary>Challis R, Blaxter M. BioRxiv 2025.11.20.689594<br/>DOI: <a>https://doi.org/10.1101/2025.11.20.689594</a></details>
+### _Formal description and analysis of snail plots_
 
+> <details><summary><b>Snail plots are badges of genome assembly quality.</b></summary>Challis R, Blaxter M. BioRxiv 2025.11.20.689594<br/>DOI: <a>https://doi.org/10.1101/2025.11.20.689594</a></details>
+>
 > [![Snail plot paper](https://img.shields.io/badge/BioRxiv-Challis,_Blaxter_2025-9c528b.svg)](https://doi.org/10.1101/2025.11.20.689594)
 
 ## NextFlow pipeline
