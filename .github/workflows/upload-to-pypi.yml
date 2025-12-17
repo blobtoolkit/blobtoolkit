@@ -23,7 +23,7 @@ jobs:
           mkdir -p ./dist
           COMPONENT=${{ inputs.component }}
           mv tmp/pip-*/${{ inputs.component }}-*-*.whl dist/
-          mv tmp/pip-*/${COMPONENT/_/-}-*.tar.gz dist/
+          mv tmp/pip-*/${{ inputs.component }}-*.tar.gz dist/ || exit 0
           ls -l ./dist
       - name: Check if version exists on PyPI
         id: check-version
