@@ -29,7 +29,7 @@ jobs:
         id: check-version
         run: |
           PACKAGE_NAME=${{ inputs.component }}
-          VERSION=4.5.0
+          VERSION=${{ inputs.version }}
           if curl -s https://pypi.org/pypi/$PACKAGE_NAME/$VERSION/json | grep -q '"version": "'$VERSION'"'; then
             echo "Version $VERSION of $PACKAGE_NAME already exists on PyPI."
             echo "version_exists=true" >> $GITHUB_OUTPUT
