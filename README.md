@@ -1,9 +1,22 @@
-# BlobToolKit (v4.5.0)
+# BlobToolKit v4.5.0
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Archive](https://img.shields.io/badge/Archive-10.5281/zenodo.2276724-blue.svg)](https://doi.org/10.5281/zenodo.2276724)
+[![License: MIT](https://img.shields.io/github/license/genomehubs/blobtoolkit?color=007ec6&logo=mit)](https://opensource.org/licenses/MIT)&nbsp;&nbsp;[![CI](https://img.shields.io/github/actions/workflow/status/genomehubs/blobtoolkit/conditional-workflow.yml?branch=main&label=CI&color=blue&logo=github)](https://github.com/genomehubs/blobtoolkit/actions)&nbsp;&nbsp;[![Zenodo](https://img.shields.io/badge/zenodo-10.5281%2Fzenodo.2276724-0f4c81?logo=zenodo)](https://doi.org/10.5281/zenodo.2276724)&nbsp;&nbsp;[![Run with Nextflow](https://img.shields.io/badge/Run-Nextflow-0dc09d?logo=nextflow)](https://pipelines.tol.sanger.ac.uk/blobtoolkit)
 
-BlobToolKit aims to help researchers ensure that a genome assembly represents a cohesive set of data from a single taget taxon and provides a platform for identifying, separating and removing cobiont and contaminant data from genome sequencing datasets and assemblies.
+[![Docker](https://img.shields.io/badge/Docker-v4.5.0-2496ed?logo=docker)](https://hub.docker.com/r/genomehubs/blobtoolkit)&nbsp;&nbsp;[![Docker Pulls](https://img.shields.io/docker/pulls/genomehubs/blobtoolkit?color=2496ed&logo=docker)](https://hub.docker.com/r/genomehubs/blobtoolkit)&nbsp;&nbsp;[![Conda (bioconda)](https://img.shields.io/conda/vn/bioconda/blobtoolkit?color=44aa44&logo=anaconda)](https://anaconda.org/bioconda/blobtoolkit)&nbsp;&nbsp;![Conda Downloads](https://img.shields.io/conda/dn/bioconda/blobtoolkit?color=44aa44&logo=anaconda)&nbsp;&nbsp;[![PyPI](https://img.shields.io/pypi/v/blobtoolkit?color=3775a9&logo=pypi)](https://pypi.org/project/blobtoolkit/)&nbsp;&nbsp;[![PyPI Downloads](https://img.shields.io/pypi/dm/blobtoolkit?color=3775a9&logo=pypi)](https://pypistats.org/packages/blobtoolkit)
+
+<!--
+
+[![Contributors](https://img.shields.io/github/contributors/genomehubs/blobtoolkit?color=6f42c1&logo=github)](https://github.com/genomehubs/blobtoolkit/graphs/contributors)
+-->
+
+BlobToolKit provides a platform for identifying, separating and removing cobiont and contaminant data from genome sequencing datasets and assemblies, with the aim of helping researchers ensure that a genome assembly represents a cohesive set of data from a single target taxon.
+
+BlobToolKit is intended to be used during the process of genome assembly QC and refinement and as a reporting tool to demonstrate the overall quality of a genome. The main toolkit comprises the `blobtools` command line tool, an interactive web-based viewer, backed by a RESTful API, and a collection of scripts used by the BlobToolKit pipeline.
+
+[![BlobToolKit viewer](https://img.shields.io/badge/BlobToolKit-viewer-9c528b.svg)](https://blobtoolkit.genomehubs.org/view)<br/>
+We host a public viewer instance at [blobtoolkit.genomehubs.org/view](https://blobtoolkit.genomehubs.org/view) with processed datasets for over 10k public genome assemblies. The quickest way to get started is to use the public viewer to explore an [example assembly dataset](https://blobtoolkit.genomehubs.org/view/dataset/CAJIMH01).
+
+[![Run with Nextflow](https://img.shields.io/badge/Run-Nextflow-blue?logo=nextflow)](https://pipelines.tol.sanger.ac.uk/blobtoolkit)<br/>To Run BlobToolKit on your own data, the `blobtools` command line tool supports direct import of assembly and analysis files from commonly used tools. However, we recommend using the [latest BlobToolKit pipeline](https://pipelines.tol.sanger.ac.uk/blobtoolkit) via Nextflow to run and process the analyses to enable the full feature set of the interactive viewer.
 
 ## Publications
 
@@ -17,9 +30,12 @@ BlobToolKit aims to help researchers ensure that a genome assembly represents a 
 
 > <details><summary><b>Snail plots are badges of genome assembly quality.</b></summary>Challis R, Blaxter M. BioRxiv 2025.11.20.689594<br/>DOI: <a>https://doi.org/10.1101/2025.11.20.689594</a></details>
 >
-> [![Snail plot paper](https://img.shields.io/badge/BioRxiv-Challis,_Blaxter_2025-9c528b.svg)](https://doi.org/10.1101/2025.11.20.689594)
+> [![Snail plot paper](https://img.shields.io/badge/BioRxiv-Challis,_Blaxter_2025-9c528b.svg?logo=biorxiv)](https://doi.org/10.1101/2025.11.20.689594)
 
-## NextFlow pipeline
+## Running BlobToolKit
+
+**[Use the Nextflow pipeline](https://pipelines.tol.sanger.ac.uk/blobtoolkit)**  
+[![Run with Nextflow](https://img.shields.io/badge/Run-Nextflow-blue?logo=nextflow)](https://pipelines.tol.sanger.ac.uk/blobtoolkit)
 
 The recommended way to run a full set of analyses for BlobToolKit is via the [sanger-tol/blobtoolkit](https://pipelines.tol.sanger.ac.uk/blobtoolkit) NextFlow pipeline. This is the actively supported version of the pipeline as used in production by the [Tree of Life Programme](https://www.sanger.ac.uk/programme/tree-of-life/) at the [Wellcome Sanger Institute](https://www.sanger.ac.uk).
 
