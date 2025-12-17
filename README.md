@@ -1,20 +1,27 @@
 # BlobToolKit (v4.5.0)
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://zenodo.org/badge/150091036.svg)](https://zenodo.org/badge/latestdoi/150091036)
+[![Archive](https://img.shields.io/badge/Archive-10.5281/zenodo.2276724-blue.svg)](https://doi.org/10.5281/zenodo.2276724)
 
-BlobToolKit is described in our [BlobToolKit paper](https://doi.org/10.1534/g3.119.400908):
+BlobToolKit aims to help researchers ensure that a genome assembly represents a cohesive set of data from a single taget taxon and provides a platform for identifying, separating and removing cobiont and contaminant data from genome sequencing datasets and assemblies.
 
-> BlobToolKit – Interactive quality assessment of genome assemblies
-> Richard Challis, Edward Richards, Jeena Rajan, Guy Cochrane, Mark Blaxter
-> G3: GENES, GENOMES, GENETICS April 1, 2020 vol. 10 no. 4 1361-1374;
-> https://doi.org/10.1534/g3.119.400908
+## Publications
 
+> _Main paper introducing BlobToolKit:_
+>
+> <details><summary><b>BlobToolKit — Interactive quality assessment of genome assemblies.</large></b></summary>Challis R, Richards E, Rajan J, Cochrane G, Blaxter M. G3 (2020) 10(4):1361–1374.<br/>DOI: <a>https://doi.org/10.1534/g3.119.400908</a></details>
+
+> [![BlobToolKit paper](https://img.shields.io/badge/G3-Challis_et_al._2020-9c528b.svg)](https://doi.org/10.1534/g3.119.400908) [![Endpoint Badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi.juleskreuer.eu%2Fcitation-badge.php%3Fshield%26doi%3D10.1534%2Fg3.119.400908&style=flat&color=9c528b&label=citations)](https://scholar.google.com/scholar?cites=4263476000213818150&as_sdt=2005&sciodt=0,5&hl=en)
+
+> _Formal description and analysis of snail plots:_
+>
+> <details><summary><b>Snail plots are badges of genome assembly quality.</b></summary>Challis R, Blaxter M. BioRxiv 2025.11.20.689594<br/>DOI: <a>https://doi.org/10.1101/2025.11.20.689594</a></details>
+
+> [![Snail plot paper](https://img.shields.io/badge/BioRxiv-Challis,_Blaxter_2025-9c528b.svg)](https://doi.org/10.1101/2025.11.20.689594)
 
 ## NextFlow pipeline
 
 The recommended way to run a full set of analyses for BlobToolKit is via the [sanger-tol/blobtoolkit](https://pipelines.tol.sanger.ac.uk/blobtoolkit) NextFlow pipeline. This is the actively supported version of the pipeline as used in production by the [Tree of Life Programme](https://www.sanger.ac.uk/programme/tree-of-life/) at the [Wellcome Sanger Institute](https://www.sanger.ac.uk).
-
 
 ## About
 
