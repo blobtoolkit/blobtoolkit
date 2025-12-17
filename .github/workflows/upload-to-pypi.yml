@@ -19,10 +19,12 @@ jobs:
           path: ./tmp
           pattern: pip-*
       - run: |
+          ls -l ./tmp
           mkdir -p ./dist
           COMPONENT=${{ inputs.component }}
           mv tmp/pip-*/${{ inputs.component }}-*-*.whl dist/
           mv tmp/pip-*/${COMPONENT/_/-}-*.tar.gz dist/
+          ls -l ./dist
       - name: Check if version exists on PyPI
         id: check-version
         run: |

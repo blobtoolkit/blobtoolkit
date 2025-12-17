@@ -62,7 +62,9 @@ jobs:
           PY_VERSION=${PY_VERSION/./}
           python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_arm64
+          ls -l dist/
           mv dist/*.whl artifacts/
+          ls -l artifacts/
       - uses: actions/upload-artifact@v4
         with:
           name: pip-pipeline-macos-${{ inputs.python-version }}

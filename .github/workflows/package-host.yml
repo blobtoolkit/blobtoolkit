@@ -44,7 +44,9 @@ jobs:
             blobtoolkit-host -v
             mv dist/blobtoolkit*.tar.gz artifacts/
           fi
+          ls -l dist/
           mv dist/*.whl artifacts/
+          ls -l artifacts/
       - uses: actions/upload-artifact@v4
         with:
           name: pip-host-linux-${{ inputs.python-version }}
