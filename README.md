@@ -14,7 +14,7 @@ BlobToolKit is intended to be used during the process of genome assembly QC and 
 [![BlobToolKit viewer](https://img.shields.io/badge/BlobToolKit-viewer-9c528b.svg)](https://blobtoolkit.genomehubs.org/view)<br/>
 We host a public viewer instance at [blobtoolkit.genomehubs.org/view](https://blobtoolkit.genomehubs.org/view) with processed datasets for over 10k public genome assemblies. The quickest way to get started is to use the public viewer to explore an [example assembly dataset](https://blobtoolkit.genomehubs.org/view/dataset/CAJIMH01).
 
-[![Run with Nextflow](https://img.shields.io/badge/Run-Nextflow-blue?logo=nextflow)](https://pipelines.tol.sanger.ac.uk/blobtoolkit)<br/>To Run BlobToolKit on your own data, the `blobtools` command line tool supports direct import of assembly and analysis files from commonly used tools. However, we recommend using the [latest BlobToolKit pipeline](https://pipelines.tol.sanger.ac.uk/blobtoolkit) via Nextflow to run and process the analyses to enable the full feature set of the interactive viewer.
+[![Run with Nextflow](https://img.shields.io/badge/Run-Nextflow-0dc09d?logo=nextflow)](https://pipelines.tol.sanger.ac.uk/blobtoolkit)<br/>To Run BlobToolKit on your own data, the `blobtools` command line tool supports direct import of assembly and analysis files from commonly used tools. However, we recommend using the [latest BlobToolKit pipeline](https://pipelines.tol.sanger.ac.uk/blobtoolkit) via Nextflow to run and process the analyses to enable the full feature set of the interactive viewer. This is the actively supported version of the pipeline as used in production by the [Tree of Life Programme](https://www.sanger.ac.uk/programme/tree-of-life/) at the [Wellcome Sanger Institute](https://www.sanger.ac.uk).
 
 ## Publications
 
@@ -35,7 +35,7 @@ We host a public viewer instance at [blobtoolkit.genomehubs.org/view](https://bl
 **[Use the Nextflow pipeline](https://pipelines.tol.sanger.ac.uk/blobtoolkit)**  
 [![Run with Nextflow](https://img.shields.io/badge/Run-Nextflow-blue?logo=nextflow)](https://pipelines.tol.sanger.ac.uk/blobtoolkit)
 
-The recommended way to run a full set of analyses for BlobToolKit is via the [sanger-tol/blobtoolkit](https://pipelines.tol.sanger.ac.uk/blobtoolkit) NextFlow pipeline. This is the actively supported version of the pipeline as used in production by the [Tree of Life Programme](https://www.sanger.ac.uk/programme/tree-of-life/) at the [Wellcome Sanger Institute](https://www.sanger.ac.uk).
+The recommended way to run a full set of analyses for BlobToolKit is via the [sanger-tol/blobtoolkit](https://pipelines.tol.sanger.ac.uk/blobtoolkit) NextFlow pipeline.
 
 ## About
 
