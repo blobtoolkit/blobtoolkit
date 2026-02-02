@@ -1,3 +1,8 @@
+---
+layout: default
+title: Pipeline Configuration
+---
+
 # Pipeline Configuration
 
 Configure the BlobToolKit pipeline using YAML configuration files and samplesheets.

@@ -37,6 +37,18 @@ We host a public viewer instance at [blobtoolkit.genomehubs.org/view](https://bl
 
 The recommended way to run a full set of analyses for BlobToolKit is via the [sanger-tol/blobtoolkit](https://pipelines.tol.sanger.ac.uk/blobtoolkit) NextFlow pipeline.
 
+## Documentation site (local preview)
+
+The documentation lives in the docs directory and can be previewed locally with Jekyll.
+
+```
+cd docs
+bundle install
+bundle exec jekyll serve
+```
+
+Then open http://localhost:4000.
+
 ## About
 
 Similar to [BlobTools v1](https://github.com/DRL/blobtools), **BlobTools2** is a command line tool designed to aid genome assembly QC and contaminant/cobiont detection and filtering. In addition to supporting interactive visualisation, a motivation for this reimplementation was to provide greater flexibility to include new types of information, such as [BUSCO](https://busco.ezlab.org) results and [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) hit distributions.

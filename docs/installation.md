@@ -1,3 +1,8 @@
+---
+layout: default
+title: Installation
+---
+
 # Installation
 
 BlobToolKit can be installed using Conda, Pip, or Docker. Choose the method that best suits your environment.

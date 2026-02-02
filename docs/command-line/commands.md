@@ -1,3 +1,8 @@
+---
+layout: default
+title: BlobTools Commands
+---
+
 # BlobTools Commands
 
 Reference guide for BlobTools command-line tools.

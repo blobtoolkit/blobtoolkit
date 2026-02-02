@@ -1,3 +1,8 @@
+---
+layout: default
+title: Pipeline Getting Started
+---
+
 # Pipeline Getting Started
 
 BlobToolKit provides pipeline implementations using Nextflow and Snakemake for automated genome assembly quality evaluation.

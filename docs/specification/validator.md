@@ -1,3 +1,8 @@
+---
+layout: default
+title: BlobDir Validator
+---
+
 # BlobDir Validator
 
 The BlobDir validator ensures your datasets conform to the official BlobDir specification.

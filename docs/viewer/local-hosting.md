@@ -1,3 +1,8 @@
+---
+layout: default
+title: Local Hosting
+---
+
 # Local Hosting with BlobTools Host
 
 The BlobTools host command starts an interactive web server for visualizing your blob plot data locally.

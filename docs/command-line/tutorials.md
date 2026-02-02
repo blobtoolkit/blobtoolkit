@@ -1,3 +1,8 @@
+---
+layout: default
+title: Command Line Tutorials
+---
+
 # Command Line Tutorials
 
 Step-by-step walkthroughs for common command line tasks.

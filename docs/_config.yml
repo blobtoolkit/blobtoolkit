@@ -2,6 +2,21 @@ title: BlobToolKit
 description: Modular genome assembly quality evaluation
 theme: jekyll-theme-minimal
 url: https://genomehubs.github.io/blobtoolkit
+logo: /assets/img/logo.png
+
+nav:
+  - title: Home
+    url: /
+  - title: Installation
+    url: /installation
+  - title: Pipeline
+    url: /pipeline/getting-started
+  - title: Commands
+    url: /command-line/commands
+  - title: Viewer
+    url: /viewer/local-hosting
+  - title: Specification
+    url: /specification/blobdir-format
 
 # Navigation
 nav_order: 1

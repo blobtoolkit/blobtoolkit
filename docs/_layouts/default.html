@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+    <link rel="stylesheet" href="{{ "/assets/css/style.css" | relative_url }}" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="site-brand" href="{{ " /" | relative_url }}">
+                {% if site.logo %}
+                <img class="site-logo" src="{{ site.logo | relative_url }}" alt="{{ site.title }} logo" />
+                {% endif %}
+                <span class="site-title">{{ site.title }}</span>
+            </a>
+            <input class="nav-toggle" type="checkbox" id="nav-toggle" />
+            <label class="nav-toggle-label" for="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <nav class="site-nav" aria-label="Primary">
+                <ul>
+                    {% for item in site.nav %}
+                    <li>
+                        <a href="{{ item.url | relative_url }}" {% if page.url==item.url %}aria-current="page" {% endif
+                            %}>{{ item.title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="site-content">
+            {{ content }}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <span>© {{ "now" | date: "%Y" }} {{ site.title }}</span>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,3 +1,8 @@
+---
+layout: default
+title: Home
+---
+
 # BlobToolKit Documentation
 
 Welcome to the BlobToolKit documentation. BlobToolKit is a modular genome assembly quality evaluation toolkit that helps you assess and visualize the quality of genome assemblies.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: BlobDir Format Specification
+---
+
 # BlobDir Format Specification
 
 Technical specification for the BlobDir JSON format used by BlobToolKit.

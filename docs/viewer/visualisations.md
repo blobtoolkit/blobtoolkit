@@ -1,3 +1,8 @@
+---
+layout: default
+title: Visualisations
+---
+
 # Interpreting Visualisations
 
 Guide to understanding BlobToolKit visualizations and plots.
