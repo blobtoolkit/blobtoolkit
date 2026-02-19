@@ -443,13 +443,14 @@
                     console.log(`Looking for snippet for "${item.url}":`, snippet ? 'FOUND' : 'NOT FOUND', '- tried:', [item.url, item.url + '/', item.url + '.html', item.url.replace(/\/$/, '') + '.html']);
                 }
                 
+                const linkUrl = baseurl + item.url;
                 if (snippet) {
                     html += `<li>
-                        <a href="${item.url}" class="quick-link-item">${item.title}</a>
+                        <a href="${linkUrl}" class="quick-link-item">${item.title}</a>
                         <div class="quick-link-snippet">${snippet}</div>
                     </li>`;
                 } else {
-                    html += `<li><a href="${item.url}" class="quick-link-item">${item.title}</a></li>`;
+                    html += `<li><a href="${linkUrl}" class="quick-link-item">${item.title}</a></li>`;
                 }
             });
             html += '</ul>';
