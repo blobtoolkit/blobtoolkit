@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Pipeline Getting Started
+permalink: /pipeline/getting-started/
 ---
 
 # Pipeline Getting Started
