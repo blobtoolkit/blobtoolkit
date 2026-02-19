@@ -1,43 +1,52 @@
 name: Build and Deploy Docs
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - "docs/**"
-            - ".github/workflows/deploy-docs.yml"
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "docs/**"
+      - ".github/workflows/deploy-docs.yml"
 
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Set up Ruby
-              uses: ruby/setup-ruby@v1
-              with:
-                  ruby-version: 3.2
-                  bundler-cache: true
-                  working-directory: ./docs
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+          bundler-cache: false
+          working-directory: ./docs
 
-            - name: Generate Navigation
-              working-directory: ./docs
-              run: ruby scripts/generate_nav.rb
+      - name: Add Linux platform to Gemfile.lock
+        working-directory: ./docs
+        run: bundle lock --add-platform x86_64-linux
 
-            - name: Build Jekyll
-              working-directory: ./docs
-              run: bundle exec jekyll build --quiet
+      - name: Install gems
+        working-directory: ./docs
+        run: bundle install
 
-            - name: Generate Snippets
-              working-directory: ./docs
-              run: ruby scripts/generate_snippets.rb
+      - name: Generate Navigation
+        working-directory: ./docs
+        run: ruby scripts/generate_nav.rb
 
-            - name: Upload artifact
-              uses: actions/upload-pages-artifact@v3
-              with:
-                  path: ./docs/_site
+      - name: Build Jekyll
+        working-directory: ./docs
+        run: bundle exec jekyll build --quiet
 
-            - name: Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v4
+      - name: Generate Snippets
+        working-directory: ./docs
+        run: ruby scripts/generate_snippets.rb
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs/_site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
