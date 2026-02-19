@@ -90,6 +90,20 @@ export const chooseZScale = (zScale) => {
     dispatch(queryToStore({ values }));
   };
 };
+
+export const snailScale = handleAction(
+  "SET_SNAIL_SCALE",
+  (state, action) => action.payload,
+  qsDefault("snailScale")
+);
+export const getSnailScale = (state) => state.snailScale;
+export const chooseSnailScale = (snailScale) => {
+  return function (dispatch) {
+    let values = { snailScale };
+    dispatch(queryToStore({ values }));
+  };
+};
+
 export const zScale = handleAction(
   "SET_Z_SCALE",
   (state, action) => action.payload,
@@ -566,6 +580,7 @@ export const plotParameterReducers = {
   circumferenceScale,
   radiusScale,
   snailOrigin,
+  snailScale,
   sideMax,
   maxCount,
   maxSpan,

@@ -19,6 +19,7 @@ import {
   getRadiusScale,
   getScaleTo,
   getSnailOrigin,
+  getSnailScale,
   getTablePage,
   getTablePageSize,
   getTableSortField,
@@ -722,6 +723,9 @@ export const getCircular = createSelector(
     let tot = sum[sum.length - 1];
     values.nXlen = [];
     let i = 0;
+    let sum_of_lengths = 0;
+    let sum_of_squares = 0;
+    let sum_of_adj_squares = 0;
 
     for (let x = 1; x <= 1000; x++) {
       let l = Math.ceil((tot * x) / 1000);
@@ -755,7 +759,21 @@ export const getCircular = createSelector(
     let meanGC = mean(values.gc.map((o) => o.mean));
     let composition = { gc: meanGC, at: 1 - meanGC, n: meanN };
     values.all = arr;
-    return { values, composition, xAxis, zAxis };
+    arr.forEach((o) => {
+      sum_of_lengths += o.z;
+      sum_of_squares += o.z * o.z;
+      let adj = o.z * (1 - o.n);
+      sum_of_adj_squares += adj * adj;
+    });
+    let aun = {
+      span: sum_of_lengths,
+      raw: sum_of_squares / sum_of_lengths,
+      adj: sum_of_adj_squares / sum_of_lengths,
+      longest: arr[0].z,
+    };
+    aun.relative = aun.raw / arr[0].z;
+    aun.adj_relative = aun.adj / arr[0].z;
+    return { values, composition, aun, xAxis, zAxis };
   }
 );
 
@@ -764,6 +782,7 @@ export const circularCurves = createSelector(
   getDefaultPalette,
   getCircumferenceScale,
   getRadiusScale,
+  getSnailScale,
   getSnailOrigin,
   getSpan,
   getGreatestX,
@@ -777,6 +796,7 @@ export const circularCurves = createSelector(
     palette,
     circumference,
     radius,
+    snailScale,
     origin,
     span,
     longest,
@@ -820,9 +840,20 @@ export const circularCurves = createSelector(
     let min = 0;
     let cScale = d3scaleLinear().range([0, maxAngle]).domain([0, 999]);
     let rScale = d3scaleSqrt().range(rRange).domain([min, radius]);
+    switch (snailScale) {
+      case "scaleLinear":
+        rScale = d3scaleLinear().range(rRange).domain([min, radius]);
+        break;
+      case "scaleLog":
+        rScale = d3scaleLog()
+          .range(rRange)
+          .domain([Math.max(min, 1), radius])
+          .clamp(true);
+        break;
+    }
+    // rScale.range(rRange).domain([min, radius]);
     let lScale = d3scaleLog().range(lRange).domain([1, 10000000]);
     let oScale = d3scaleLinear().range([350, 425]).domain([0, 1]);
-    let f = d3Format(".3f");
     let si = d3Format(".3s");
     let paths = {};
     let pathProps = {};
@@ -1026,46 +1057,98 @@ export const circularCurves = createSelector(
       [cScale(0), rScale(0)],
     ]);
     axes.radial.ticks = { major: [], minor: [], labels: [] };
-    for (let r = radius; r > 10; r /= 10) {
-      let len = String(Math.floor(r)).length - 1;
-      let value = Math.pow(10, len);
-      axes.radial.ticks.major.push(
-        d3Line()([
-          [cScale(0), -rScale(value)],
-          [cScale(0) - 2 * len, -rScale(value)],
-        ])
-      );
-      for (let m = 2; m < 10; m++) {
-        if (m * value < radius) {
-          axes.radial.ticks.minor.push(
-            d3Line()([
-              [cScale(0), -rScale(m * value)],
-              [cScale(0) - len, -rScale(m * value)],
-            ])
-          );
+    if (snailScale == "scaleLinear") {
+      let ticks = rScale.ticks(5);
+      for (let t of ticks) {
+        if (t == 0) {
+          continue;
         }
-      }
-      if (r > radius / 1000) {
+        let len = String(Math.floor(rScale(t))).length - 1;
+        axes.radial.ticks.major.push(
+          d3Line()([
+            [cScale(0) - 10, -rScale(t)],
+            [cScale(0), -rScale(t)],
+          ])
+        );
+
         axes.radial.ticks.labels.push({
           path: d3Line()([
-            [cScale(0) - 2 * len - 80, -rScale(value)],
-            [cScale(0) - 2 * len - 5, -rScale(value)],
+            [cScale(0) - 2 * len - 90, -rScale(t)],
+            [cScale(0) - 2 * len - 15, -rScale(t)],
           ]),
-          text: si(value),
+          text: si(t).replace(/\.0*([A-Z])$/, "$1"),
           align: "right",
           fontSize: plotText.snailAxisLarge.fontSize,
+          baseline: "central",
+          y: 10,
         });
         let points = [];
         nXlen.forEach((n, i) => {
-          if (value <= nXlen[i]) points.push([cScale(i), rScale(value)]);
+          if (t <= nXlen[i]) points.push([cScale(i), rScale(t)]);
         });
-        paths["radial_" + len] = d3RadialLine()(points);
-        pathProps["radial_" + len] = {
+        paths["radial_" + t] = d3RadialLine()(points);
+        pathProps["radial_" + t] = {
           fill: "none",
-          stroke: "#cccccc",
+          stroke: "#ffffff",
           strokeWidth: 1,
-          strokeDasharray: 16,
+          strokeDasharray: 6,
         };
+      }
+
+      let minorTicks = rScale.ticks(15);
+      for (let t of minorTicks) {
+        if (t == 0 || ticks.indexOf(t) !== -1) {
+          continue;
+        }
+        axes.radial.ticks.minor.push(
+          d3Line()([
+            [cScale(0) - 5, -rScale(t)],
+            [cScale(0), -rScale(t)],
+          ])
+        );
+      }
+    } else {
+      for (let r = radius; r > 10; r /= 10) {
+        let len = String(Math.floor(r)).length - 1;
+        let value = Math.pow(10, len);
+        axes.radial.ticks.major.push(
+          d3Line()([
+            [cScale(0), -rScale(value)],
+            [cScale(0) - 2 * len, -rScale(value)],
+          ])
+        );
+        for (let m = 2; m < 10; m++) {
+          if (m * value < radius) {
+            axes.radial.ticks.minor.push(
+              d3Line()([
+                [cScale(0), -rScale(m * value)],
+                [cScale(0) - len, -rScale(m * value)],
+              ])
+            );
+          }
+        }
+        if (r > radius / 1000) {
+          axes.radial.ticks.labels.push({
+            path: d3Line()([
+              [cScale(0) - 2 * len - 80, -rScale(value)],
+              [cScale(0) - 2 * len - 5, -rScale(value)],
+            ]),
+            text: si(value),
+            align: "right",
+            fontSize: plotText.snailAxisLarge.fontSize,
+          });
+          let points = [];
+          nXlen.forEach((n, i) => {
+            if (value <= nXlen[i]) points.push([cScale(i), rScale(value)]);
+          });
+          paths["radial_" + len] = d3RadialLine()(points);
+          pathProps["radial_" + len] = {
+            fill: "none",
+            stroke: "#ffffff",
+            strokeWidth: 1,
+            strokeDasharray: 6,
+          };
+        }
       }
     }
 
@@ -1110,6 +1193,11 @@ export const circularCurves = createSelector(
     };
     let gcFormat = d3Format(".1f");
     let legend = {
+      score: [
+        {
+          title: `Score: ${circular.aun.adj_relative.toFixed(2)}`,
+        },
+      ],
       stats: [
         {
           label: `Log10 ${record_type} count`,
@@ -1120,7 +1208,7 @@ export const circularCurves = createSelector(
           label: `${
             record_type[0].toUpperCase() + record_type.slice(1)
           } length`,
-          value: "total " + format(sum[999]),
+          value: `total ${format(sum[999])} | auN: ${format(circular.aun.raw)}`,
           color: "#999999",
         },
         {

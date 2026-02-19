@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit",  # Required
-    version="4.4.5",
+    version="4.5.0",
     description="blobtoolkit",  # Optional
     long_description="blobtoolkit",  # Optional
     long_description_content_type="text/markdown",
@@ -108,11 +108,11 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "blobtk>=0.5.3",
+        "blobtk>=0.7.9",
         # "chromedriver-binary-auto>=0.3.1",
         "chromedriver-autoinstaller>=0.6.2",
         "docopt>=0.6.2",
-        "fastjsonschema==2.21.1",
+        "fastjsonschema>=2.21.1",
         "geckodriver-autoinstaller>=0.1.0",
         "psutil==5.9.4",
         "pyvirtualdisplay==3.0",
@@ -141,9 +141,9 @@ setup(
             "pytest-mock>=3.1.1",
             "pytest>=6.0.0",
         ],
-        "full": ["blobtoolkit-host==4.4.1", "blobtoolkit-pipeline==4.4.3"],
-        "host": ["blobtoolkit-host==4.4.1"],
-        "pipeline": ["blobtoolkit-pipeline==4.4.3"],
+        "full": ["blobtoolkit-host==4.5.0", "blobtoolkit-pipeline==4.4.6"],
+        "host": ["blobtoolkit-host==4.5.0"],
+        "pipeline": ["blobtoolkit-pipeline==4.4.6"],
     },
     entry_points={
         "console_scripts": [

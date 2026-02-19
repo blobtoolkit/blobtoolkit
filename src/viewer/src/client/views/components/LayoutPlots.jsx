@@ -177,7 +177,6 @@ class PlotsLayoutComponent extends React.Component {
           view = <BuscoPlot {...this.props} />;
           break;
         case "cumulative":
-          console.log("here");
           view = <CumulativePlot {...this.props} />;
           break;
         case "detail":

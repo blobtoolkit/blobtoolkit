@@ -213,7 +213,7 @@ class Snail extends React.Component {
       nXnums,
       index,
     });
-    let topLeft, bottomRight, topRight;
+    let topLeft, bottomRight, topRight, topCenter;
     if (legend.composition) {
       bottomRight = (
         <SnailPlotLegend title={"Composition"} list={legend.composition} />
@@ -262,6 +262,9 @@ class Snail extends React.Component {
           list={legend.stats}
         />
       );
+    }
+    if (legend.score) {
+      topCenter = <SnailPlotLegend title={legend.score[0].title} />;
     }
     if (this.props.buscoPaths) {
       let buscoListA = [];
@@ -419,6 +422,9 @@ class Snail extends React.Component {
                   xlinkHref={"#" + k + "_path_" + idx}
                   textAnchor={textAnchor}
                   startOffset={startOffset}
+                  style={{
+                    dominantBaseline: d.baseline || "default",
+                  }}
                 >
                   {d.text}
                 </textPath>
@@ -532,6 +538,7 @@ class Snail extends React.Component {
               />
             </Pointable>
             <g transform={"translate(10,35)"}>{topLeft}</g>
+            <g transform={"translate(418, 35)"}>{topCenter}</g>
             <g transform={"translate(10,890)"}>{bottomLeft}</g>
             <g transform={"translate(850,890)"}>{bottomRight}</g>
             <g transform={"translate(850,35)"}>{topRight}</g>

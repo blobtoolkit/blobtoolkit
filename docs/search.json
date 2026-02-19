@@ -1,0 +1,20 @@
+---
+layout: null
+---
+{
+  "documents": [
+    {% assign first = true %}
+    {% for page in site.pages %}
+      {% if page.title and page.url != "/search.json" %}
+        {% unless first %},{% endunless %}
+        {
+          "id": "{{ page.url }}",
+          "title": {{ page.title | jsonify }},
+          "content": {{ page.content | strip_html | replace: '  ', ' ' | replace: '
+', ' ' | strip | jsonify }}
+        }
+        {% assign first = false %}
+      {% endif %}
+    {% endfor %}
+  ]
+}

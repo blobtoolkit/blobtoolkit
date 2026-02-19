@@ -19,10 +19,12 @@ jobs:
           path: ./tmp
           pattern: pip-*
       - run: |
+          ls -l ./tmp
           mkdir -p ./dist
           COMPONENT=${{ inputs.component }}
           mv tmp/pip-*/${{ inputs.component }}-*-*.whl dist/
-          mv tmp/pip-*/${COMPONENT/_/-}-*.tar.gz dist/
+          mv tmp/pip-*/${{ inputs.component }}-*.tar.gz dist/ || exit 0
+          ls -l ./dist
       - name: Check if version exists on PyPI
         id: check-version
         run: |
@@ -30,9 +32,10 @@ jobs:
           VERSION=${{ inputs.version }}
           if curl -s https://pypi.org/pypi/$PACKAGE_NAME/$VERSION/json | grep -q '"version": "'$VERSION'"'; then
             echo "Version $VERSION of $PACKAGE_NAME already exists on PyPI."
-            exit 0
+            echo "version_exists=true" >> $GITHUB_OUTPUT
           else
             echo "Version $VERSION of $PACKAGE_NAME does not exist on PyPI."
+            echo "version_exists=false" >> $GITHUB_OUTPUT
           fi
       - name: Publish package to PyPI
         if: steps.check-version.outputs.version_exists == 'false'
