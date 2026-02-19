@@ -132,7 +132,7 @@
         let idx;
         
         async function loadSearchIndex() {
-            let searchPath = '/search.json';
+            let searchPath = '{{ site.baseurl }}/search.json';
             try {
                 const response = await fetch(searchPath);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -145,7 +145,7 @@
         }
         
         async function loadSnippets() {
-            let snippetsPath = '/snippets.json';
+            let snippetsPath = '{{ site.baseurl }}/snippets.json';
             try {
                 const response = await fetch(snippetsPath);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
