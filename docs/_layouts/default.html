@@ -258,7 +258,17 @@
 
         // Generate breadcrumbs and quick links
         function generateBreadcrumbs() {
-            const currentPath = window.location.pathname;
+            let currentPath = window.location.pathname;
+            
+            // Strip baseurl from pathname for comparison
+            const baseurl = '{{ site.baseurl }}';
+            if (baseurl && baseurl !== '' && currentPath.startsWith(baseurl)) {
+                currentPath = currentPath.substring(baseurl.length);
+            }
+            // Ensure path starts with /
+            if (!currentPath.startsWith('/')) {
+                currentPath = '/' + currentPath;
+            }
             
             // Hide breadcrumbs on home page
             if (currentPath === '/' || currentPath === '/index.html') {
@@ -269,7 +279,7 @@
             const breadcrumbList = document.getElementById('breadcrumb-list');
             
             // Always add home
-            let html = '<li><a href="/" class="breadcrumb-home" aria-label="Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><rect x="9" y="12" width="6" height="10" fill="currentColor"></rect></svg></a></li>';
+            let html = '<li><a href="{{ site.baseurl }}/" class="breadcrumb-home" aria-label="Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><rect x="9" y="12" width="6" height="10" fill="currentColor"></rect></svg></a></li>';
             
             // Extract path parts
             const parts = currentPath.split('/').filter(p => p && p !== 'index.html');
@@ -284,7 +294,7 @@
                 if (isLast) {
                     html += `<li><span class="breadcrumb-current">${label}</span></li>`;
                 } else {
-                    html += `<li><a href="${pathAccum}/">${label}</a></li>`;
+                    html += `<li><a href="{{ site.baseurl }}${pathAccum}/">${label}</a></li>`;
                 }
             }
             
