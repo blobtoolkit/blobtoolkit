@@ -1,0 +1,33 @@
+title: BlobToolKit
+description: Modular genome assembly quality evaluation
+theme: jekyll-theme-minimal
+url: https://genomehubs.github.io/blobtoolkit
+logo: /assets/img/logo.png
+
+nav:
+  - title: Home
+    url: /
+  - title: Installation
+    url: /installation/
+  - title: Pipeline
+    url: /pipeline/
+  - title: Commands
+    url: /command-line/
+  - title: Viewer
+    url: /viewer/
+  - title: Specification
+    url: /specification/
+
+# Navigation
+nav_order: 1
+
+# Exclude from processing
+exclude:
+  - node_modules/
+  - vendor/
+  - .git/
+
+# Collections
+collections:
+  docs:
+    output: true

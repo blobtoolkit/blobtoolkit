@@ -1,0 +1,43 @@
+name: Build and Deploy Docs
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "docs/**"
+            - ".github/workflows/deploy-docs.yml"
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Ruby
+              uses: ruby/setup-ruby@v1
+              with:
+                  ruby-version: 3.2
+                  bundler-cache: true
+                  working-directory: ./docs
+
+            - name: Generate Navigation
+              working-directory: ./docs
+              run: ruby scripts/generate_nav.rb
+
+            - name: Build Jekyll
+              working-directory: ./docs
+              run: bundle exec jekyll build --quiet
+
+            - name: Generate Snippets
+              working-directory: ./docs
+              run: ruby scripts/generate_snippets.rb
+
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./docs/_site
+
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
