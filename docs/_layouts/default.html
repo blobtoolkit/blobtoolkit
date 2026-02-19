@@ -12,6 +12,13 @@
 <body>
     <header class="site-header">
         <div class="site-header__inner">
+            <label class="sidebar-toggle-label" for="sidebar-toggle" aria-label="Toggle sidebar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </label>
             <a class="site-brand" href="{{ "/" | relative_url }}">
                 {% if site.logo %}
                 <img class="site-logo" src="{{ site.logo | relative_url }}" alt="{{ site.title }} logo" />
@@ -101,13 +108,6 @@
     </aside>
 
     <main class="site-main">
-        <label class="sidebar-toggle-label" for="sidebar-toggle" aria-label="Toggle sidebar">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </label>
         <div class="breadcrumb-container">
             <nav class="breadcrumbs" aria-label="Breadcrumb">
                 <ul id="breadcrumb-list"></ul>
@@ -259,10 +259,17 @@
         // Generate breadcrumbs and quick links
         function generateBreadcrumbs() {
             const currentPath = window.location.pathname;
+            
+            // Hide breadcrumbs on home page
+            if (currentPath === '/' || currentPath === '/index.html') {
+                document.getElementById('breadcrumb-list').innerHTML = '';
+                return;
+            }
+            
             const breadcrumbList = document.getElementById('breadcrumb-list');
             
             // Always add home
-            let html = '<li><a href="/" class="breadcrumb-home" aria-label="Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></a></li>';
+            let html = '<li><a href="/" class="breadcrumb-home" aria-label="Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><rect x="9" y="12" width="6" height="10" fill="currentColor"></rect></svg></a></li>';
             
             // Extract path parts
             const parts = currentPath.split('/').filter(p => p && p !== 'index.html');
@@ -432,6 +439,24 @@
             // Replace placeholder
             siteContent.innerHTML = siteContent.innerHTML.replace('<!-- QUICK_LINKS -->', html);
         }
+
+        // Smart header: hide on scroll down, show on scroll up
+        let lastScrollTop = 0;
+        const header = document.querySelector('.site-header');
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop + 10) {
+                // Scrolling down - hide header
+                header.classList.add('hide');
+            } else if (scrollTop < lastScrollTop - 10) {
+                // Scrolling up - show header
+                header.classList.remove('hide');
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async () => {

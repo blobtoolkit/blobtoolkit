@@ -21,6 +21,8 @@ body {
   padding-top: 72px;
   padding-bottom: 56px;
   padding-left: 240px;
+  padding-right: 0;
+  scrollbar-gutter: stable;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -36,19 +38,53 @@ h1, h2, h3, h4, h5, h6 {
   right: 0;
   z-index: 1000;
   width: 100%;
+  padding-right: 17px;
+  box-sizing: border-box;
   background: var(--btk-dark);
   color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.site-header.hide {
+  transform: translateY(-100%);
 }
 
 .site-header__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 12px 32px;
+  gap: 12px;
+  padding: 12px 16px;
   width: 100%;
-  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+.sidebar-toggle-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 8px;
+  margin: 0;
+  order: -1;
+  background: transparent;
+  border: none;
+  color: transparent;
+}
+
+.sidebar-toggle-label svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  display: block;
+}
+
+.sidebar-toggle-label:hover {
+  opacity: 0.8;
 }
 
 .site-brand {
@@ -191,7 +227,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .breadcrumb-container {
   display: block;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
 .breadcrumbs {
@@ -285,7 +321,15 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: none;
 }
 
+.quick-link-snippet {
+  display: none;
+}
+
 @media (min-width: 1100px) {
+  .sidebar-toggle-label {
+    display: none;
+  }
+
   .quick-links-list {
     list-style: disc;
     display: block;
@@ -328,7 +372,7 @@ h1, h2, h3, h4, h5, h6 {
 .site-main {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 12px 20px 12px 24px;
   display: block;
   position: relative;
 }
@@ -404,7 +448,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .site-content {
   background: #fff;
-  padding: 28px;
+  padding: 12px 12px 28px 12px;
   border-radius: 6px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
@@ -555,11 +599,32 @@ hr {
   }
 
   .site-header__inner {
-    gap: 16px;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .sidebar-toggle-label {
+    display: flex;
+    background: transparent;
+    border: none;
+    color: transparent;
+    order: -1;
+    margin: 0;
+    padding: 8px;
+  }
+
+  .sidebar-toggle-label svg {
+    stroke: #fff;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    width: 24px;
+    height: 24px;
   }
 
   .site-brand {
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
   }
 
   .site-search {
@@ -569,28 +634,6 @@ hr {
 
   .github-link {
     flex-shrink: 0;
-  }
-
-  .quick-links-container {
-    display: block;
-  }
-
-  .sidebar-toggle-label {
-    display: inline-flex;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 8px;
-    color: var(--btk-text);
-    margin-bottom: 16px;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .sidebar-toggle-label svg {
-    width: 24px;
-    height: 24px;
-    stroke: var(--btk-text);
   }
 
   .site-main {
