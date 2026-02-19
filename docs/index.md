@@ -9,11 +9,11 @@ Welcome to the BlobToolKit documentation. BlobToolKit is a modular genome assemb
 
 ## Quick Links
 
-- **[Installation](installation.md)** - Get BlobToolKit up and running
-- **[Pipeline](pipeline/getting-started.md)** - Run the analysis pipeline
-- **[BlobTools Commands](command-line/commands.md)** - Command-line reference
-- **[Viewer](viewer/local-hosting.md)** - Interactive visualization
-- **[Specification](specification/blobdir-format.md)** - Technical documentation
+- **[Installation](installation/)** - Get BlobToolKit up and running
+- **[Pipeline](pipeline/)** - Run the analysis pipeline
+- **[BlobTools Commands](command-line/)** - Command-line reference
+- **[Viewer](viewer/)** - Interactive visualization
+- **[Specification](specification/)** - Technical documentation
 
 ## What is BlobToolKit?
 
@@ -26,7 +26,7 @@ BlobToolKit provides tools for:
 
 ## Getting Started
 
-New to BlobToolKit? Start with [Installation](installation.md) and then explore the [Pipeline Guide](pipeline/getting-started.md).
+New to BlobToolKit? Start with [Installation](installation/) and then explore the [Pipeline Guide](pipeline/).
 
 ## Need Help?
 

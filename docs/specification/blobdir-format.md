@@ -60,7 +60,7 @@ Main data structure containing:
 
 ## JSON Schema Validation
 
-The complete JSON schema is available in the [Validator](validator.md).
+The complete JSON schema is available in the [Validator](validator).
 
 ## Compatibility
 

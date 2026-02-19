@@ -36,11 +36,11 @@ snakemake --snakefile blobtoolkit.smk
 ## Basic Workflow Steps
 
 1. Prepare your assembly and reads
-2. Configure the pipeline (see [Configuration](configuration.md))
+2. Configure the pipeline (see [Configuration](configuration))
 3. Run the pipeline
-4. View results in the [BlobToolKit Viewer](../viewer/local-hosting.md)
+4. View results in the [BlobToolKit Viewer](../viewer/local-hosting)
 
 ## Next Steps
 
-- Learn about pipeline configuration in [Configuration Guide](configuration.md)
-- Check the [command line](../command-line/commands.md) reference
+- Learn about pipeline configuration in [Configuration Guide](configuration)
+- Check the [command line](../command-line/commands) reference

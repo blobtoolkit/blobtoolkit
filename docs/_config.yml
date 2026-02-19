@@ -8,15 +8,15 @@ nav:
   - title: Home
     url: /
   - title: Installation
-    url: /installation
+    url: /installation/
   - title: Pipeline
-    url: /pipeline/getting-started
+    url: /pipeline/
   - title: Commands
-    url: /command-line/commands
+    url: /command-line/
   - title: Viewer
-    url: /viewer/local-hosting
+    url: /viewer/
   - title: Specification
-    url: /specification/blobdir-format
+    url: /specification/
 
 # Navigation
 nav_order: 1

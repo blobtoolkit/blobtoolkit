@@ -62,4 +62,4 @@ blobtools [command] --help
 
 ## Next Steps
 
-Check out [Tutorials](tutorials.md) for practical examples.
+Check out [Tutorials](tutorials) for practical examples.

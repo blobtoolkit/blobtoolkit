@@ -55,4 +55,4 @@ Key metrics displayed:
 
 ## Next Steps
 
-For command-line operations, see [BlobTools Commands](../command-line/commands.md).
+For command-line operations, see [BlobTools Commands](../command-line/commands).

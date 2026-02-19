@@ -48,4 +48,4 @@ blobtools --version
 
 ## Next Steps
 
-After installation, check out the [Pipeline Getting Started](pipeline/getting-started.md) guide.
+After installation, check out the [Pipeline Getting Started](../pipeline/getting-started) guide.

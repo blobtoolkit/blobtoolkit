@@ -43,4 +43,4 @@ The web viewer provides:
 
 ## Next Steps
 
-Learn how to interpret the visualizations in [Visualisations Guide](visualisations.md).
+Learn how to interpret the visualizations in [Visualisations Guide](visualisations).

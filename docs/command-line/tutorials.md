@@ -53,4 +53,4 @@ blobtools filter --query "read_cov > 5" my_blobdir/ --output_dir filtered/
 
 ## Further Reading
 
-See the [Commands Reference](commands.md) for more options. Visit the [Wiki](https://github.com/genomehubs/blobtoolkit/wiki) for additional tutorials.
+See the [Commands Reference](commands) for more options. Visit the [Wiki](https://github.com/genomehubs/blobtoolkit/wiki) for additional tutorials.

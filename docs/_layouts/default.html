@@ -12,7 +12,7 @@
 <body>
     <header class="site-header">
         <div class="site-header__inner">
-            <a class="site-brand" href="{{ " /" | relative_url }}">
+            <a class="site-brand" href="{{ "/" | relative_url }}">
                 {% if site.logo %}
                 <img class="site-logo" src="{{ site.logo | relative_url }}" alt="{{ site.title }} logo" />
                 {% endif %}
@@ -37,7 +37,84 @@
         </div>
     </header>
 
+    <input class="sidebar-toggle" type="checkbox" id="sidebar-toggle" />
+    <aside class="site-sidebar">
+        <div class="sidebar-header">
+            <label class="sidebar-close" for="sidebar-toggle" aria-label="Close sidebar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </label>
+        </div>
+        <nav class="sidebar-nav" aria-label="Section">
+            <ul>
+                {% assign current_section = page.url | split: '/' | where_exp: 'item', 'item != ""' | first %}
+                
+                <!-- Show all main sections -->
+                {% for section_key in site.data.navigation.main %}
+                    {% assign section_name = section_key.folder %}
+                    {% assign section_title = section_key.title %}
+                    {% assign section_url = section_key.url %}
+                    {% assign section_items = site.data.navigation.sections[section_name] %}
+                    
+                    <li class="nav-section {% if current_section == section_name %}active{% endif %}">
+                        <a href="{{ section_url | relative_url }}" 
+                           class="nav-section-title"
+                           {% if current_section == section_name %}aria-expanded="true"{% else %}aria-expanded="false"{% endif %}>
+                            {{ section_title }}
+                        </a>
+                        
+                        <!-- Show section pages only when section is active and has items -->
+                        {% if current_section == section_name and section_items.size > 0 %}
+                            <ul class="nav-section-items">
+                                {% for item in section_items %}
+                                    {% assign is_active = false %}
+                                    {% if page.url contains item.active_pattern %}
+                                        {% assign is_active = true %}
+                                    {% endif %}
+                                    <li>
+                                        <a href="{{ item.url | relative_url }}" 
+                                           class="nav-item {% if is_active %}active{% endif %}"
+                                           {% if item.children %}aria-expanded="{% if is_active %}true{% else %}false{% endif %}"{% endif %}>
+                                            {{ item.title }}
+                                        </a>
+                                        
+                                        <!-- Show nested pages if this item has children and is active -->
+                                        {% if item.children and is_active %}
+                                            <ul class="nav-item-children">
+                                                {% for child in item.children %}
+                                                    {% assign child_active = false %}
+                                                    {% if page.url contains child.active_pattern %}
+                                                        {% assign child_active = true %}
+                                                    {% endif %}
+                                                    <li>
+                                                        <a href="{{ child.url | relative_url }}" 
+                                                           {% if child_active %}class="active"{% endif %}>
+                                                            {{ child.title }}
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </aside>
+
     <main class="site-main">
+        <label class="sidebar-toggle-label" for="sidebar-toggle" aria-label="Toggle sidebar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </label>
         <div class="site-content">
             {{ content }}
         </div>

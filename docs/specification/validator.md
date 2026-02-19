@@ -53,7 +53,7 @@ Validated BlobDirs can be safely used with:
 ## Fixing Validation Errors
 
 1. Check error messages carefully
-2. Refer to [BlobDir Format Specification](blobdir-format.md)
+2. Refer to [BlobDir Format Specification](blobdir-format)
 3. Regenerate or repair the BlobDir
 4. Re-run validator to confirm
 
