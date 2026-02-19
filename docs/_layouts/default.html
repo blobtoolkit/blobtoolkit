@@ -232,7 +232,7 @@
                         if (doc.content.length > 150) excerpt += '...';
                     }
                     
-                    html += `<a href="${doc.id}" class="search-result-item">
+                    html += `<a href="{{ site.baseurl }}${doc.id}" class="search-result-item">
                         <div class="search-result-title">${doc.title}</div>
                         <div class="search-result-excerpt">${excerpt}</div>
                     </a>`;
