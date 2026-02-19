@@ -39,6 +39,14 @@ jobs:
         working-directory: ./docs
         run: ruby scripts/generate_nav.rb
 
+      - name: Generate Permalinks
+        working-directory: ./docs
+        run: ruby scripts/generate_permalinks.rb
+
+      - name: Generate Frontmatter
+        working-directory: ./docs
+        run: ruby scripts/generate_frontmatter.rb
+
       - name: Build Jekyll
         working-directory: ./docs
         run: bundle exec jekyll build --quiet
