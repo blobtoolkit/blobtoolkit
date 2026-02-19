@@ -2,7 +2,7 @@
 
 require 'fileutils'
 
-# Automatically add missing frontmatter (title) to markdown files
+# Automatically add missing titles to markdown files that already have frontmatter
 class FrontmatterGenerator
   def initialize(docs_dir)
     @docs_dir = docs_dir
@@ -24,28 +24,32 @@ class FrontmatterGenerator
   def process_file(file)
     content = File.read(file)
     
-    # Parse frontmatter
-    if content.start_with?('---')
-      parts = content.split("---", 3)
-      frontmatter = parts[1]
-      body = parts[2]
-      
-      # Check if title already exists
-      return if frontmatter.include?('title:')
-      
-      # Extract title from first H1 header in the body
-      title = extract_title_from_body(body)
-      return unless title # Skip if no H1 header found
-      
-      # Add title to frontmatter (before closing ---)
-      new_frontmatter = frontmatter.rstrip + "\ntitle: #{title}\n"
-      new_content = "---#{new_frontmatter}---#{body}"
-      
-      # Write back to file
-      File.write(file, new_content)
-      relative_path = file.sub(@docs_dir + '/', '')
-      puts "Added title to #{relative_path}: #{title}"
+    # Only process files that already have frontmatter (start with ---)
+    # This ensures we don't add frontmatter to files not meant to be Jekyll pages
+    unless content.start_with?('---')
+      return
     end
+    
+    # Parse frontmatter
+    parts = content.split("---", 3)
+    frontmatter = parts[1]
+    body = parts[2]
+    
+    # Check if title already exists
+    return if frontmatter.include?('title:')
+    
+    # Extract title from first H1 header in the body
+    title = extract_title_from_body(body)
+    return unless title # Skip if no H1 header found
+    
+    # Add title to frontmatter (before closing ---)
+    new_frontmatter = frontmatter.rstrip + "\ntitle: #{title}\n"
+    new_content = "---#{new_frontmatter}---#{body}"
+    
+    # Write back to file
+    File.write(file, new_content)
+    relative_path = file.sub(@docs_dir + '/', '')
+    puts "Added title to #{relative_path}: #{title}"
   end
 
   def extract_title_from_body(body)
