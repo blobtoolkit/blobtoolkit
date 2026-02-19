@@ -9,11 +9,7 @@ Welcome to the BlobToolKit documentation. BlobToolKit is a modular genome assemb
 
 ## Quick Links
 
-- **[Installation](installation/)** - Get BlobToolKit up and running
-- **[Pipeline](pipeline/)** - Run the analysis pipeline
-- **[BlobTools Commands](command-line/)** - Command-line reference
-- **[Viewer](viewer/)** - Interactive visualization
-- **[Specification](specification/)** - Technical documentation
+<!-- QUICK_LINKS -->
 
 ## What is BlobToolKit?
 

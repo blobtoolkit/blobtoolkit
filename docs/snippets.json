@@ -1,0 +1,19 @@
+---
+layout: null
+---
+{
+  "snippets": [
+    {% for page in site.pages %}
+      {% if page.url != '/404.html' and page.content and page.content.size > 0 %}
+        {% unless forloop.first %},{% endunless %}
+        {% capture snippet_raw %}{{ page.content | strip_html | strip }}{% endcapture %}
+        {% assign snippet_text = snippet_raw | truncate: 120 | escape %}
+        {% assign final_url = page.url | replace: '/index.html', '/' %}
+        {
+          "id": "{{ final_url }}",
+          "snippet": "{{ snippet_text }}"
+        }
+      {% endif %}
+    {% endfor %}
+  ]
+}

@@ -8,6 +8,10 @@ nav_order: 3
 
 The BlobToolKit pipeline automates genome assembly quality assessment end-to-end, from data retrieval through analysis and visualization.
 
+## Quick Links
+
+<!-- QUICK_LINKS -->
+
 ## Overview
 
 This section covers:
