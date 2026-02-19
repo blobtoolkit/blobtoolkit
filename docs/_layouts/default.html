@@ -375,7 +375,17 @@
             const scriptContent = document.querySelector('script[data-nav]');
             if (!scriptContent) return;
             
-            const currentPath = window.location.pathname;
+            // Strip baseurl from pathname for comparison
+            let currentPath = window.location.pathname;
+            const baseurl = '{{ site.baseurl }}';
+            if (baseurl && baseurl !== '' && currentPath.startsWith(baseurl)) {
+                currentPath = currentPath.substring(baseurl.length);
+            }
+            // Ensure path starts with /
+            if (!currentPath.startsWith('/')) {
+                currentPath = '/' + currentPath;
+            }
+            
             const isLargeScreen = window.innerWidth >= 1100;
             
             // Unescape main nav data
