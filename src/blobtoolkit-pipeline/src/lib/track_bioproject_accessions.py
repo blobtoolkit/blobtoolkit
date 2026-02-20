@@ -14,9 +14,10 @@ import os
 from time import sleep
 
 from docopt import docopt
-from tolkein import tofetch
-from tolkein import tofile
-from tolkein import tolog
+
+from .tolkein_compat import tofetch
+from .tolkein_compat import tofile
+from .tolkein_compat import tolog
 
 LOGGER = tolog.logger(__name__)
 
@@ -68,9 +69,12 @@ def fetch_bioproject_children(
 def fetch_accession(bioproject):
     """Fetch a GCA accession for a bioproject."""
     LOGGER.info("Fetching GCA accession for bioproject %s" % bioproject)
-    url = "%s/search?result=assembly&query=study_accession%%3D%%22%s%%22&fields=accession%%2Cversion&format=tsv" % (
-        ENA_API,
-        bioproject,
+    url = (
+        "%s/search?result=assembly&query=study_accession%%3D%%22%s%%22&fields=accession%%2Cversion&format=tsv"
+        % (
+            ENA_API,
+            bioproject,
+        )
     )
     result = tofetch.fetch_url(url)
     accession = None
@@ -119,4 +123,5 @@ if __name__ == "__main__":
     with open(projects_file, "a+") as pfh:
         pfh.writelines([bioproject + "\n" for bioproject in new_projects])
 
+    # TODO: introduce page numbering for when list gets long
     # TODO: introduce page numbering for when list gets long

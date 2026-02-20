@@ -100,7 +100,7 @@ setup(
         "docopt>=0.6.2",
         "psutil==5.9.4",
         "pyyaml",
-        "tolkein>=0.5.0",
+        "genomehubs",
         "tqdm==4.64.1",
         "ujson>=5.7.0",
         "defusedxml==0.7.1",

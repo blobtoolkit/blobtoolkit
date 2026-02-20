@@ -115,10 +115,22 @@ jobs:
       python-version: ${{ matrix.python-version }}
       platform: ${{ matrix.platform }}
 
+  validate-blobtools-wheels:
+    needs:
+      - changes
+      - package-blobtools
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      needs.changes.outputs.blobtools == 'true'
+    uses: ./.github/workflows/validate-wheels.yml
+
   release-blobtools:
     needs:
       - changes
       - package-blobtools
+      - validate-blobtools-wheels
       - release-host
       - release-pipeline
     if: |

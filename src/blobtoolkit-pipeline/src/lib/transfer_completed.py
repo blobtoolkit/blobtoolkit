@@ -22,9 +22,10 @@ from pathlib import Path
 import yaml
 from docopt import DocoptExit
 from docopt import docopt
-from tolkein import tofetch
-from tolkein import tofile
-from tolkein import tolog
+
+from .tolkein_compat import tofetch
+from .tolkein_compat import tofile
+from .tolkein_compat import tolog
 
 LOGGER = tolog.logger(__name__)
 
@@ -177,4 +178,5 @@ def main(rename=None):
 
 
 if __name__ == "__main__":
+    main()
     main()

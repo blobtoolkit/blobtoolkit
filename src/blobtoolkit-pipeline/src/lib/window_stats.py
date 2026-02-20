@@ -29,7 +29,8 @@ from pathlib import Path
 
 from docopt import DocoptExit
 from docopt import docopt
-from tolkein import tofile
+
+from .tolkein_compat import tofile
 
 logger_config = {
     "level": logging.INFO,
@@ -220,4 +221,5 @@ def main(rename=None):
 
 
 if __name__ == "__main__":
+    main()
     main()

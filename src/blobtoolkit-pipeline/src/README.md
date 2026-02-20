@@ -64,7 +64,7 @@ Alternatively create the environment by specifying individual packages:
 mamba create -y -n btk_env -c conda-forge -c bioconda -c tolkit \
     python=3.8 snakemake docopt defusedxml psutil pyyaml tqdm ujson urllib3 \
     entrez-direct minimap2=2.17 seqtk diamond=2 busco=5 \
-    samtools=1.10 pysam=0.16 blobtk=0.2.4 tolkein
+    samtools=1.10 pysam=0.16 blobtk=0.2.4 genomehubs
 ```
 
 Activate this environment:

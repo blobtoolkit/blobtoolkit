@@ -14,12 +14,11 @@ from os import path
 from os import stat
 from pathlib import Path
 
-from tolkein import tofile
-
 from .field import Array
 from .field import Identifier
 from .field import MultiArray
 from .field import Variable
+from .tolkein_compat import tofile
 
 
 def field_settings():

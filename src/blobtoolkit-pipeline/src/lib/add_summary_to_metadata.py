@@ -20,10 +20,10 @@ from collections import OrderedDict
 import yaml
 from docopt import DocoptExit
 from docopt import docopt
-from tolkein import tofile
 
 from .functions import read_similarity_settings
 from .functions import reads_by_prefix
+from .tolkein_compat import tofile
 from .version import __version__
 
 logger_config = {

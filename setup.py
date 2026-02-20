@@ -108,18 +108,18 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "blobtk>=0.7.9",
+        "blobtk>=0.7.11",
         # "chromedriver-binary-auto>=0.3.1",
         "chromedriver-autoinstaller>=0.6.2",
         "docopt>=0.6.2",
         "fastjsonschema>=2.21.1",
         "geckodriver-autoinstaller>=0.1.0",
-        "psutil==5.9.4",
-        "pyvirtualdisplay==3.0",
+        "psutil>=5.9.4",
+        "pyvirtualdisplay>=3.0",
         "pyyaml",
         "selenium>=4.10.0",
-        "tolkein>=0.5.0",
-        "tqdm==4.64.1",
+        "genomehubs>=2.12.4",
+        "tqdm>=4.64.1",
         "ujson>=5.7.0",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development

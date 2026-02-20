@@ -20,6 +20,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import warnings
 
 from docopt import DocoptExit
 from docopt import docopt
@@ -103,6 +104,15 @@ def run_snakemake_pipeline(args):
 
 def main(rename=None):
     """Entry point."""
+    # Warn about deprecated Snakemake pipeline
+    warnings.warn(
+        "The Snakemake-based BlobToolKit pipeline is no longer actively maintained. "
+        "Please use the actively supported Nextflow implementation instead: "
+        "https://pipelines.tol.sanger.ac.uk/blobtoolkit",
+        FutureWarning,
+        stacklevel=2,
+    )
+
     docs = __doc__
     if rename is not None:
         docs = docs.replace("blobtoolkit-pipeline", rename)

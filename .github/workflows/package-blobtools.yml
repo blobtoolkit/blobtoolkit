@@ -61,6 +61,30 @@ jobs:
           python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_x86_64
           python3 setup.py sdist bdist_wheel --python-tag py${PY_VERSION} --plat-name macosx_11_0_arm64
           mv dist/*.whl artifacts/
+      - name: Test wheel installation and imports
+        run: |
+          PY_VERSION=${{ inputs.python-version }}
+          PY_VERSION=${PY_VERSION/./}
+          ARCH=$(uname -m)
+          if [ "$ARCH" == "arm64" ]; then
+            WHEEL_ARCH="macosx_11_0_arm64"
+          else
+            WHEEL_ARCH="macosx_11_0_x86_64"
+          fi
+          python3 -m venv test_env
+          source test_env/bin/activate
+          pip install --upgrade pip
+          pip install artifacts/blobtoolkit-*-py${PY_VERSION}-none-${WHEEL_ARCH}.whl
+          echo "Testing basic imports..."
+          python -c "import blobtools; print(f'blobtools {blobtools.__version__}')" || exit 1
+          python -c "import btk; print('btk imported successfully')" || exit 1
+          echo "Testing CLI entry points..."
+          blobtools -v || exit 1
+          btk -v || exit 1
+          echo "Testing blobtk binary dependency..."
+          python -c "from blobtk import depth; print('blobtk.depth imported successfully')" || echo "WARNING: blobtk import failed - users may need conda-forge blobtk"
+          deactivate
+          rm -rf test_env
       - uses: actions/upload-artifact@v4
         with:
           name: pip-macos-${{ inputs.python-version }}
