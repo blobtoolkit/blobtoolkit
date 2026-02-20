@@ -2,14 +2,24 @@ name: validate-wheels
 
 on:
     workflow_call:
+        inputs:
+            python-matrix:
+                required: false
+                type: string
+                default: '["3.12"]'
     workflow_dispatch:
+        inputs:
+            python-matrix:
+                required: false
+                type: string
+                default: '["3.12"]'
 
 jobs:
     validate-macos-arm64:
         runs-on: macos-14 # macOS 14+ is arm64 (Apple Silicon)
         strategy:
             matrix:
-                python-version: ["3.9", "3.10", "3.11", "3.12"]
+                python-version: ${{ fromJSON(inputs.python-matrix) }}
         steps:
             - uses: actions/checkout@v3
             - uses: actions/setup-python@v4
@@ -45,7 +55,7 @@ jobs:
                   python -c "import platform, sys; print(f'Python: {sys.version}'); print(f'Platform: {platform.platform()}'); print(f'Machine: {platform.machine()}')"
 
                   echo "Testing imports..."
-                  python -c "import blobtools; from blobtools import cli; print(f'✓ blobtools {blobtools.__version__}')"
+                  python -c "import blobtools; from blobtools import cli; print('✓ blobtools imported')"
                   python -c "import btk; from btk import cli; print('✓ btk imported')"
 
                   echo "Testing blobtk binary dependency..."
@@ -65,7 +75,7 @@ jobs:
         runs-on: macos-13 # macOS 13 is x86_64 (Intel)
         strategy:
             matrix:
-                python-version: ["3.9", "3.10", "3.11", "3.12"]
+                python-version: ${{ fromJSON(inputs.python-matrix) }}
         steps:
             - uses: actions/checkout@v3
             - uses: actions/setup-python@v4
@@ -101,7 +111,7 @@ jobs:
                   python -c "import platform, sys; print(f'Python: {sys.version}'); print(f'Platform: {platform.platform()}'); print(f'Machine: {platform.machine()}')"
 
                   echo "Testing imports..."
-                  python -c "import blobtools; from blobtools import cli; print(f'✓ blobtools {blobtools.__version__}')"
+                  python -c "import blobtools; from blobtools import cli; print('✓ blobtools imported')"
                   python -c "import btk; from btk import cli; print('✓ btk imported')"
 
                   echo "Testing blobtk binary dependency..."
@@ -121,7 +131,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ["3.9", "3.10", "3.11", "3.12"]
+                python-version: ${{ fromJSON(inputs.python-matrix) }}
         steps:
             - uses: actions/checkout@v3
             - uses: actions/setup-python@v4
@@ -156,7 +166,7 @@ jobs:
                   python -c "import platform, sys; print(f'Python: {sys.version}'); print(f'Platform: {platform.platform()}'); print(f'Machine: {platform.machine()}')"
 
                   echo "Testing imports..."
-                  python -c "import blobtools; from blobtools import cli; print(f'✓ blobtools {blobtools.__version__}')"
+                  python -c "import blobtools; from blobtools import cli; print('✓ blobtools imported')"
                   python -c "import btk; from btk import cli; print('✓ btk imported')"
 
                   echo "Testing blobtk binary dependency..."

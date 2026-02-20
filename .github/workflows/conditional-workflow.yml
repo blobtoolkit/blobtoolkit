@@ -125,6 +125,8 @@ jobs:
       !contains(needs.*.result, 'cancelled') &&
       needs.changes.outputs.blobtools == 'true'
     uses: ./.github/workflows/validate-wheels.yml
+    with:
+      python-matrix: ${{ needs.changes.outputs.blobtools-matrix }}
 
   release-blobtools:
     needs:

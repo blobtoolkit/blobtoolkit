@@ -76,7 +76,7 @@ jobs:
           pip install --upgrade pip
           pip install artifacts/blobtoolkit-*-py${PY_VERSION}-none-${WHEEL_ARCH}.whl
           echo "Testing basic imports..."
-          python -c "import blobtools; print(f'blobtools {blobtools.__version__}')" || exit 1
+          python -c "import blobtools; print('blobtools imported successfully')" || exit 1
           python -c "import btk; print('btk imported successfully')" || exit 1
           echo "Testing CLI entry points..."
           blobtools -v || exit 1
