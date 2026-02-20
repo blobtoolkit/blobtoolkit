@@ -30,17 +30,28 @@ jobs:
         run: |
           PACKAGE_NAME=${{ inputs.component }}
           VERSION=${{ inputs.version }}
-          if curl -s https://pypi.org/pypi/$PACKAGE_NAME/$VERSION/json | grep -q '"version": "'$VERSION'"'; then
-            echo "Version $VERSION of $PACKAGE_NAME already exists on PyPI."
+
+          # PyPI normalizes package names (hyphens become underscores)
+          # Check using the package JSON endpoint
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/${PACKAGE_NAME}/${VERSION}/json")
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✓ Version $VERSION of $PACKAGE_NAME already exists on PyPI (HTTP $HTTP_CODE)"
             echo "version_exists=true" >> $GITHUB_OUTPUT
           else
-            echo "Version $VERSION of $PACKAGE_NAME does not exist on PyPI."
+            echo "✗ Version $VERSION of $PACKAGE_NAME does not exist on PyPI (HTTP $HTTP_CODE)"
             echo "version_exists=false" >> $GITHUB_OUTPUT
           fi
       - name: Publish package to PyPI
         if: steps.check-version.outputs.version_exists == 'false'
+        continue-on-error: true
         uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
           repository_url: https://upload.pypi.org/legacy/
+      - name: Skip upload (version exists)
+        if: steps.check-version.outputs.version_exists == 'true'
+        run: |
+          echo "⚠️  Skipping upload - ${{ inputs.component }} version ${{ inputs.version }} already exists on PyPI"
+          echo "This is expected for re-runs of release workflows."
