@@ -22,7 +22,7 @@
     "cors": "^2.8.5",
     "csv-to-js-parser": "^2.3.5",
     "d3": "^5.16.0",
-    "express": "^4.17.2",
+    "express": "^4.21.2",
     "express-cors": "0.0.3",
     "express-openapi-validator": "^5.0.0",
     "promise": "^8.1.0",
