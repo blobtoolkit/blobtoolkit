@@ -63,6 +63,11 @@ else
     git diff --exit-code -s ${LATEST_TAG}..HEAD src/blobtools
     BLOBTOOLS_UPDATE=$?
   fi
+
+  if [ "$BLOBTOOLS_UPDATE" == 0 ]; then
+    git diff --exit-code -s ${LATEST_TAG}..HEAD src/docker
+    BLOBTOOLS_UPDATE=$?
+  fi
   
   if [ "$BLOBTOOLS_UPDATE" == 0 ]; then
     LEVEL="-preid rc pre$LEVEL"
