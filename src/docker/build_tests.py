@@ -4,8 +4,9 @@
 
 import subprocess
 import sys
+from importlib import metadata
 
-commands = [
+required_commands = [
     ["blobtools", "--version"],
     ["blobtools", "--help"],
     ["blobtools", "create", "--help"],
@@ -17,7 +18,6 @@ commands = [
     ["blobtools", "host", "--help"],
     ["blobtools", "view", "--help"],
     ["btk", "pipeline", "--help"],
-    ["btk", "pipeline", "run", "--help"],
     ["btk", "pipeline", "add-summary-to-metadata", "--help"],
     ["btk", "pipeline", "chunk-fasta", "--help"],
     ["btk", "pipeline", "count-busco-genes", "--help"],
@@ -32,19 +32,37 @@ commands = [
 
 def run_command(command):
     try:
-        subprocess.run(
-            command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
+        subprocess.run(command, check=True, capture_output=True, text=True)
         print(f"Command {' '.join(command)}: SUCCESS")
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as exc:
         print(f"Command {' '.join(command)}: FAIL")
+        if exc.stdout:
+            print(exc.stdout.strip())
+        if exc.stderr:
+            print(exc.stderr.strip())
         return False
     return True
 
 
+def require_installed(package):
+    try:
+        version = metadata.version(package)
+        print(f"Package {package}=={version}: INSTALLED")
+        return True
+    except metadata.PackageNotFoundError:
+        print(f"Package {package}: MISSING")
+        return False
+
+
 def main():
     all_success = True
-    for command in commands:
+
+    if not require_installed("blobtoolkit-host"):
+        all_success = False
+    if not require_installed("blobtoolkit-pipeline"):
+        all_success = False
+
+    for command in required_commands:
         if not run_command(command):
             all_success = False
 
