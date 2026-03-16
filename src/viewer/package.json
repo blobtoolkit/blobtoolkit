@@ -39,7 +39,7 @@
     "re-resizable": "^6.9.1",
     "react": "^17.0.2",
     "react-color": "^2.19.3",
-    "react-cookie": "^4.1.1",
+    "react-cookie": "^7.2.2",
     "react-cookie-consent": "^7.4.1",
     "react-csv": "^1.1.2",
     "react-d3-axis": "^0.1.2",
