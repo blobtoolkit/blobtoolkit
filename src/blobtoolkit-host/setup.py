@@ -35,6 +35,7 @@ setup(
     # This should be a valid email address corresponding to the author listed
     # above.
     author_email="blobtoolkit@genomehubs.org",  # Optional
+    license="MIT",
     # Classifiers help users find your project by categorizing it.
     #
     # For a list of valid classifiers, see https://pypi.org/classifiers/
@@ -47,8 +48,6 @@ setup(
         # Indicate who your project is intended for
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
-        # Pick your license as you wish
-        "License :: OSI Approved :: MIT License",
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate you support Python 3. These classifiers are *not*
         # checked by 'pip install'. See instead 'python_requires' below.

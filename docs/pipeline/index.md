@@ -8,6 +8,14 @@ nav_order: 3
 
 The BlobToolKit pipeline automates genome assembly quality assessment end-to-end, from data retrieval through analysis and visualization.
 
+## Preferred Pipeline
+
+The preferred pipeline for configuration and execution is the Nextflow implementation documented at:
+
+- https://pipelines.tol.sanger.ac.uk/blobtoolkit
+
+At present this preferred Nextflow workflow is run outside the BlobToolKit CLI.
+
 ## Quick Links
 
 <!-- QUICK_LINKS -->
@@ -16,8 +24,8 @@ The BlobToolKit pipeline automates genome assembly quality assessment end-to-end
 
 This section covers:
 
-- **[Getting Started](getting-started)** - Nextflow/Snakemake workflow overview
-- **[Configuration](configuration)** - YAML and samplesheet setup
+- **[Getting Started](getting-started)** - preferred workflow and legacy local options
+- **[Configuration](configuration)** - legacy/local configuration reference
 
 ## Pipeline Components
 
@@ -30,4 +38,6 @@ The pipeline includes:
 
 ## Running the Pipeline
 
-For the recommended approach using the Nextflow pipeline, visit the [Getting Started](getting-started) guide.
+For the recommended approach, use the external pipeline documentation at https://pipelines.tol.sanger.ac.uk/blobtoolkit.
+
+Use the pages in this section for context and legacy/local pipeline notes.

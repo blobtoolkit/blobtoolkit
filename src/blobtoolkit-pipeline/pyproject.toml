@@ -1,7 +1,8 @@
 [build-system]
 requires = [
-    'setuptools>=42',
+    'setuptools>=61',
     'wheel',
+    'build',
 ]
 
 [tool.pytest.ini_options]

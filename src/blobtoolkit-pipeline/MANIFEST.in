@@ -1,9 +1,10 @@
 # MANIFEST.in
 include setup.py
+include README.md
 prune .cache
 prune .git
 prune build
 prune dist
 recursive-include src/blobtoolkit-snakefiles *
 recursive-include src/lib *
-recursive-exclude *.egg-info *
+global-exclude *.egg-info
