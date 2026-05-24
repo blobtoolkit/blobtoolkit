@@ -44,15 +44,23 @@ examples:
 
 import os
 import sys
+from importlib.metadata import entry_points
 
 from docopt import DocoptExit
 from docopt import docopt
-from pkg_resources import working_set
 from tolkein import tolog
 
 from .lib.version import __version__
 
 LOGGER = tolog.logger(__name__)
+
+
+def iter_entry_points(group):
+    """Return entry points for a group across supported Python versions."""
+    discovered = entry_points()
+    if hasattr(discovered, "select"):
+        return discovered.select(group=group)
+    return discovered.get(group, ())
 
 
 def suggest_option(command):
@@ -98,7 +106,7 @@ def cli():
                     sys.argv.insert(command_index + 1, "--replace")
                 args["<command>"] = "add"
             sys.argv[command_index] = "add"
-        for entry_point in working_set.iter_entry_points("%s.subcmd" % args["<tool>"]):
+        for entry_point in iter_entry_points("%s.subcmd" % args["<tool>"]):
             if entry_point.name == args["<command>"]:
                 try:
                     subcommand = entry_point.load()

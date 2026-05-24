@@ -24,11 +24,19 @@ See 'blobtoolkit-pipeline <command> --help' for more information on a specific c
 """
 
 import sys
+from importlib.metadata import entry_points
 
 from docopt import DocoptExit
 from docopt import docopt
 from lib.version import __version__
-from pkg_resources import working_set
+
+
+def iter_entry_points(group):
+    """Return entry points for a group across supported Python versions."""
+    discovered = entry_points()
+    if hasattr(discovered, "select"):
+        return discovered.select(group=group)
+    return discovered.get(group, ())
 
 
 def cli(rename=None):
@@ -46,7 +54,7 @@ def cli(rename=None):
         args = {"<command>": command}
     if args["<command>"]:
         # load <command> from entry_points
-        for entry_point in working_set.iter_entry_points("blobtoolkit_pipeline.subcmd"):
+        for entry_point in iter_entry_points("blobtoolkit_pipeline.subcmd"):
             if entry_point.name == args["<command>"]:
                 subcommand = entry_point.load()
                 sys.exit(subcommand(rename))
