@@ -18,15 +18,23 @@ See 'btk <command> --help' for more information on a specific command.
 import os
 import subprocess
 import sys
+from importlib.metadata import entry_points
 
 from docopt import DocoptExit
 from docopt import docopt
-from pkg_resources import working_set
 from tolkein import tolog
 
 from .lib.version import __version__
 
 LOGGER = tolog.logger(__name__)
+
+
+def iter_entry_points(group):
+    """Return entry points for a group across supported Python versions."""
+    discovered = entry_points()
+    if hasattr(discovered, "select"):
+        return discovered.select(group=group)
+    return discovered.get(group, ())
 
 
 def suggest_option(command):
@@ -72,7 +80,7 @@ def cli():
     if "<command>" in args and args["<command>"]:
         args.update({"<tool>": os.path.basename(sys.argv[0])})
         # load <command> from entry_points
-        for entry_point in working_set.iter_entry_points("%s.subcmd" % args["<tool>"]):
+        for entry_point in iter_entry_points("%s.subcmd" % args["<tool>"]):
             if entry_point.name == args["<command>"]:
                 if entry_point.name == args["<command>"]:
                     try:
