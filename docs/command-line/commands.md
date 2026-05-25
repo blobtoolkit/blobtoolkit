@@ -41,10 +41,38 @@ blobtools filter --query "gc > 0.4 AND read_cov > 10" \
 
 ### view
 
-Export BlobDir data:
+Export BlobDir data or plots:
 
 ```bash
 blobtools view --out tsv \
+               input_directory/
+```
+
+Blob plots use the category field stored in the BlobDir plot metadata by
+default. Hits added with the default taxrule create category fields named
+`bestsumorder_<rank>`, such as `bestsumorder_phylum`,
+`bestsumorder_family`, and `bestsumorder_genus`.
+
+Use the `catField` parameter to render a blob plot at a different taxonomic
+rank from the command line:
+
+```bash
+blobtools view --plot \
+               --view blob \
+               --format png \
+               --out ./ \
+               --param catField=bestsumorder_family \
+               input_directory/
+```
+
+The same parameter can be passed without `--plot` when rendering through the
+viewer-backed export path:
+
+```bash
+blobtools view --view blob \
+               --format png \
+               --out ./ \
+               --param catField=bestsumorder_genus \
                input_directory/
 ```
 
