@@ -27,10 +27,10 @@ The viewer provides:
 
 ## Quick Start
 
-To visualize a local BlobDir dataset:
+To visualize local BlobDir datasets, host the parent directory that contains one or more BlobDirs:
 
 ```bash
-blobtools host --port 8080 /path/to/blobdir/
+blobtools host --port 8080 /path/to/datasets/
 ```
 
-Then open `http://localhost:8080` in your browser.
+Then open `http://localhost:8080/view/all` in your browser. See [Local Hosting](local-hosting) for the expected directory layout and Docker usage.
