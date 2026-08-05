@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name="blobtoolkit-pipeline",  # Required
-    version="4.5.1",
+    version="4.5.2",
     description="blobtoolkit-pipeline",  # Optional
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
