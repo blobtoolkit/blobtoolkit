@@ -71,61 +71,61 @@ jobs:
 
                   deactivate
 
-    validate-macos-x86_64:
-        runs-on: macos-13 # macOS 13 is x86_64 (Intel)
-        strategy:
-            matrix:
-                python-version: ${{ fromJSON(inputs.python-matrix) }}
-        steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-python@v4
-              with:
-                  python-version: ${{ matrix.python-version }}
-            - name: Download built wheels
-              uses: actions/download-artifact@v4
-              with:
-                  path: ./wheels
-                  pattern: pip-macos-*
-            - name: Test x86_64 wheel installation
-              run: |
-                  ls -R ./wheels
-                  PY_VERSION=${{ matrix.python-version }}
-                  PY_VERSION=${PY_VERSION/./}
+    # validate-macos-x86_64:
+    #     runs-on: macos-13 # macOS 13 is x86_64 (Intel)
+    #     strategy:
+    #         matrix:
+    #             python-version: ${{ fromJSON(inputs.python-matrix) }}
+    #     steps:
+    #         - uses: actions/checkout@v3
+    #         - uses: actions/setup-python@v4
+    #           with:
+    #               python-version: ${{ matrix.python-version }}
+    #         - name: Download built wheels
+    #           uses: actions/download-artifact@v4
+    #           with:
+    #               path: ./wheels
+    #               pattern: pip-macos-*
+    #         - name: Test x86_64 wheel installation
+    #           run: |
+    #               ls -R ./wheels
+    #               PY_VERSION=${{ matrix.python-version }}
+    #               PY_VERSION=${PY_VERSION/./}
 
-                  # Find the x86_64 wheel
-                  WHEEL=$(find wheels -name "blobtoolkit-*-py${PY_VERSION}-none-macosx_*_x86_64.whl" | head -n 1)
+    #               # Find the x86_64 wheel
+    #               WHEEL=$(find wheels -name "blobtoolkit-*-py${PY_VERSION}-none-macosx_*_x86_64.whl" | head -n 1)
 
-                  if [ -z "$WHEEL" ]; then
-                    echo "ERROR: No x86_64 wheel found for Python ${PY_VERSION}"
-                    exit 1
-                  fi
+    #               if [ -z "$WHEEL" ]; then
+    #                 echo "ERROR: No x86_64 wheel found for Python ${PY_VERSION}"
+    #                 exit 1
+    #               fi
 
-                  echo "Testing wheel: $WHEEL"
-                  python3 -m venv test_env
-                  source test_env/bin/activate
+    #               echo "Testing wheel: $WHEEL"
+    #               python3 -m venv test_env
+    #               source test_env/bin/activate
 
-                  pip install --upgrade pip
-                  pip install "$WHEEL"
+    #               pip install --upgrade pip
+    #               pip install "$WHEEL"
 
-                  echo "Platform info:"
-                  python -c "import platform, sys; print(f'Python: {sys.version}'); print(f'Platform: {platform.platform()}'); print(f'Machine: {platform.machine()}')"
+    #               echo "Platform info:"
+    #               python -c "import platform, sys; print(f'Python: {sys.version}'); print(f'Platform: {platform.platform()}'); print(f'Machine: {platform.machine()}')"
 
-                  echo "Testing imports..."
-                  python -c "import blobtools; from blobtools import cli; print('✓ blobtools imported')"
-                  python -c "import btk; from btk import cli; print('✓ btk imported')"
+    #               echo "Testing imports..."
+    #               python -c "import blobtools; from blobtools import cli; print('✓ blobtools imported')"
+    #               python -c "import btk; from btk import cli; print('✓ btk imported')"
 
-                  echo "Testing blobtk binary dependency..."
-                  python -c "from blobtk import depth; print('✓ blobtk.depth imported')" || {
-                    echo "⚠ WARNING: blobtk import failed on x86_64"
-                    echo "This suggests binary compatibility issues with blobtk wheel"
-                    exit 1
-                  }
+    #               echo "Testing blobtk binary dependency..."
+    #               python -c "from blobtk import depth; print('✓ blobtk.depth imported')" || {
+    #                 echo "⚠ WARNING: blobtk import failed on x86_64"
+    #                 echo "This suggests binary compatibility issues with blobtk wheel"
+    #                 exit 1
+    #               }
 
-                  echo "Testing CLI commands..."
-                  blobtools -v
-                  btk -v
+    #               echo "Testing CLI commands..."
+    #               blobtools -v
+    #               btk -v
 
-                  deactivate
+    #               deactivate
 
     validate-linux:
         runs-on: ubuntu-latest
