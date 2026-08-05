@@ -7,6 +7,8 @@ title: Home
 
 Welcome to the BlobToolKit documentation. BlobToolKit is a modular genome assembly quality evaluation toolkit that helps you assess and visualize the quality of genome assemblies.
 
+{% include cta-button.html text="Open Viewer" href="https://blobtoolkit.genomehubs.org/view" %}
+
 ## Quick Links
 
 <!-- QUICK_LINKS -->
