@@ -15,16 +15,18 @@ def parse_busco(busco_file, identifiers):  # pylint: disable=too-many-locals
         print("WARNING file %s is empty" % busco_file)
         return None
     lines = data.split("\n")
+    tool = lines[0].split(" ")[1].strip()
     version = lines[0].split(":")[1].strip()
     desc = re.split(r":\s*|\(|\)\s*|,\s*", lines[1])
     meta = {
+        "tool": tool,
         "version": version,
         "set": desc[1].strip(),
         "count": int(desc[7].strip()),
         "file": busco_file,
     }
     version = int(version.split(".")[0])
-    if version < 4:
+    if tool.lower() == "busco" and version < 4:
         rows = [re.split("\t", line) for line in lines[5:]]
         meta["set"] = re.search(
             r"-l\s.*?\/*(\w+_odb\d+)\/", lines[2].split(":")[1].strip()
